@@ -308,6 +308,8 @@ function ProjectDetailPanel() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
   const isMobile = useIsMobile();
   const project = getProjectById(currentView);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showAdditionalDescription, setShowAdditionalDescription] = useState<{ [id: string]: boolean }>({});
   const [minimized, setMinimized] = useState(false);
 
   if (!project || currentView === 'monitor') return null;
@@ -370,17 +372,33 @@ function ProjectDetailPanel() {
                 {project.period} • {project.location}
               </p>
 
+              {/* GitHub Button */}
+              {project.github && (
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mb-3 px-3 py-1.5 rounded-lg bg-terminal-green/10 border border-terminal-green text-xs font-mono text-terminal-green hover:bg-terminal-green/20 transition"
+                >
+                  View on GitHub
+                </a>
+              )}
+
               {/* Description */}
               <div className="space-y-2 mb-3">
-                {project.description.slice(0, 2).map((paragraph, i) => (
+                {(showFullDescription ? project.description : project.description.slice(0, 2)).map((paragraph, i) => (
                   <p key={i} className="text-gray-300 text-[11px] leading-relaxed font-mono">
                     • {paragraph}
                   </p>
                 ))}
+
                 {project.description.length > 2 && (
-                  <p className="text-phosphor-dim text-[10px] font-mono">
-                    +{project.description.length - 2} more details...
-                  </p>
+                  <button
+                    onClick={() => setShowFullDescription(prev => !prev)}
+                    className="text-phosphor-dim text-[10px] font-mono underline"
+                  >
+                    {showFullDescription ? 'Show Less' : `+${project.description.length - 2} more details...`}
+                  </button>
                 )}
               </div>
 
@@ -403,19 +421,56 @@ function ProjectDetailPanel() {
 
               {/* Related Projects */}
               {project.additionalProjects?.length ? (
-                <details className="mb-2">
-                  <summary className="text-phosphor-dim text-[9px] uppercase tracking-wider font-mono cursor-pointer">
-                    + {project.additionalProjects.length} Related Project{project.additionalProjects.length > 1 ? 's' : ''}
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {project.additionalProjects.map((addProject, i) => (
-                      <div key={i} className="pl-2 border-l border-terminal-green/30">
-                        <h4 className="text-phosphor-text font-mono text-[10px] font-semibold">{addProject.title}</h4>
-                        <p className="text-phosphor-dim text-[9px]">{addProject.period}</p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  <h3 className="text-phosphor-dim text-xs uppercase tracking-wider mb-4 font-mono">
+                    Related Projects
+                  </h3>
+                  {project.additionalProjects.map((addProject, i) => (
+                    <div key={i} className="mb-4 pl-4 border-l-2 border-terminal-green/30">
+                      <h4 className="text-phosphor-text font-mono text-sm font-semibold">{addProject.title}</h4>
+                      <p className="text-phosphor-dim text-xs mb-2">{addProject.period}</p>
+
+                      {/* GitHub Button for additional project */}
+                      {addProject.github && (
+                        <a
+                          href={addProject.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mb-2 px-3 py-1 rounded-lg bg-terminal-green/10 border border-terminal-green text-xs font-mono text-terminal-green hover:bg-terminal-green/20 transition"
+                        >
+                          View on GitHub
+                        </a>
+                      )}
+
+                      {/* Expandable description */}
+                      <div className="space-y-1">
+                        {(showAdditionalDescription[i] ? addProject.description : []).map((desc, j) => (
+                          <p key={j} className="text-gray-400 text-xs leading-relaxed mb-1">
+                            • {desc}
+                          </p>
+                        ))}
+
+                        {addProject.description.length > 0 && (
+                          <button
+                            onClick={() =>
+                              setShowAdditionalDescription(prev => ({
+                                ...prev,
+                                [i]: !prev[i],
+                              }))
+                            }
+                            className="text-phosphor-dim text-[10px] font-mono underline"
+                          >
+                            {showAdditionalDescription[i] ? 'Show Less' : `+${addProject.description.length} more details...`}
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </details>
+                    </div>
+                  ))}
+                </motion.div>
               ) : null}
 
               {/* Hint */}
@@ -482,6 +537,18 @@ function ProjectDetailPanel() {
           {project.period} • {project.location}
         </motion.p>
 
+        {/* GitHub Button */}
+        {project.github && (
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mb-6 px-4 py-2 rounded-lg bg-terminal-green/10 border border-terminal-green text-sm font-mono text-terminal-green hover:bg-terminal-green/20 transition"
+          >
+            View on GitHub
+          </a>
+        )}
+
         {/* Description */}
         <motion.div
           className="space-y-4 mb-8"
@@ -521,24 +588,31 @@ function ProjectDetailPanel() {
 
         {/* Additional/Related Projects */}
         {project.additionalProjects?.length ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-          >
-            <h3 className="text-phosphor-dim text-xs uppercase tracking-wider mb-4 font-mono">
-              Related Projects
-            </h3>
-            {project.additionalProjects.map((addProject, i) => (
-              <div key={i} className="mb-4 pl-4 border-l-2 border-terminal-green/30">
-                <h4 className="text-phosphor-text font-mono text-sm font-semibold">{addProject.title}</h4>
-                <p className="text-phosphor-dim text-xs mb-2">{addProject.period}</p>
-                {addProject.description.map((desc, j) => (
-                  <p key={j} className="text-gray-400 text-xs leading-relaxed mb-1">• {desc}</p>
-                ))}
-              </div>
-            ))}
-          </motion.div>
+          <details className="mb-2">
+            <summary className="text-phosphor-dim text-[9px] uppercase tracking-wider font-mono cursor-pointer">
+              + {project.additionalProjects.length} Related Project{project.additionalProjects.length > 1 ? 's' : ''}
+            </summary>
+            <div className="mt-2 space-y-2">
+              {project.additionalProjects.map((addProject, i) => (
+                <div key={i} className="pl-2 border-l border-terminal-green/30">
+                  <h4 className="text-phosphor-text font-mono text-[10px] font-semibold">{addProject.title}</h4>
+                  <p className="text-phosphor-dim text-[9px]">{addProject.period}</p>
+
+                  {/* GitHub Button for additional project */}
+                  {addProject.github && (
+                    <a
+                      href={addProject.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-1 mb-2 px-2 py-1 rounded-lg bg-terminal-green/10 border border-terminal-green text-[9px] font-mono text-terminal-green hover:bg-terminal-green/20 transition"
+                    >
+                      View on GitHub
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </details>
         ) : null}
 
         {/* Drag hint */}
