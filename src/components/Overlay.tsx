@@ -258,7 +258,7 @@ function TerminalView() {
                           : 'hover:border-terminal-green/50 hover:bg-terminal-green/5 cursor-pointer active:bg-terminal-green/10'
                         }
                       `}
-                      whileTap={!isAnimating ? { scale: 0.98 } : {}}
+                      whileTap={{}}
                     >
                       <div className="flex items-center gap-1 sm:gap-2">
                         <span className="phosphor-text-bright text-[10px] sm:text-sm">[EXEC]</span>
@@ -280,7 +280,7 @@ function TerminalView() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="flex-1 bg-transparent outline-none phosphor-text min-w-0"
+                    className="flex-1 bg-transparent outline-none phosphor-text min-w-0 text-base sm:text-sm"
                     style={{ caretColor: '#00ff41' }}
                     autoFocus
                   />
@@ -512,7 +512,7 @@ function ProjectDetailPanel() {
             ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-terminal-green/10 hover:border-terminal-green'}
           `}
           whileHover={!isAnimating ? { scale: 1.02 } : {}}
-          whileTap={!isAnimating ? { scale: 0.98 } : {}}
+          whileTap={{}}
         >
           ← Back to Terminal
         </motion.button>
