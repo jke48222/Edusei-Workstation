@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import * as easing from 'maath/easing';
@@ -27,115 +27,139 @@ const OBJECT_POSITIONS = {
 };
 
 /**
- * Camera framing constants
+ * Hook to detect mobile viewport (must be in component)
  */
-const CAMERA_DISTANCE = 7;
-const CAMERA_HEIGHT = 2.5;
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return isMobile;
+}
 
 /**
- * THIS controls left/right screen framing
- * Increase this to push the object further LEFT on screen
+ * Generate camera configs based on screen size
+ * 
+ * DESKTOP: Offset camera target to push model to left side (text panel on right)
+ * MOBILE: Center the model (bottom sheet doesn't block it as much)
  */
-const TARGET_X_OFFSET = -2;
+function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
+  // Desktop: offset to left. Mobile: centered
+  const TARGET_X_OFFSET = isMobile ? 0 : -2;
+  
+  // Mobile: slightly closer and higher to see model above bottom sheet
+  const CAMERA_DISTANCE = isMobile ? 5.5 : 7;
+  const CAMERA_HEIGHT = isMobile ? 2.8 : 2.5;
 
-/**
- * Define camera positions and look-at targets for every view state
- */
-const cameraConfigs: Record<ViewState, CameraConfig> = {
-  // Monitor: Homepage view (centered)
-  monitor: {
-    position: new Vector3(
-      OBJECT_POSITIONS.monitor.x,
-      1.6,
-      4
-    ),
-    target: new Vector3(
-      OBJECT_POSITIONS.monitor.x,
-      OBJECT_POSITIONS.monitor.y,
-      OBJECT_POSITIONS.monitor.z
-    ),
-  },
+  return {
+    // Monitor: Homepage view (always centered)
+    monitor: {
+      position: new Vector3(
+        OBJECT_POSITIONS.monitor.x,
+        1.6,
+        4
+      ),
+      target: new Vector3(
+        OBJECT_POSITIONS.monitor.x,
+        OBJECT_POSITIONS.monitor.y,
+        OBJECT_POSITIONS.monitor.z
+      ),
+    },
 
-  // Car: Audio Tracking Car
-  car: {
-    position: new Vector3(
-      OBJECT_POSITIONS.car.x,
-      CAMERA_HEIGHT,
-      CAMERA_DISTANCE
-    ),
-    target: new Vector3(
-      OBJECT_POSITIONS.car.x - TARGET_X_OFFSET,
-      OBJECT_POSITIONS.car.y,
-      OBJECT_POSITIONS.car.z
-    ),
-  },
+    // Car: Audio Tracking Car
+    car: {
+      position: new Vector3(
+        OBJECT_POSITIONS.car.x,
+        CAMERA_HEIGHT,
+        CAMERA_DISTANCE
+      ),
+      target: new Vector3(
+        OBJECT_POSITIONS.car.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.car.y,
+        OBJECT_POSITIONS.car.z
+      ),
+    },
 
-  // Dog: AnimalDot sleeping dog
-  dog: {
-    position: new Vector3(
-      OBJECT_POSITIONS.dog.x,
-      CAMERA_HEIGHT,
-      CAMERA_DISTANCE
-    ),
-    target: new Vector3(
-      OBJECT_POSITIONS.dog.x - TARGET_X_OFFSET,
-      OBJECT_POSITIONS.dog.y,
-      OBJECT_POSITIONS.dog.z
-    ),
-  },
+    // Dog: AnimalDot sleeping dog
+    dog: {
+      position: new Vector3(
+        OBJECT_POSITIONS.dog.x,
+        CAMERA_HEIGHT,
+        CAMERA_DISTANCE
+      ),
+      target: new Vector3(
+        OBJECT_POSITIONS.dog.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.dog.y,
+        OBJECT_POSITIONS.dog.z
+      ),
+    },
 
-  // VR: Kitchen Chaos VR headset
-  vr: {
-    position: new Vector3(
-      OBJECT_POSITIONS.vr.x,
-      CAMERA_HEIGHT,
-      CAMERA_DISTANCE
-    ),
-    target: new Vector3(
-      OBJECT_POSITIONS.vr.x - TARGET_X_OFFSET,
-      OBJECT_POSITIONS.vr.y,
-      OBJECT_POSITIONS.vr.z
-    ),
-  },
+    // VR: Kitchen Chaos VR headset
+    vr: {
+      position: new Vector3(
+        OBJECT_POSITIONS.vr.x,
+        CAMERA_HEIGHT,
+        CAMERA_DISTANCE
+      ),
+      target: new Vector3(
+        OBJECT_POSITIONS.vr.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.vr.y,
+        OBJECT_POSITIONS.vr.z
+      ),
+    },
 
-  // Satellite: MEMESat-1 CubeSat
-  satellite: {
-    position: new Vector3(
-      OBJECT_POSITIONS.satellite.x,
-      CAMERA_HEIGHT,
-      CAMERA_DISTANCE
-    ),
-    target: new Vector3(
-      OBJECT_POSITIONS.satellite.x - TARGET_X_OFFSET,
-      OBJECT_POSITIONS.satellite.y,
-      OBJECT_POSITIONS.satellite.z
-    ),
-  },
+    // Satellite: MEMESat-1 CubeSat
+    satellite: {
+      position: new Vector3(
+        OBJECT_POSITIONS.satellite.x,
+        CAMERA_HEIGHT,
+        CAMERA_DISTANCE
+      ),
+      target: new Vector3(
+        OBJECT_POSITIONS.satellite.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.satellite.y,
+        OBJECT_POSITIONS.satellite.z
+      ),
+    },
 
-  // Tablet: Capital One
-  tablet: {
-    position: new Vector3(
-      OBJECT_POSITIONS.tablet.x,
-      CAMERA_HEIGHT,
-      CAMERA_DISTANCE
-    ),
-    target: new Vector3(
-      OBJECT_POSITIONS.tablet.x - TARGET_X_OFFSET,
-      OBJECT_POSITIONS.tablet.y,
-      OBJECT_POSITIONS.tablet.z
-    ),
-  },
-};
+    // Tablet: Capital One
+    tablet: {
+      position: new Vector3(
+        OBJECT_POSITIONS.tablet.x,
+        CAMERA_HEIGHT,
+        CAMERA_DISTANCE
+      ),
+      target: new Vector3(
+        OBJECT_POSITIONS.tablet.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.tablet.y,
+        OBJECT_POSITIONS.tablet.z
+      ),
+    },
+  };
+}
 
 /**
  * CameraRig Component
  *
  * Handles smooth camera transitions between different view states
  * using maath easing for a heavy, cinematic feel.
+ * 
+ * RESPONSIVE BEHAVIOR:
+ * - Desktop: Model offset to left side (room for text panel on right)
+ * - Mobile: Model centered (bottom sheet slides up from below)
  */
 export function CameraRig() {
   const { camera } = useThree();
   const { currentView, isAnimating, completeAnimation } = useWorkstationStore();
+  const isMobile = useIsMobile();
 
   const currentPosition = useRef(new Vector3());
   const currentTarget = useRef(new Vector3());
@@ -143,13 +167,16 @@ export function CameraRig() {
 
   const ARRIVAL_THRESHOLD = 0.05;
 
+  // Regenerate camera configs when screen size changes
+  const cameraConfigs = useMemo(() => getCameraConfigs(isMobile), [isMobile]);
+
   const targetConfig = useMemo(() => {
     return cameraConfigs[currentView];
-  }, [currentView]);
+  }, [currentView, cameraConfigs]);
 
   // Initialize camera on first render
   if (!initialized.current) {
-    const initialConfig = cameraConfigs.monitor;
+    const initialConfig = getCameraConfigs(false).monitor; // Start with desktop config
     currentPosition.current.copy(initialConfig.position);
     currentTarget.current.copy(initialConfig.target);
     camera.position.copy(initialConfig.position);
@@ -197,7 +224,7 @@ export function CameraRig() {
 }
 
 /**
- * Export camera configs for reuse
+ * Export for reuse
  */
-export { cameraConfigs, OBJECT_POSITIONS };
+export { OBJECT_POSITIONS };
 export type { CameraConfig };
