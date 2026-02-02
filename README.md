@@ -2,6 +2,8 @@
 
 An immersive 3D portfolio website built with React Three Fiber, featuring a retro CRT terminal interface and cinematic camera transitions.
 
+🌐 **Live Portfolio**: https://jalenedusei.com
+
 ## 🚀 Quick Start
 
 ```bash
@@ -17,15 +19,15 @@ npm run build
 
 ## 🎮 How to Use
 
-1. **Terminal View**: The default view shows a working CLI interface on a CRT monitor
+1. **Terminal View**: The default view shows a working CLI interface on a CRT monitor  
 2. **Navigate Projects**: Click on projects in the terminal list or type commands:
-   - `help` - Show available commands
-   - `list` - List all projects
-   - `run [project].exe` - Open a specific project
-   - `about` - Show profile info
-   - `clear` - Clear terminal
-3. **Explore Objects**: Click on 3D objects on the desk to view project details
-4. **Return**: Click "Back to Terminal" or press ESC to return to the main view
+   - `help` – Show available commands  
+   - `list` – List all projects  
+   - `run [project].exe` – Open a specific project  
+   - `about` – Show profile info  
+   - `clear` – Clear terminal  
+3. **Explore Objects**: Click on 3D objects on the desk to view project details  
+4. **Return**: Click "Back to Terminal" or press ESC to return to the main view  
 
 ## 📁 Project Structure
 
@@ -44,11 +46,11 @@ src/
 
 ## 🎨 Tech Stack
 
-- **Framework**: React + Vite + TypeScript
-- **3D**: @react-three/fiber, @react-three/drei
-- **Animation**: framer-motion (UI), maath (camera)
-- **State**: zustand
-- **Styling**: Tailwind CSS
+- **Framework**: React + Vite + TypeScript  
+- **3D**: @react-three/fiber, @react-three/drei  
+- **Animation**: framer-motion (UI), maath (camera)  
+- **State**: zustand  
+- **Styling**: Tailwind CSS  
 
 ## 🔧 Customization
 
@@ -95,8 +97,6 @@ This project uses the following 3D models under Creative Commons Attribution lic
 |-------|---------|---------|
 | [Meta Quest 3](https://skfb.ly/oNCEG) | Elin | [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) |
 | [Capital One](https://skfb.ly/px9vD) | Laurance Animations | [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) |
-| [CRT Computer Monitor](https://skfb.ly/o9BvF) | fizyman | [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) |
-| [Desk Set](https://skfb.ly/6UuEP) | Ren Viro Store | [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) |
 
 Additional models (Robot Car, Sleeping Dog, Satellite) are included in `/public/models/`.
 
@@ -106,4 +106,6 @@ Place your resume PDF in the `public/` folder as `resume.pdf`. Users can then ty
 
 ---
 
-Built with 💚 for Jalen Edusei's engineering portfolio
+**Jalen Edusei**  
+🌐 https://jalenedusei.com  
+Engineering Portfolio and Interactive Workstation
