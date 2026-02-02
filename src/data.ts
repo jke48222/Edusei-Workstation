@@ -229,9 +229,9 @@ export const projectsData: ProjectData[] = [
         period: 'October 2025 – November 2025',
         github: 'https://github.com/jke48222/VR-Portfolio-2',
         description: [
-          'Developed advanced XR experiences including a VR Mini Museum and an MR Instrument Room featuring hand tracking and passthrough.',
-          'Engineered 20+ C# scripts using Unity URP, OpenXR, and Meta XR SDK for physics-driven interactions and spatial anchors.',
-          'Implemented depth-based occlusion, real-time sound mapping, and PBR materials to ensure stable performance on Meta Quest 3.',
+          'Developed Quest 3 XR environments with spatial audio, physics, and hand-tracking using Unity URP, OpenXR, and Meta SDK.',
+          'Implemented MR mechanics including occlusion, passthrough, anchors, and haptics via a modular system of 20+ C# scripts.',
+          'Built a Wit.ai NPC with NLU and lip-syncing to enable voice-controlled panels and dynamic XR interactions.',
         ],
       },
       {
