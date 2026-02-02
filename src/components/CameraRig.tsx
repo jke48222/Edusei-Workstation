@@ -56,8 +56,8 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
   const TARGET_X_OFFSET = isMobile ? 0 : -2;
   
   // Mobile: slightly closer and higher to see model above bottom sheet
-  const CAMERA_DISTANCE = isMobile ? 5.5 : 7;
-  const CAMERA_HEIGHT = isMobile ? 2.8 : 2.5;
+  const CAMERA_DISTANCE = isMobile ? 6.8 : 7;
+  const CAMERA_HEIGHT = isMobile ? 1.8 : 2.5;
 
   return {
     // Monitor: Homepage view (always centered)
