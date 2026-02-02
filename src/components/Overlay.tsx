@@ -307,145 +307,140 @@ function TerminalView() {
 function ProjectDetailPanel() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
   const isMobile = useIsMobile();
-  
   const project = getProjectById(currentView);
-  
-  if (!project || currentView === 'monitor') {
-    return null;
-  }
-  
-  // Mobile: Bottom sheet layout with Drag-to-Close
+  const [minimized, setMinimized] = useState(false);
+
+  if (!project || currentView === 'monitor') return null;
+
+  // Mobile: Bottom sheet layout with Minimize button
   if (isMobile) {
     return (
       <motion.div
         initial={{ opacity: 0, y: '100%' }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: '100%' }}
-        transition={{ 
-          duration: 0.4, 
+        transition={{
+          duration: 0.4,
           delay: 0.3,
-          ease: [0.25, 0.1, 0.25, 1]
+          ease: [0.25, 0.1, 0.25, 1],
         }}
-        // Add drag gestures
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.5 }}
-        onDragEnd={(e, { offset, velocity }) => {
-          // Close if dragged down more than 100px OR flicked down fast
-          if (offset.y > 100 || velocity.y > 500) {
-            !isAnimating && returnToMonitor();
-          }
-        }}
-        className="absolute bottom-0 left-0 right-0 max-h-[85vh] z-10"
+        className="absolute bottom-0 left-0 right-0 z-10"
       >
-        <div className="glass-card rounded-t-2xl p-4 pb-8 overflow-hidden flex flex-col max-h-[85vh]">
-          {/* Drag handle */}
-          <div className="flex justify-center mb-4 flex-shrink-0 pt-1 cursor-grab active:cursor-grabbing">
-            <div className="w-12 h-1.5 bg-terminal-green/30 rounded-full" />
-          </div>
-          
-          <div className="overflow-y-auto pr-1">
-            {/* Back button */}
-            <motion.button
-              onClick={() => !isAnimating && returnToMonitor()}
-              disabled={isAnimating}
-              className={`
-                mb-3 px-3 py-1.5 rounded-lg
-                border border-terminal-green/50
-                font-mono text-xs phosphor-text
-                transition-all duration-200
-                ${isAnimating 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'active:bg-terminal-green/10'
-                }
-              `}
-            >
-              ← Back
-            </motion.button>
-            
-            {/* Title */}
-            <h1 className="text-lg font-bold phosphor-text-bright mb-1">
-              {project.title}
-            </h1>
-            
-            {/* Period & Location */}
-            <p className="text-phosphor-dim text-[10px] font-mono mb-3">
-              {project.period} • {project.location}
-            </p>
-            
-            {/* Description - show only first 2 on mobile */}
-            <div className="space-y-2 mb-3">
-              {project.description.slice(0, 2).map((paragraph, i) => (
-                <p key={i} className="text-gray-300 text-[11px] leading-relaxed font-mono">
-                  • {paragraph}
-                </p>
-              ))}
-              {project.description.length > 2 && (
-                <p className="text-phosphor-dim text-[10px] font-mono">
-                  +{project.description.length - 2} more details...
-                </p>
-              )}
-            </div>
-            
-            {/* Tech Stack */}
-            <div className="mb-3">
-              <h3 className="text-phosphor-dim text-[9px] uppercase tracking-wider mb-1.5 font-mono">
-                Technologies
-              </h3>
-              <div className="flex flex-wrap gap-1">
-                {project.techStack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="text-[9px] px-1.5 py-0.5 rounded border border-terminal-green/40 text-terminal-green/80 font-mono"
-                  >
-                    {tech}
-                  </span>
+        <motion.div
+          animate={{ height: minimized ? 50 : 'auto' }}
+          transition={{ duration: 0.3 }}
+          className="glass-card rounded-t-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        >
+          {/* Minimize / Expand button */}
+          <motion.button
+            onClick={() => setMinimized(prev => !prev)}
+            className="
+              mb-3 px-3 py-1.5 rounded-lg
+              border border-terminal-green/50
+              font-mono text-xs phosphor-text
+              transition-all duration-200
+            "
+          >
+            {minimized ? '⬆︎ Expand' : '⬇︎ Minimize'}
+          </motion.button>
+
+          {/* Panel content */}
+          <div className={`overflow-hidden transition-all duration-300 ${minimized ? 'h-0 opacity-0' : 'h-auto opacity-100'}`}>
+            <div className="overflow-y-auto pr-1 max-h-[75vh]">
+              {/* Back button */}
+              <motion.button
+                onClick={() => !isAnimating && returnToMonitor()}
+                disabled={isAnimating}
+                className={`
+                  mb-3 px-3 py-1.5 rounded-lg
+                  border border-terminal-green/50
+                  font-mono text-xs phosphor-text
+                  transition-all duration-200
+                  ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'active:bg-terminal-green/10'}
+                `}
+              >
+                ← Back
+              </motion.button>
+
+              {/* Title */}
+              <h1 className="text-lg font-bold phosphor-text-bright mb-1">{project.title}</h1>
+
+              {/* Period & Location */}
+              <p className="text-phosphor-dim text-[10px] font-mono mb-3">
+                {project.period} • {project.location}
+              </p>
+
+              {/* Description */}
+              <div className="space-y-2 mb-3">
+                {project.description.slice(0, 2).map((paragraph, i) => (
+                  <p key={i} className="text-gray-300 text-[11px] leading-relaxed font-mono">
+                    • {paragraph}
+                  </p>
                 ))}
+                {project.description.length > 2 && (
+                  <p className="text-phosphor-dim text-[10px] font-mono">
+                    +{project.description.length - 2} more details...
+                  </p>
+                )}
               </div>
-            </div>
-            
-            {/* Related Projects - collapsible on mobile */}
-            {project.additionalProjects && project.additionalProjects.length > 0 && (
-              <details className="mb-2">
-                <summary className="text-phosphor-dim text-[9px] uppercase tracking-wider font-mono cursor-pointer">
-                  + {project.additionalProjects.length} Related Project{project.additionalProjects.length > 1 ? 's' : ''}
-                </summary>
-                <div className="mt-2 space-y-2">
-                  {project.additionalProjects.map((addProject, i) => (
-                    <div key={i} className="pl-2 border-l border-terminal-green/30">
-                      <h4 className="text-phosphor-text font-mono text-[10px] font-semibold">
-                        {addProject.title}
-                      </h4>
-                      <p className="text-phosphor-dim text-[9px]">{addProject.period}</p>
-                    </div>
+
+              {/* Tech Stack */}
+              <div className="mb-3">
+                <h3 className="text-phosphor-dim text-[9px] uppercase tracking-wider mb-1.5 font-mono">
+                  Technologies
+                </h3>
+                <div className="flex flex-wrap gap-1">
+                  {project.techStack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="text-[9px] px-1.5 py-0.5 rounded border border-terminal-green/40 text-terminal-green/80 font-mono"
+                    >
+                      {tech}
+                    </span>
                   ))}
                 </div>
-              </details>
-            )}
-            
-            {/* Touch hint */}
-            <div className="text-center pt-2 border-t border-terminal-green/20 mt-2">
-              <span className="text-phosphor-dim text-[9px] font-mono">
-                ↓ Swipe down to close
-              </span>
+              </div>
+
+              {/* Related Projects */}
+              {project.additionalProjects?.length ? (
+                <details className="mb-2">
+                  <summary className="text-phosphor-dim text-[9px] uppercase tracking-wider font-mono cursor-pointer">
+                    + {project.additionalProjects.length} Related Project{project.additionalProjects.length > 1 ? 's' : ''}
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {project.additionalProjects.map((addProject, i) => (
+                      <div key={i} className="pl-2 border-l border-terminal-green/30">
+                        <h4 className="text-phosphor-text font-mono text-[10px] font-semibold">{addProject.title}</h4>
+                        <p className="text-phosphor-dim text-[9px]">{addProject.period}</p>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
+
+              {/* Hint */}
+              <div className="text-center pt-2 border-t border-terminal-green/20 mt-2">
+                <span className="text-phosphor-dim text-[9px] font-mono">
+                  Press Back to Return
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     );
   }
-  
-  // Desktop: Right side panel
-  // Updated with responsive width fallback (w-full md:w-1/2)
+
+  // Desktop: Right side panel (unchanged)
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 100 }}
-      transition={{ 
-        duration: 0.6, 
+      transition={{
+        duration: 0.6,
         delay: 0.5,
-        ease: [0.25, 0.1, 0.25, 1]
+        ease: [0.25, 0.1, 0.25, 1],
       }}
       className="absolute top-0 right-0 w-full md:w-1/2 h-full flex items-center justify-center p-8"
     >
@@ -459,19 +454,16 @@ function ProjectDetailPanel() {
             border border-terminal-green/50
             font-mono text-sm phosphor-text
             transition-all duration-200
-            ${isAnimating 
-              ? 'opacity-50 cursor-not-allowed' 
-              : 'hover:bg-terminal-green/10 hover:border-terminal-green'
-            }
+            ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-terminal-green/10 hover:border-terminal-green'}
           `}
           whileHover={!isAnimating ? { scale: 1.02 } : {}}
           whileTap={!isAnimating ? { scale: 0.98 } : {}}
         >
           ← Back to Terminal
         </motion.button>
-        
+
         {/* Title */}
-        <motion.h1 
+        <motion.h1
           className="text-3xl font-bold phosphor-text-bright mb-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -479,9 +471,9 @@ function ProjectDetailPanel() {
         >
           {project.title}
         </motion.h1>
-        
+
         {/* Period & Location */}
-        <motion.p 
+        <motion.p
           className="text-phosphor-dim text-sm font-mono mb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -489,9 +481,9 @@ function ProjectDetailPanel() {
         >
           {project.period} • {project.location}
         </motion.p>
-        
+
         {/* Description */}
-        <motion.div 
+        <motion.div
           className="space-y-4 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -503,7 +495,7 @@ function ProjectDetailPanel() {
             </p>
           ))}
         </motion.div>
-        
+
         {/* Tech Stack */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -511,9 +503,7 @@ function ProjectDetailPanel() {
           transition={{ delay: 1 }}
           className="mb-8"
         >
-          <h3 className="text-phosphor-dim text-xs uppercase tracking-wider mb-3 font-mono">
-            Technologies
-          </h3>
+          <h3 className="text-phosphor-dim text-xs uppercase tracking-wider mb-3 font-mono">Technologies</h3>
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((tech, i) => (
               <motion.span
@@ -528,9 +518,9 @@ function ProjectDetailPanel() {
             ))}
           </div>
         </motion.div>
-        
+
         {/* Additional/Related Projects */}
-        {project.additionalProjects && project.additionalProjects.length > 0 && (
+        {project.additionalProjects?.length ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -541,35 +531,30 @@ function ProjectDetailPanel() {
             </h3>
             {project.additionalProjects.map((addProject, i) => (
               <div key={i} className="mb-4 pl-4 border-l-2 border-terminal-green/30">
-                <h4 className="text-phosphor-text font-mono text-sm font-semibold">
-                  {addProject.title}
-                </h4>
+                <h4 className="text-phosphor-text font-mono text-sm font-semibold">{addProject.title}</h4>
                 <p className="text-phosphor-dim text-xs mb-2">{addProject.period}</p>
                 {addProject.description.map((desc, j) => (
-                  <p key={j} className="text-gray-400 text-xs leading-relaxed mb-1">
-                    • {desc}
-                  </p>
+                  <p key={j} className="text-gray-400 text-xs leading-relaxed mb-1">• {desc}</p>
                 ))}
               </div>
             ))}
           </motion.div>
-        )}
-        
+        ) : null}
+
         {/* Drag hint */}
-        <motion.div 
+        <motion.div
           className="mt-6 pt-4 border-t border-terminal-green/20 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.3 }}
         >
-          <span className="text-phosphor-dim text-xs font-mono">
-            ↺ Drag the 3D model to rotate
-          </span>
+          <span className="text-phosphor-dim text-xs font-mono">↺ Drag the 3D model to rotate</span>
         </motion.div>
       </div>
     </motion.div>
   );
 }
+
 
 /**
  * Loading/Transition indicator
