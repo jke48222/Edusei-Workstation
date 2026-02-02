@@ -16,6 +16,21 @@ html, body, #root {
   font-family: 'IBM Plex Mono', monospace;
 }
 
+/* --- iOS Safari Zoom Prevention --- */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  body {
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+}
+
+
 /* CRT Monitor Simulation Effects */
 @layer components {
   /* Scanline overlay effect */
