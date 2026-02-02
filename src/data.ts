@@ -14,9 +14,11 @@ export interface ProjectData {
   location: string;
   objectLabel: string;
   accentColor: string;
+  github?: string;
   additionalProjects?: {
     title: string;
     period: string;
+    github?: string;
     description: string[];
   }[];
 }
@@ -152,6 +154,7 @@ export const projectsData: ProjectData[] = [
     location: 'ECSE Design Methodology',
     objectLabel: 'Car',
     accentColor: '#ff6b35',
+    github: 'https://github.com/jke48222/Audio-Tracking-Car',
     description: [
       'Engineered a Python-based control system on Raspberry Pi 4 that autonomously navigated towards specific audio frequencies, improving tracking precision by 20%.',
       'Developed a PID motor control algorithm utilizing optical encoder feedback and ADC signal processing, enhancing motor response time by 15%.',
@@ -213,6 +216,7 @@ export const projectsData: ProjectData[] = [
     location: 'Virtual Reality, CSCI 6830',
     objectLabel: 'Quest 3',
     accentColor: '#a855f7',
+    github: 'https://github.com/jke48222/VR-Final-Project',
     description: [
       'Built an Overcooked-style multiplayer VR cooking game for Meta Quest 3 in Unity with physics-driven interactions.',
       'Integrated VelNet networking for player avatar sync, spawning, and round state across clients.',
@@ -223,6 +227,7 @@ export const projectsData: ProjectData[] = [
       {
         title: 'VR Portfolio 2',
         period: 'October 2025 – November 2025',
+        github: 'https://github.com/jke48222/VR-Portfolio-2',
         description: [
           'Developed advanced XR experiences including a VR Mini Museum and an MR Instrument Room featuring hand tracking and passthrough.',
           'Engineered 20+ C# scripts using Unity URP, OpenXR, and Meta XR SDK for physics-driven interactions and spatial anchors.',
@@ -232,6 +237,7 @@ export const projectsData: ProjectData[] = [
       {
         title: 'VR Portfolio 1',
         period: 'August 2025 – October 2025',
+        github: 'https://github.com/jke48222/VR-Portfolio-1',
         description: [
           'Constructed four-part Unity portfolio demonstrating transformation, physics, immersion, and interaction.',
           'Authored 15+ C# scripts with real-time lighting, spatial audio, and smooth locomotion.',
