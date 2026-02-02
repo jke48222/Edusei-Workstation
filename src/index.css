@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* CRT Monitor Simulation Effects */
+@layer components {
+  /* Scanline overlay effect */
+  .crt-scanlines {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .crt-scanlines::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 65, 0.03) 2px,
+      rgba(0, 255, 65, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  /* Screen flicker effect */
+  .crt-flicker {
+    animation: crt-flicker 0.15s infinite;
+  }
+  
+  @keyframes crt-flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.96; }
+    94% { opacity: 1; }
+  }
+  
+  /* Phosphor glow on text */
+  .phosphor-text {
+    color: #00ff41;
+    text-shadow: 
+      0 0 5px #00ff41,
+      0 0 10px #00ff4180,
+      0 0 15px #00ff4140;
+  }
+  
+  .phosphor-text-bright {
+    color: #33ff5c;
+    text-shadow: 
+      0 0 5px #00ff41,
+      0 0 15px #00ff41,
+      0 0 25px #00ff4180,
+      0 0 35px #00ff4140;
+  }
+  
+  /* Terminal cursor */
+  .terminal-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1.2em;
+    background-color: #00ff41;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  /* Glass morphism card */
+  .glass-card {
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(0, 255, 65, 0.1),
+      inset 0 1px 0 rgba(0, 255, 65, 0.1);
+  }
+  
+  /* Hover glow effect for clickable items */
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+  
+  .hover-glow:hover {
+    text-shadow: 
+      0 0 10px #00ff41,
+      0 0 20px #00ff41,
+      0 0 30px #00ff4180;
+    transform: translateX(4px);
+  }
+  
+  /* Terminal prompt styling */
+  .terminal-prompt {
+    color: #00ff41;
+  }
+  
+  .terminal-prompt::before {
+    content: '>';
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+  
+  /* CRT screen border/bezel effect */
+  .crt-bezel {
+    border: 4px solid #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 
+      inset 0 0 50px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(0, 255, 65, 0.15);
+  }
+  
+  /* Noise texture overlay */
+  .noise-overlay {
+    position: relative;
+  }
+  
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  /* Tech tag styling */
+  .tech-tag {
+    background: rgba(0, 255, 65, 0.1);
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    color: #00ff41;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* Canvas container */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Overlay container */
+.overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.overlay-container > * {
+  pointer-events: auto;
+}
