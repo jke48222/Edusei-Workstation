@@ -1,4 +1,5 @@
 import { Suspense, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
 import { useWorkstationStore } from './store';
@@ -103,6 +104,9 @@ function App() {
       <div className="fixed bottom-4 left-4 text-phosphor-dim text-xs font-mono opacity-50">
         ESC to return • Click objects to explore
       </div>
+      
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
