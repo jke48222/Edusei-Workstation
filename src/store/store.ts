@@ -1,0 +1,413 @@
+import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
+import * as THREE from 'three';
+
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+/**
+ * ViewState enum representing all possible camera positions in the workstation
+ */
+export type ViewState = 'monitor' | 'car' | 'dog' | 'vr' | 'satellite' | 'tablet';
+
+/**
+ * Scene mode - tracks which major scene the user is in
+ */
+export type SceneMode = 'workstation' | 'vr-transition' | 'gallery';
+
+/**
+ * Camera mode within the gallery
+ */
+export type GalleryCameraMode = 'follow' | 'cinema';
+
+/**
+ * Gallery state for the gamified experience
+ */
+interface GalleryState {
+  // Scene state machine
+  sceneMode: SceneMode;
+  transitionProgress: number; // 0 to 1
+  isSceneTransitioning: boolean;
+
+  // Avatar state
+  avatarPosition: THREE.Vector3;
+  avatarRotation: number; // Y-axis rotation in radians
+  avatarVelocity: THREE.Vector3;
+  isMoving: boolean;
+
+  // Camera state
+  galleryCameraMode: GalleryCameraMode;
+  cinematicTarget: THREE.Vector3 | null;
+  cinematicLookAt: THREE.Vector3 | null;
+
+  // Video interaction state
+  activeVideoId: string | null;
+  activePlatformId: string | null;
+  videoPlaying: boolean;
+
+  // Input state (for keyboard controls)
+  input: {
+    forward: boolean;
+    backward: boolean;
+    left: boolean;
+    right: boolean;
+  };
+
+  // Headset dissolve effect
+  headsetOpacity: number;
+}
+
+interface GalleryActions {
+  // Scene transitions
+  enterGallery: () => void;
+  setTransitionProgress: (progress: number) => void;
+  completeGalleryTransition: () => void;
+  exitGallery: () => void;
+
+  // Avatar controls
+  setAvatarPosition: (position: THREE.Vector3) => void;
+  setAvatarRotation: (rotation: number) => void;
+  setAvatarVelocity: (velocity: THREE.Vector3) => void;
+  setIsMoving: (moving: boolean) => void;
+
+  // Camera controls
+  setGalleryCameraMode: (mode: GalleryCameraMode) => void;
+  enterCinemaMode: (cameraPos: THREE.Vector3, lookAt: THREE.Vector3) => void;
+  exitCinemaMode: () => void;
+
+  // Video controls
+  setActiveVideo: (videoId: string | null, platformId: string | null) => void;
+  setVideoPlaying: (playing: boolean) => void;
+
+  // Input controls
+  setInput: (key: keyof GalleryState['input'], value: boolean) => void;
+  resetInput: () => void;
+
+  // Headset effect
+  setHeadsetOpacity: (opacity: number) => void;
+}
+
+// ============================================================================
+// Workstation Store (Original)
+// ============================================================================
+
+interface WorkstationState {
+  currentView: ViewState;
+  isAnimating: boolean;
+  animationStartTime: number | null;
+  transitionDuration: number;
+}
+
+interface WorkstationActions {
+  setView: (view: ViewState) => void;
+  returnToMonitor: () => void;
+  completeAnimation: () => void;
+  canNavigate: () => boolean;
+}
+
+// ============================================================================
+// Combined Store Type
+// ============================================================================
+
+type StoreState = WorkstationState & GalleryState;
+type StoreActions = WorkstationActions & GalleryActions;
+
+// ============================================================================
+// Initial States
+// ============================================================================
+
+const initialWorkstationState: WorkstationState = {
+  currentView: 'monitor',
+  isAnimating: false,
+  animationStartTime: null,
+  transitionDuration: 1500,
+};
+
+const initialGalleryState: GalleryState = {
+  sceneMode: 'workstation',
+  transitionProgress: 0,
+  isSceneTransitioning: false,
+
+  avatarPosition: new THREE.Vector3(0, 0, 8),
+  avatarRotation: 0,
+  avatarVelocity: new THREE.Vector3(0, 0, 0),
+  isMoving: false,
+
+  galleryCameraMode: 'follow',
+  cinematicTarget: null,
+  cinematicLookAt: null,
+
+  activeVideoId: null,
+  activePlatformId: null,
+  videoPlaying: false,
+
+  input: {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+  },
+
+  headsetOpacity: 1,
+};
+
+// ============================================================================
+// Store Creation
+// ============================================================================
+
+export const useWorkstationStore = create<StoreState & StoreActions>()(
+  subscribeWithSelector((set, get) => ({
+    // Spread initial states
+    ...initialWorkstationState,
+    ...initialGalleryState,
+
+    // ========================================================================
+    // Workstation Actions (Original)
+    // ========================================================================
+
+    setView: (view: ViewState) => {
+      const state = get();
+      if (state.isAnimating || state.currentView === view) return;
+      
+      // If clicking VR headset while at VR view, trigger gallery transition
+      if (view === 'vr' && state.currentView === 'vr') {
+        get().enterGallery();
+        return;
+      }
+
+      set({
+        currentView: view,
+        isAnimating: true,
+        animationStartTime: Date.now(),
+      });
+
+      setTimeout(() => {
+        const currentState = get();
+        if (currentState.isAnimating && currentState.animationStartTime) {
+          const elapsed = Date.now() - currentState.animationStartTime;
+          if (elapsed >= currentState.transitionDuration * 0.9) {
+            set({ isAnimating: false, animationStartTime: null });
+          }
+        }
+      }, state.transitionDuration + 200);
+    },
+
+    returnToMonitor: () => {
+      const state = get();
+      
+      // If in gallery, exit gallery first
+      if (state.sceneMode === 'gallery') {
+        get().exitGallery();
+        return;
+      }
+
+      if (state.isAnimating || state.currentView === 'monitor') return;
+
+      set({
+        currentView: 'monitor',
+        isAnimating: true,
+        animationStartTime: Date.now(),
+      });
+
+      setTimeout(() => {
+        const currentState = get();
+        if (currentState.isAnimating) {
+          set({ isAnimating: false, animationStartTime: null });
+        }
+      }, state.transitionDuration + 200);
+    },
+
+    completeAnimation: () => {
+      set({ isAnimating: false, animationStartTime: null });
+    },
+
+    canNavigate: () => {
+      const state = get();
+      return !state.isAnimating && state.sceneMode === 'workstation';
+    },
+
+    // ========================================================================
+    // Gallery Scene Transitions
+    // ========================================================================
+
+    enterGallery: () => {
+      const state = get();
+      if (state.sceneMode !== 'workstation' || state.isSceneTransitioning) return;
+
+      set({
+        sceneMode: 'vr-transition',
+        isSceneTransitioning: true,
+        transitionProgress: 0,
+        headsetOpacity: 1,
+      });
+    },
+
+    setTransitionProgress: (progress: number) => {
+      const clamped = Math.min(1, Math.max(0, progress));
+      
+      // Headset dissolves out as we go through (starts at 0.3, fully dissolved by 0.7)
+      const dissolveStart = 0.3;
+      const dissolveEnd = 0.7;
+      let headsetOpacity = 1;
+      
+      if (clamped >= dissolveStart) {
+        headsetOpacity = 1 - ((clamped - dissolveStart) / (dissolveEnd - dissolveStart));
+        headsetOpacity = Math.max(0, Math.min(1, headsetOpacity));
+      }
+
+      set({ 
+        transitionProgress: clamped,
+        headsetOpacity,
+      });
+    },
+
+    completeGalleryTransition: () => {
+      set({
+        sceneMode: 'gallery',
+        isSceneTransitioning: false,
+        transitionProgress: 1,
+        galleryCameraMode: 'follow',
+        headsetOpacity: 0,
+        // Reset avatar to spawn point
+        avatarPosition: new THREE.Vector3(0, 0, 8),
+        avatarRotation: Math.PI, // Face towards screens
+        avatarVelocity: new THREE.Vector3(0, 0, 0),
+      });
+    },
+
+    exitGallery: () => {
+      set({
+        ...initialGalleryState,
+        sceneMode: 'workstation',
+        headsetOpacity: 1,
+      });
+    },
+
+    // ========================================================================
+    // Avatar Controls
+    // ========================================================================
+
+    setAvatarPosition: (position: THREE.Vector3) => {
+      set({ avatarPosition: position.clone() });
+    },
+
+    setAvatarRotation: (rotation: number) => {
+      set({ avatarRotation: rotation });
+    },
+
+    setAvatarVelocity: (velocity: THREE.Vector3) => {
+      set({ avatarVelocity: velocity.clone() });
+    },
+
+    setIsMoving: (moving: boolean) => {
+      set({ isMoving: moving });
+    },
+
+    // ========================================================================
+    // Gallery Camera Controls
+    // ========================================================================
+
+    setGalleryCameraMode: (mode: GalleryCameraMode) => {
+      set({ galleryCameraMode: mode });
+    },
+
+    enterCinemaMode: (cameraPos: THREE.Vector3, lookAt: THREE.Vector3) => {
+      set({
+        galleryCameraMode: 'cinema',
+        cinematicTarget: cameraPos.clone(),
+        cinematicLookAt: lookAt.clone(),
+      });
+    },
+
+    exitCinemaMode: () => {
+      set({
+        galleryCameraMode: 'follow',
+        cinematicTarget: null,
+        cinematicLookAt: null,
+      });
+    },
+
+    // ========================================================================
+    // Video Controls
+    // ========================================================================
+
+    setActiveVideo: (videoId: string | null, platformId: string | null) => {
+      const state = get();
+      if (state.activeVideoId === videoId) return;
+
+      set({
+        activeVideoId: videoId,
+        activePlatformId: platformId,
+        videoPlaying: videoId !== null,
+      });
+    },
+
+    setVideoPlaying: (playing: boolean) => {
+      set({ videoPlaying: playing });
+    },
+
+    // ========================================================================
+    // Input Controls
+    // ========================================================================
+
+    setInput: (key: keyof GalleryState['input'], value: boolean) => {
+      set((state) => ({
+        input: { ...state.input, [key]: value },
+      }));
+    },
+
+    resetInput: () => {
+      set({
+        input: {
+          forward: false,
+          backward: false,
+          left: false,
+          right: false,
+        },
+      });
+    },
+
+    // ========================================================================
+    // Headset Effect
+    // ========================================================================
+
+    setHeadsetOpacity: (opacity: number) => {
+      set({ headsetOpacity: Math.min(1, Math.max(0, opacity)) });
+    },
+  }))
+);
+
+// ============================================================================
+// Selectors for Optimized Re-renders
+// ============================================================================
+
+export const useCurrentView = () => useWorkstationStore((state) => state.currentView);
+export const useIsAnimating = () => useWorkstationStore((state) => state.isAnimating);
+export const useCanNavigate = () => useWorkstationStore((state) => !state.isAnimating && state.sceneMode === 'workstation');
+
+// Gallery-specific selectors
+export const useSceneMode = () => useWorkstationStore((state) => state.sceneMode);
+export const useGalleryCameraMode = () => useWorkstationStore((state) => state.galleryCameraMode);
+export const useActiveVideo = () => useWorkstationStore((state) => state.activeVideoId);
+export const useAvatarPosition = () => useWorkstationStore((state) => state.avatarPosition);
+export const useInput = () => useWorkstationStore((state) => state.input);
+export const useIsInGallery = () => useWorkstationStore((state) => state.sceneMode === 'gallery');
+export const useTransitionProgress = () => useWorkstationStore((state) => state.transitionProgress);
+export const useHeadsetOpacity = () => useWorkstationStore((state) => state.headsetOpacity);
+
+// ============================================================================
+// Debug subscriptions (development only)
+// ============================================================================
+
+if (import.meta.env?.DEV) {
+  useWorkstationStore.subscribe(
+    (state) => state.sceneMode,
+    (sceneMode) => console.log('[Store] Scene mode:', sceneMode)
+  );
+  
+  useWorkstationStore.subscribe(
+    (state) => state.activeVideoId,
+    (videoId) => console.log('[Store] Active video:', videoId)
+  );
+}

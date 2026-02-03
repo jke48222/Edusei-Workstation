@@ -1,4 +1,4 @@
-import type { ViewState } from './store';
+import type { ViewState } from './store/store.ts';
 
 /**
  * Project data interface
