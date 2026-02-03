@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useWorkstationStore } from '../store';
+import { useWorkstationStore } from '../store/store';
 import { 
   projectsData, 
   profileData, 
@@ -10,7 +10,7 @@ import {
   helpText,
   skillsData,
 } from '../data';
-import type { ViewState } from '../store';
+import type { ViewState } from '../store/store';
 
 /**
  * Hook to detect mobile viewport
