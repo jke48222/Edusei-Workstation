@@ -2,8 +2,12 @@ import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import * as easing from 'maath/easing';
-import { useWorkstationStore } from '../store';
-import type { ViewState } from '../store';
+import { 
+  useWorkstationStore, 
+  useSceneMode, 
+  useIsInGallery 
+} from '../store/store';
+import type { ViewState } from '../store/store';
 
 /**
  * Camera position and target configuration for each view
@@ -47,20 +51,13 @@ function useIsMobile() {
 
 /**
  * Generate camera configs based on screen size
- * 
- * DESKTOP: Offset camera target to push model to left side (text panel on right)
- * MOBILE: Center the model (bottom sheet doesn't block it as much)
  */
 function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
-  // Desktop: offset to left. Mobile: centered
   const TARGET_X_OFFSET = isMobile ? 0 : -2;
-  
-  // Mobile: slightly closer and higher to see model above bottom sheet
   const CAMERA_DISTANCE = isMobile ? 6.8 : 7;
   const CAMERA_HEIGHT = isMobile ? 1.8 : 2.5;
 
   return {
-    // Monitor: Homepage view (always centered)
     monitor: {
       position: new Vector3(
         OBJECT_POSITIONS.monitor.x,
@@ -74,7 +71,6 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
       ),
     },
 
-    // Car: Audio Tracking Car
     car: {
       position: new Vector3(
         OBJECT_POSITIONS.car.x,
@@ -88,7 +84,6 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
       ),
     },
 
-    // Dog: AnimalDot sleeping dog
     dog: {
       position: new Vector3(
         OBJECT_POSITIONS.dog.x,
@@ -102,7 +97,6 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
       ),
     },
 
-    // VR: Kitchen Chaos VR headset
     vr: {
       position: new Vector3(
         OBJECT_POSITIONS.vr.x,
@@ -116,7 +110,6 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
       ),
     },
 
-    // Satellite: MEMESat-1 CubeSat
     satellite: {
       position: new Vector3(
         OBJECT_POSITIONS.satellite.x,
@@ -130,7 +123,6 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
       ),
     },
 
-    // Tablet: Capital One
     tablet: {
       position: new Vector3(
         OBJECT_POSITIONS.tablet.x,
@@ -152,13 +144,14 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
  * Handles smooth camera transitions between different view states
  * using maath easing for a heavy, cinematic feel.
  * 
- * RESPONSIVE BEHAVIOR:
- * - Desktop: Model offset to left side (room for text panel on right)
- * - Mobile: Model centered (bottom sheet slides up from below)
+ * Now also handles scene mode changes (workstation vs gallery).
+ * The TransitionPortal component handles the actual transition animation.
  */
 export function CameraRig() {
   const { camera } = useThree();
   const { currentView, isAnimating, completeAnimation } = useWorkstationStore();
+  const sceneMode = useSceneMode();
+  const isInGallery = useIsInGallery();
   const isMobile = useIsMobile();
 
   const currentPosition = useRef(new Vector3());
@@ -176,7 +169,7 @@ export function CameraRig() {
 
   // Initialize camera on first render
   if (!initialized.current) {
-    const initialConfig = getCameraConfigs(false).monitor; // Start with desktop config
+    const initialConfig = getCameraConfigs(false).monitor;
     currentPosition.current.copy(initialConfig.position);
     currentTarget.current.copy(initialConfig.target);
     camera.position.copy(initialConfig.position);
@@ -185,6 +178,12 @@ export function CameraRig() {
   }
 
   useFrame((_, delta) => {
+    // Skip camera updates during transition (TransitionPortal handles it)
+    // And skip during gallery mode (AvatarController handles it)
+    if (sceneMode === 'vr-transition' || sceneMode === 'gallery') {
+      return;
+    }
+    
     const clampedDelta = Math.min(delta, 0.1);
     const dampingFactor = 0.4;
 

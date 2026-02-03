@@ -1,5 +1,5 @@
-import { useRef, useState, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { useRef, useState, Suspense, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   Environment, 
   useGLTF,
@@ -8,10 +8,17 @@ import {
   PresentationControls,
   Stars,
 } from '@react-three/drei';
-import { Group } from 'three';
-import { useWorkstationStore } from '../store';
+import { Group, Mesh } from 'three';
+import * as THREE from 'three';
+import { 
+  useWorkstationStore, 
+  useSceneMode, 
+  useHeadsetOpacity,
+  useTransitionProgress,
+} from '../store/store';
 import { CameraRig } from './CameraRig';
-import type { ViewState } from '../store';
+import { GalleryExperience, TransitionPortal } from './gallery';
+import type { ViewState } from '../store/store';
 
 // Preload all models for faster loading
 useGLTF.preload('/models/crt_monitor.glb');
@@ -69,24 +76,32 @@ function PlatformRing({ position }: { position: [number, number, number] }) {
 /**
  * Clickable 3D object wrapper with hover effects
  * Now includes PresentationControls for drag-to-spin
- * NO LABEL above the model
  */
 interface ClickableObjectProps {
   viewId: ViewState;
   children: React.ReactNode;
   position: [number, number, number];
   isActive: boolean;
+  onEnterGallery?: () => void;
 }
 
-function ClickableObject({ viewId, children, position, isActive }: ClickableObjectProps) {
+function ClickableObject({ viewId, children, position, isActive, onEnterGallery }: ClickableObjectProps) {
   const { setView, currentView, isAnimating } = useWorkstationStore();
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<Group>(null);
   
   const canClick = !isAnimating && currentView === 'monitor';
+  const isVRAndActive = viewId === 'vr' && isActive;
   
   const handleClick = (e: import('@react-three/fiber').ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+    
+    // If VR headset is active (we're viewing it), clicking enters the gallery
+    if (isVRAndActive && onEnterGallery) {
+      onEnterGallery();
+      return;
+    }
+    
     if (canClick) {
       setView(viewId);
     }
@@ -118,7 +133,7 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
       
       {/* Drag-to-spin wrapper - only active when viewing this object */}
       <PresentationControls
-        enabled={isActive}
+        enabled={isActive && !isVRAndActive}
         global={false}
         cursor={isActive}
         snap={false}
@@ -133,7 +148,7 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
           onClick={handleClick}
           onPointerOver={(e) => {
             e.stopPropagation();
-            if (canClick) {
+            if (canClick || isVRAndActive) {
               setHovered(true);
               document.body.style.cursor = 'pointer';
             } else if (isActive) {
@@ -144,14 +159,28 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
             setHovered(false);
             document.body.style.cursor = 'auto';
           }}
-          scale={hovered && canClick ? 1.05 : 1}
+          scale={(hovered && canClick) || (hovered && isVRAndActive) ? 1.05 : 1}
         >
           {children}
         </group>
       </PresentationControls>
       
+      {/* "Enter Gallery" hint when VR is active */}
+      {isVRAndActive && (
+        <group position={[0, -0.5, 0]}>
+          <Sparkles 
+            count={40}
+            scale={[2, 1, 2]}
+            size={3}
+            speed={0.8}
+            color="#a855f7"
+            opacity={0.8}
+          />
+        </group>
+      )}
+      
       {/* Ambient particles when active */}
-      {isActive && (
+      {isActive && !isVRAndActive && (
         <Sparkles 
           count={30}
           scale={[3, 3, 3]}
@@ -214,7 +243,6 @@ function CRTMonitor() {
 
 /**
  * Robot Car - Audio Tracking Car project
- * FIXED ROTATION: rotated so all wheels are on the ground
  */
 function RobotCar() {
   const { scene } = useGLTF('/models/robot_car.glb');
@@ -233,7 +261,7 @@ function RobotCar() {
         <primitive 
           object={clonedScene} 
           scale={0.012}
-          rotation={[Math.PI / 2, 0, 0]} // Rotated to stand upright
+          rotation={[Math.PI / 2, 0, 0]}
         />
       </Center>
     </ClickableObject>
@@ -269,28 +297,93 @@ function SleepingDog() {
 
 /**
  * VR Headset - Kitchen Chaos VR project
- * DOUBLED SIZE: scale 3 -> 6
+ * NOW WITH DISSOLVE EFFECT AND GALLERY TRIGGER
  */
 function VRHeadset() {
   const { scene } = useGLTF('/models/quest3.glb');
   const { currentView } = useWorkstationStore();
-  const clonedScene = scene.clone();
+  const enterGallery = useWorkstationStore((state) => state.enterGallery);
+  const sceneMode = useSceneMode();
+  const headsetOpacity = useHeadsetOpacity();
+  
+  const groupRef = useRef<Group>(null);
   const pos = OBJECT_POSITIONS.vr;
   const isActive = currentView === 'vr';
+  
+  // Clone and setup materials for dissolve
+  const clonedScene = scene.clone();
+  
+  // Apply dissolve effect to all meshes
+  useEffect(() => {
+    if (!groupRef.current) return;
+    
+    groupRef.current.traverse((child) => {
+      if (child instanceof Mesh && child.material) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((mat) => {
+          if (mat instanceof THREE.MeshStandardMaterial) {
+            mat.transparent = true;
+            mat.opacity = headsetOpacity;
+            mat.needsUpdate = true;
+            
+            // Add emissive glow as it dissolves
+            if (headsetOpacity < 1) {
+              mat.emissive = new THREE.Color('#a855f7');
+              mat.emissiveIntensity = (1 - headsetOpacity) * 0.5;
+            } else {
+              mat.emissiveIntensity = 0;
+            }
+          }
+        });
+      }
+    });
+  }, [headsetOpacity]);
+  
+  // Don't render in gallery mode
+  if (sceneMode === 'gallery') return null;
   
   return (
     <ClickableObject 
       viewId="vr" 
       position={[pos.x, pos.y, pos.z]} 
       isActive={isActive}
+      onEnterGallery={enterGallery}
     >
       <Center>
-        <primitive 
-          object={clonedScene} 
-          scale={6}  // DOUBLED from 3
-          rotation={[0, 0, 0]}
-        />
+        <group ref={groupRef}>
+          <primitive 
+            object={clonedScene} 
+            scale={6}
+            rotation={[0, 0, 0]}
+          />
+        </group>
       </Center>
+      
+      {/* Portal effect when active - hint to click */}
+      {isActive && sceneMode === 'workstation' && (
+        <>
+          {/* Glowing lens effect */}
+          <mesh position={[0, 0, 0.3]}>
+            <planeGeometry args={[0.8, 0.4]} />
+            <meshBasicMaterial
+              color="#a855f7"
+              transparent
+              opacity={0.2 + Math.sin(Date.now() * 0.003) * 0.1}
+            />
+          </mesh>
+          
+          {/* "Click to enter" particles */}
+          <Sparkles
+            count={50}
+            scale={[2, 1, 2]}
+            position={[0, 0, 0.5]}
+            size={4}
+            speed={1}
+            color="#a855f7"
+            opacity={0.8}
+          />
+        </>
+      )}
     </ClickableObject>
   );
 }
@@ -371,6 +464,11 @@ function HomepageDesk() {
  * Infinite floor
  */
 function InfiniteFloor() {
+  const sceneMode = useSceneMode();
+  
+  // Don't render in gallery mode
+  if (sceneMode === 'gallery') return null;
+  
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[60, -1, 0]} receiveShadow>
       <planeGeometry args={[300, 100]} />
@@ -395,14 +493,16 @@ function ModelFallback() {
 }
 
 /**
- * Scene content wrapper with model suspense boundaries
+ * Workstation scene content (original scene)
  */
-function SceneContent() {
+function WorkstationContent() {
+  const sceneMode = useSceneMode();
+  
+  // Hide workstation content when fully in gallery
+  if (sceneMode === 'gallery') return null;
+  
   return (
     <>
-      {/* Camera controller */}
-      <CameraRig />
-      
       {/* Environment and lighting */}
       <color attach="background" args={['#030303']} />
       <fog attach="fog" args={['#030303', 10, 50]} />
@@ -462,6 +562,31 @@ function SceneContent() {
       
       <Suspense fallback={<ModelFallback />}>
         <CapitalOneLogo />
+      </Suspense>
+    </>
+  );
+}
+
+/**
+ * Scene content wrapper that handles both workstation and gallery
+ */
+function SceneContent() {
+  const sceneMode = useSceneMode();
+  
+  return (
+    <>
+      {/* Camera controller - handles transitions */}
+      <CameraRig />
+      
+      {/* Transition portal - handles the zoom-through effect */}
+      {sceneMode === 'vr-transition' && <TransitionPortal />}
+      
+      {/* Workstation content */}
+      <WorkstationContent />
+      
+      {/* Gallery content */}
+      <Suspense fallback={null}>
+        <GalleryExperience />
       </Suspense>
     </>
   );
