@@ -8,21 +8,22 @@ export default {
     extend: {
       colors: {
         terminal: {
-          green: '#00ff41',
-          darkgreen: '#00c832',
-          dim: '#00ff4180',
-          bg: '#0a0a0a',
-          bglight: '#1a1a1a',
+          green: '#4ade80',
+          darkgreen: '#22c55e',
+          dim: '#4ade8080',
+          bg: '#0c0c0c',
+          bglight: '#181818',
         },
         phosphor: {
-          glow: '#00ff41',
-          text: '#33ff5c',
-          dim: '#00aa2e',
+          glow: '#4ade80',
+          text: '#86efac',
+          dim: '#22c55e',
         }
       },
       fontFamily: {
         mono: ['IBM Plex Mono', 'Fira Code', 'Consolas', 'monospace'],
-        display: ['Space Grotesk', 'sans-serif'],
+        display: ['Syne', 'Space Grotesk', 'sans-serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
       },
       animation: {
         'blink': 'blink 1s step-end infinite',
@@ -30,6 +31,7 @@ export default {
         'flicker': 'flicker 0.15s infinite',
         'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
         'typing': 'typing 3.5s steps(40, end)',
+        'marquee': 'marquee 30s linear infinite',
       },
       keyframes: {
         blink: {
@@ -45,17 +47,21 @@ export default {
           '50%': { opacity: '0.97' },
         },
         'glow-pulse': {
-          '0%, 100%': { textShadow: '0 0 5px #00ff41, 0 0 10px #00ff41' },
-          '50%': { textShadow: '0 0 15px #00ff41, 0 0 25px #00ff41, 0 0 35px #00ff41' },
+          '0%, 100%': { textShadow: '0 0 4px rgba(74,222,128,0.4), 0 0 8px rgba(74,222,128,0.2)' },
+          '50%': { textShadow: '0 0 8px rgba(74,222,128,0.5), 0 0 16px rgba(74,222,128,0.25)' },
         },
         typing: {
           'from': { width: '0' },
           'to': { width: '100%' },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
       boxShadow: {
-        'terminal': '0 0 20px rgba(0, 255, 65, 0.3), inset 0 0 60px rgba(0, 255, 65, 0.05)',
-        'crt': '0 0 100px rgba(0, 255, 65, 0.15), 0 0 60px rgba(0, 255, 65, 0.1)',
+        'terminal': '0 0 15px rgba(74, 222, 128, 0.15), inset 0 0 40px rgba(74, 222, 128, 0.03)',
+        'crt': '0 0 60px rgba(74, 222, 128, 0.08), 0 0 30px rgba(74, 222, 128, 0.05)',
         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
       },
       backdropBlur: {

@@ -5,9 +5,11 @@ import * as easing from 'maath/easing';
 import { useWorkstationStore, useSceneMode, useTransitionProgress } from '../../store/store';
 
 /**
- * Lens position relative to headset center
- * Adjust these based on your Quest 3 model geometry
+ * @file TransitionPortal.tsx
+ * @description Workstation → gallery transition: camera flies into Quest headset lens, dissolve effect, keyframe-driven.
  */
+
+/** Lens offset from headset center (tune for Quest 3 geometry). */
 const LENS_OFFSET = {
   left: new THREE.Vector3(-0.032, 0.01, -0.05),  // Left lens
   right: new THREE.Vector3(0.032, 0.01, -0.05), // Right lens
@@ -251,7 +253,7 @@ export function createDissolveMaterial(
     cloned.opacity = opacity;
     // Add slight emissive glow as it dissolves
     if (opacity < 1) {
-      cloned.emissive = new THREE.Color('#6366f1');
+      cloned.emissive = new THREE.Color('#FFB7C5');
       cloned.emissiveIntensity = (1 - opacity) * 0.3;
     }
     return cloned;

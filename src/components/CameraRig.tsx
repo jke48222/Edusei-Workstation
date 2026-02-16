@@ -1,26 +1,24 @@
+/**
+ * @file CameraRig.tsx
+ * @description R3F camera controller: smooth transitions between workstation views (monitor,
+ * car, dog, vr, satellite, tablet) using maath damp easing. Configs vary by viewport
+ * (mobile vs desktop). Exports OBJECT_POSITIONS and CameraConfig for alignment with Experience.
+ */
+
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import * as easing from 'maath/easing';
-import { 
-  useWorkstationStore, 
-  useSceneMode, 
-  useIsInGallery 
-} from '../store/store';
+import { useWorkstationStore } from '../store/store';
 import type { ViewState } from '../store/store';
 
-/**
- * Camera position and target configuration for each view
- */
+/** Camera position and look-at target for a single view. */
 interface CameraConfig {
   position: Vector3;
   target: Vector3;
 }
 
-/**
- * Object positions (must match Experience.tsx)
- * Objects are arranged in a line along X-axis, 25 units apart
- */
+/** World positions for each view; must match Experience.tsx (25 units apart on X). */
 const OBJECT_POSITIONS = {
   monitor: { x: 0, y: 1, z: 0 },
   car: { x: 25, y: 1.5, z: 0 },
@@ -30,9 +28,7 @@ const OBJECT_POSITIONS = {
   tablet: { x: 125, y: 1.5, z: 0 },
 };
 
-/**
- * Hook to detect mobile viewport (must be in component)
- */
+/** In-component mobile check (viewport width < 768). */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   
@@ -49,9 +45,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-/**
- * Generate camera configs based on screen size
- */
+/** Builds position/target configs for all views; distance and height vary by isMobile. */
 function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
   const TARGET_X_OFFSET = isMobile ? 0 : -2;
   const CAMERA_DISTANCE = isMobile ? 6.8 : 7;
@@ -139,19 +133,12 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
 }
 
 /**
- * CameraRig Component
- *
- * Handles smooth camera transitions between different view states
- * using maath easing for a heavy, cinematic feel.
- * 
- * Now also handles scene mode changes (workstation vs gallery).
- * The TransitionPortal component handles the actual transition animation.
+ * R3F component (returns null). Drives camera position and lookAt from currentView
+ * with damped easing; calls completeAnimation when within ARRIVAL_THRESHOLD.
  */
 export function CameraRig() {
   const { camera } = useThree();
   const { currentView, isAnimating, completeAnimation } = useWorkstationStore();
-  const sceneMode = useSceneMode();
-  const isInGallery = useIsInGallery();
   const isMobile = useIsMobile();
 
   const currentPosition = useRef(new Vector3());
@@ -160,7 +147,6 @@ export function CameraRig() {
 
   const ARRIVAL_THRESHOLD = 0.05;
 
-  // Regenerate camera configs when screen size changes
   const cameraConfigs = useMemo(() => getCameraConfigs(isMobile), [isMobile]);
 
   const targetConfig = useMemo(() => {
@@ -178,12 +164,6 @@ export function CameraRig() {
   }
 
   useFrame((_, delta) => {
-    // Skip camera updates during transition (TransitionPortal handles it)
-    // And skip during gallery mode (AvatarController handles it)
-    if (sceneMode === 'vr-transition' || sceneMode === 'gallery') {
-      return;
-    }
-    
     const clampedDelta = Math.min(delta, 0.1);
     const dampingFactor = 0.4;
 
@@ -222,8 +202,6 @@ export function CameraRig() {
   return null;
 }
 
-/**
- * Export for reuse
- */
+/** Exported for alignment with Experience and tests. */
 export { OBJECT_POSITIONS };
 export type { CameraConfig };

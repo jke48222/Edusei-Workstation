@@ -1,207 +1,197 @@
-import { Suspense, useEffect, lazy } from 'react';
+/**
+ * @file App.tsx
+ * @description Root application component. Renders either the immersive 3D workstation
+ * or the professional portfolio view based on view mode. Includes cinematic loading
+ * screen, theme-aware layout, and top-level headshot in professional mode.
+ */
+
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
-import { GalleryControls } from './components/ui/GalleryControls';
-import { MobileFallback } from './components/ui/MobileFallback';
-import { GalleryKeyboardHandler } from './components/gallery/GalleryExperience';
-import { useWorkstationStore, useSceneMode, useIsInGallery } from './store/store';
-import { useIsMobile } from './hooks/useIsMobile';
+import { useWorkstationStore, useViewMode } from './store/store';
+import { useActiveTheme } from './store/themeStore';
+import { ModeToggle } from './components/ModeToggle';
+import { ProfessionalView } from './components/professional/ProfessionalView';
+import { ThemeSelector } from './components/ThemeSelector';
+import { projectsData, asciiArt, profileData } from './data';
+
+/* -----------------------------------------------------------------------------
+ * Boot sequence copy: lines shown during loading (BIOS-style diagnostics).
+ * Each entry: { text: string, delay: number } — delay in ms before next line.
+ * ----------------------------------------------------------------------------- */
+
+const bootLines = [
+  { text: 'BIOS v2.026 — POST check..........OK', delay: 80 },
+  { text: 'CPU: AMD Ryzen 9 7950X @ 5.7GHz', delay: 60 },
+  { text: 'RAM: 64GB DDR5-6000 ..............OK', delay: 60 },
+  { text: 'GPU: NVIDIA RTX 4090 24GB', delay: 60 },
+  { text: 'STORAGE: 2TB NVMe SSD ............OK', delay: 60 },
+  { text: '', delay: 30 },
+  { text: 'Loading kernel modules...', delay: 100 },
+  { text: '  [OK] three.js r165', delay: 70 },
+  { text: '  [OK] react-three-fiber', delay: 70 },
+  { text: '  [OK] zustand state', delay: 70 },
+  { text: '  [OK] framer-motion', delay: 70 },
+  { text: '', delay: 30 },
+  { text: 'Mounting /dev/portfolio...', delay: 120 },
+  { text: `Loading ${projectsData.length} project modules...`, delay: 100 },
+  { text: 'Initializing 3D render pipeline...', delay: 150 },
+  { text: '', delay: 50 },
+  { text: 'System ready.', delay: 100 },
+];
 
 /**
- * Loading screen while 3D content loads
+ * Full-screen loading UI shown while the 3D experience loads. Displays ASCII art
+ * briefly, then a typewriter-style boot log and "Press any key to continue";
+ * dismisses on any key or click.
+ * @returns {JSX.Element | null} Loading UI or null after user dismissal
  */
 function LoadingScreen() {
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [showAscii, setShowAscii] = useState(true);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const lineIndexRef = useRef(0);
+
+  useEffect(() => {
+    const asciiTimer = setTimeout(() => setShowAscii(false), 1200);
+    return () => clearTimeout(asciiTimer);
+  }, []);
+
+  useEffect(() => {
+    if (showAscii) return;
+    if (lineIndexRef.current < bootLines.length) {
+      const line = bootLines[lineIndexRef.current];
+      const timer = setTimeout(() => {
+        lineIndexRef.current++;
+        setVisibleLines(lineIndexRef.current);
+      }, line.delay);
+      return () => clearTimeout(timer);
+    } else {
+      const promptTimer = setTimeout(() => setShowPrompt(true), 300);
+      return () => clearTimeout(promptTimer);
+    }
+  }, [showAscii, visibleLines]);
+
+  useEffect(() => {
+    if (!showPrompt) return;
+    const handleKey = () => setDismissed(true);
+    const handleClick = () => setDismissed(true);
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [showPrompt]); // Dismiss on first key or click so user can proceed
+
+  if (dismissed) return null;
+
   return (
-    <div className="fixed inset-0 bg-terminal-bg flex items-center justify-center">
-      <div className="text-center">
-        <div className="phosphor-text-bright text-2xl font-mono mb-4 animate-pulse">
-          INITIALIZING WORKSTATION
-        </div>
-        <div className="flex items-center justify-center gap-2">
-          <div 
-            className="w-2 h-2 bg-terminal-green rounded-full animate-bounce" 
-            style={{ animationDelay: '0ms' }}
-          />
-          <div 
-            className="w-2 h-2 bg-terminal-green rounded-full animate-bounce" 
-            style={{ animationDelay: '150ms' }}
-          />
-          <div 
-            className="w-2 h-2 bg-terminal-green rounded-full animate-bounce" 
-            style={{ animationDelay: '300ms' }}
-          />
-        </div>
-        <div className="mt-4 text-phosphor-dim text-sm font-mono">
-          Loading 3D environment...
-        </div>
+    <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center z-[100] font-mono text-sm">
+      <div className="w-full max-w-2xl px-6">
+        {showAscii ? (
+          <pre className="text-[#4ade80]/80 text-[10px] sm:text-xs leading-tight whitespace-pre animate-pulse">
+            {asciiArt}
+          </pre>
+        ) : (
+          <div className="space-y-0.5">
+            {bootLines.slice(0, visibleLines).map((line, i) => (
+              <div
+                key={i}
+                className={`${
+                  line.text.includes('[OK]')
+                    ? 'text-[#4ade80]/70'
+                    : line.text.includes('OK')
+                    ? 'text-[#4ade80]/50'
+                    : line.text === ''
+                    ? ''
+                    : 'text-[#4ade80]/60'
+                }`}
+              >
+                {line.text || '\u00A0'}
+              </div>
+            ))}
+            
+            {showPrompt && (
+              <div className="mt-6 text-center">
+                <p className="text-[#4ade80] animate-pulse text-base">
+                  Press any key to continue...
+                </p>
+              </div>
+            )}
+            
+            {!showPrompt && visibleLines < bootLines.length && (
+              <span className="inline-block h-4 w-2 bg-[#4ade80]/60 animate-pulse" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 /**
- * Gallery transition overlay - shows during the portal transition
+ * Immersive 3D workstation view: scene, overlay, theme selector, and analytics.
+ * Listens for Escape to return to monitor from any focused object. Works on all screen sizes.
  */
-function TransitionOverlay() {
-  const sceneMode = useSceneMode();
-  
-  if (sceneMode !== 'vr-transition') return null;
-  
-  return (
-    <div className="fixed inset-0 pointer-events-none z-30">
-      {/* Vignette effect during transition */}
-      <div 
-        className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/50"
-        style={{
-          background: 'radial-gradient(circle at center, transparent 30%, rgba(139, 92, 246, 0.1) 60%, rgba(0, 0, 0, 0.3) 100%)'
-        }}
-      />
-      
-      {/* Loading hint */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <p className="text-purple-400/80 font-mono text-sm animate-pulse">
-          Entering VR Gallery...
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Error boundary fallback
- */
-function ErrorFallback() {
-  return (
-    <div className="fixed inset-0 bg-terminal-bg flex items-center justify-center p-4">
-      <div className="glass-card p-8 max-w-md text-center rounded-xl">
-        <div className="phosphor-text-bright text-xl font-mono mb-4">
-          ⚠ SYSTEM ERROR
-        </div>
-        <div className="text-phosphor-dim text-sm font-mono mb-6">
-          Failed to initialize 3D workstation.
-          <br />
-          Please refresh the page to try again.
-        </div>
-        <button
-          onClick={() => window.location.reload()}
-          className="
-            px-6 py-2 rounded-lg
-            border border-terminal-green
-            phosphor-text font-mono text-sm
-            transition-all duration-200
-            hover:bg-terminal-green/10
-          "
-        >
-          RESTART SYSTEM
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Desktop Experience - Full 3D workstation with gallery feature
- */
-function DesktopExperience() {
+function ImmersiveExperience() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
-  const sceneMode = useSceneMode();
-  const isInGallery = useIsInGallery();
+  const theme = useActiveTheme();
   
-  // Keyboard shortcut: ESC to return to monitor OR exit gallery
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isAnimating) {
-        if (isInGallery) {
-          // Exit gallery handled by GalleryKeyboardHandler
-          return;
-        }
-        if (currentView !== 'monitor') {
-          returnToMonitor();
-        }
+      if (e.key === 'Escape' && !isAnimating && currentView !== 'monitor') {
+        returnToMonitor();
       }
     };
-    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentView, isAnimating, returnToMonitor, isInGallery]);
+  }, [currentView, isAnimating, returnToMonitor]);
   
   return (
-    <div className="w-full h-screen bg-terminal-bg overflow-hidden">
-      {/* 3D Canvas - renders the desk scene and gallery */}
+    <div className="w-full h-screen overflow-hidden" style={{ backgroundColor: theme.bg }}>
       <Suspense fallback={<LoadingScreen />}>
         <Experience />
       </Suspense>
       
-      {/* HTML Overlay - terminal UI and project cards (hidden in gallery) */}
-      {sceneMode === 'workstation' && <Overlay />}
+      <Overlay />
       
-      {/* Gallery Controls Overlay - WASD hints, exit button */}
-      <GalleryControls />
-      
-      {/* Transition Overlay */}
-      <TransitionOverlay />
-      
-      {/* Gallery Keyboard Handler (WASD controls) */}
-      <GalleryKeyboardHandler />
-      
-      {/* Keyboard shortcut hint - changes based on mode */}
-      <div className="fixed bottom-4 left-4 text-phosphor-dim text-xs font-mono opacity-50 pointer-events-none">
-        {isInGallery ? (
-          'WASD to move • ESC to exit'
-        ) : (
-          'ESC to return • Click objects to explore'
-        )}
+      <div
+        className="fixed bottom-4 left-4 text-xs font-mono opacity-50 pointer-events-none hidden sm:block"
+        style={{ color: theme.textDim }}
+      >
+        ESC to return • Click objects to explore
       </div>
       
-      {/* VR Gallery hint when viewing headset */}
-      {currentView === 'vr' && sceneMode === 'workstation' && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 pointer-events-none">
-          <div className="bg-purple-900/50 backdrop-blur-sm px-6 py-3 rounded-xl border border-purple-500/30">
-            <p className="text-purple-300 font-mono text-sm text-center">
-              Click the headset to enter the <span className="text-purple-200 font-bold">VR Gallery</span>
-            </p>
-          </div>
-        </div>
-      )}
+      <ThemeSelector />
       
-      {/* Vercel Web Analytics */}
       <Analytics />
     </div>
   );
 }
 
 /**
- * Mobile Experience - Video card grid fallback
- */
-function MobileExperience() {
-  return (
-    <div className="min-h-screen bg-terminal-bg">
-      <MobileFallback />
-      <Analytics />
-    </div>
-  );
-}
-
-/**
- * Main App Component
- * 
- * Key Architecture Decisions:
- * 1. Mobile detection happens BEFORE Canvas mount to prevent performance issues
- * 2. On mobile, we render a completely different component tree (no WebGL)
- * 3. The gallery state machine is integrated with the existing workstation store
- * 4. Keyboard handlers are separate components to prevent re-renders
+ * Root component: switches between professional (scroll) and immersive (3D) view
+ * via view mode. Renders mode toggle, active view, and optional headshot in professional mode.
  */
 function App() {
-  const isMobile = useIsMobile();
+  const viewMode = useViewMode();
   
-  // Critical: Don't even mount the Canvas on mobile devices
-  // This prevents WebGL context creation and saves memory/battery
-  if (isMobile) {
-    return <MobileExperience />;
-  }
-  
-  return <DesktopExperience />;
+  return (
+    <>
+      <ModeToggle />
+      {viewMode === 'professional' ? <ProfessionalView /> : <ImmersiveExperience />}
+      {viewMode === 'professional' && (
+        <img
+          src="/headshot.png"
+          alt={profileData.name}
+          className="fixed top-4 left-4 z-30 h-32 w-32 rounded-full object-cover ring-2 ring-[#0a0a0a]/10 shadow-xl md:h-40 md:w-40"
+        />
+      )}
+    </>
+  );
 }
 
 export default App;

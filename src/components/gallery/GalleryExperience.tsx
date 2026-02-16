@@ -1,69 +1,78 @@
 import { Suspense, useEffect } from 'react';
-import { useWorkstationStore, useSceneMode, useIsInGallery } from '../../store/store';
-import { galleryVideos } from '../../constants/galleryData';
+import { useWorkstationStore, useSceneMode, useIsInGallery, useBridgeStates } from '../../store/store';
+import { islandData } from '../../constants/galleryData';
 import { useKeyboardControls } from '../../hooks/useKeyboardControls';
 
 // Gallery components
 import { Avatar } from './Avatar';
 import { AvatarController } from './AvatarController';
-import { VideoStageGroup } from './VideoStage';
-import { VoidEnvironment } from './VoidEnvironment';
+import { SpiritOasis } from './SpiritOasis';
+import { GalleryPostProcessing } from './GalleryPostProcessing';
+import { ProjectIslandGroup } from './ProjectIsland';
+import { GazeBridgeGroup } from './GazeBridge';
+import { SpatialAudioManager } from './SpatialAudioManager';
 
 /**
- * GalleryExperience Component
- * 
- * The main entry point for the gallery scene.
- * Orchestrates all gallery sub-components:
- * - VoidEnvironment (background, lighting, decorations)
- * - VideoStageGroup (all video platforms and screens)
- * - Avatar (the player character)
- * - AvatarController (movement and camera logic)
- * 
- * This component is conditionally rendered based on sceneMode.
+ * @file GalleryExperience.tsx
+ * @description Main entry point for the Spirit Oasis gallery scene. Orchestrates:
+ * - SpiritOasis (sky, main island, Spirit Tree, Koi Pond, atmosphere)
+ * - GalleryPostProcessing (bloom, vignette)
+ * - ProjectIslandGroup (6 floating project islands)
+ * - GazeBridgeGroup (stone-step bridges between islands)
+ * - Avatar (player character)
+ * - AvatarController (movement, camera, gaze raycasting)
  */
 export function GalleryExperience() {
   const sceneMode = useSceneMode();
-  const isInGallery = useIsInGallery();
-  
-  // Only render when we're in the gallery
+  const bridgeStates = useBridgeStates();
+
   if (sceneMode !== 'gallery') {
     return null;
   }
-  
+
   return (
     <group>
-      {/* Environment - background, floor, lighting, decorations */}
-      <VoidEnvironment />
-      
-      {/* Video screens and platforms */}
+      {/* Post-processing effects */}
+      <GalleryPostProcessing />
+
+      {/* Spirit Oasis environment (sky, main island, tree, pond) */}
+      <SpiritOasis />
+
+      {/* Project islands (6 floating exhibits) */}
       <Suspense fallback={null}>
-        <VideoStageGroup videos={galleryVideos} />
+        <ProjectIslandGroup islands={islandData} />
       </Suspense>
-      
+
+      {/* Gaze bridges (stone steps between main and project islands) */}
+      <GazeBridgeGroup islands={islandData} bridgeStates={bridgeStates} />
+
       {/* Player avatar */}
       <Suspense fallback={null}>
         <Avatar />
       </Suspense>
-      
-      {/* Movement and camera controller */}
+
+      {/* Movement, camera, and gaze controller */}
       <AvatarController />
-      
-      {/* Spawn point marker (optional visual) */}
+
+      {/* Spatial audio (wind, water, chimes, birds) */}
+      <SpatialAudioManager />
+
+      {/* Spawn point marker */}
       <SpawnPointMarker />
     </group>
   );
 }
 
 /**
- * SpawnPointMarker - Visual indicator of where the player starts
+ * SpawnPointMarker — soft glow ring where the player spawns
  */
 function SpawnPointMarker() {
   return (
-    <group position={[0, 0.01, 8]}>
+    <group position={[0, 0.05, 8]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.8, 1, 32]} />
+        <ringGeometry args={[0.6, 0.8, 32]} />
         <meshBasicMaterial
-          color="#22c55e"
+          color="#FFB7C5"
           transparent
           opacity={0.3}
         />
@@ -73,50 +82,46 @@ function SpawnPointMarker() {
 }
 
 /**
- * GalleryKeyboardHandler - Handles keyboard input for the gallery
- * This is a separate component to avoid re-renders in the main experience
+ * GalleryKeyboardHandler — handles keyboard input for the gallery
  */
 export function GalleryKeyboardHandler() {
   const isInGallery = useIsInGallery();
-  
-  // Enable keyboard controls only when in gallery
+
   useKeyboardControls(isInGallery);
-  
-  // Handle ESC to exit gallery
+
   const exitGallery = useWorkstationStore((state) => state.exitGallery);
-  
+
   useEffect(() => {
     if (!isInGallery) return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         exitGallery();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isInGallery, exitGallery]);
-  
+
   return null;
 }
 
 /**
- * GalleryLoadingState - Loading placeholder while gallery initializes
+ * GalleryLoadingState — loading placeholder with warm colors
  */
 export function GalleryLoadingState() {
   return (
     <group>
-      <color attach="background" args={['#030014']} />
-      <ambientLight intensity={0.2} />
-      
-      {/* Loading indicator */}
+      <color attach="background" args={['#2A6B6B']} />
+      <ambientLight intensity={0.3} color="#FFF8E7" />
+
       <mesh position={[0, 1.5, 0]}>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <octahedronGeometry args={[0.4, 0]} />
         <meshStandardMaterial
-          color="#6366f1"
+          color="#FFB7C5"
           wireframe
-          emissive="#6366f1"
+          emissive="#FFB7C5"
           emissiveIntensity={0.5}
         />
       </mesh>

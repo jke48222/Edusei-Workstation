@@ -1,20 +1,14 @@
+/**
+ * @file MobileFallback.tsx
+ * @description Fallback UI when 3D gallery is not shown (e.g. mobile): responsive grid of
+ * video cards, modal video player, and MobileGalleryWrapper for conditional rendering.
+ */
+
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { galleryVideos, GalleryVideo } from '../../constants/galleryData';
 
-/**
- * MobileFallback Component
- * 
- * Renders a responsive grid of video cards when the 3D gallery is disabled
- * (typically on mobile devices).
- * 
- * Features:
- * - Responsive grid layout (1-3 columns based on screen size)
- * - Video thumbnails with play overlay
- * - Modal video player on tap
- * - Smooth framer-motion animations
- * - GitHub link for each project
- */
+/** Responsive grid of video cards with thumbnails, play overlay, and modal player. */
 export function MobileFallback() {
   const [selectedVideo, setSelectedVideo] = useState<GalleryVideo | null>(null);
   
@@ -79,9 +73,7 @@ export function MobileFallback() {
   );
 }
 
-/**
- * VideoCard - Individual video card in the grid
- */
+/** Props for a single video card in the grid. */
 interface VideoCardProps {
   video: GalleryVideo;
   index: number;
@@ -192,9 +184,7 @@ function VideoCard({ video, index, onSelect }: VideoCardProps) {
   );
 }
 
-/**
- * VideoModal - Full-screen video player modal
- */
+/** Props for the full-screen video modal. */
 interface VideoModalProps {
   video: GalleryVideo;
   onClose: () => void;
@@ -285,10 +275,7 @@ function VideoModal({ video, onClose }: VideoModalProps) {
   );
 }
 
-/**
- * MobileGalleryWrapper - Wrapper that handles the mobile detection logic
- * Use this in your main App component
- */
+/** Renders MobileFallback when isMobile, else children (3D gallery). */
 interface MobileGalleryWrapperProps {
   isMobile: boolean;
   children: React.ReactNode;

@@ -1,3 +1,10 @@
+/**
+ * @file useGameStore.ts
+ * @description Alternate/legacy game store for gallery scene: scene mode (kitchen | transition | gallery),
+ * camera (orbit | follow | cinema), avatar state, video state, and keyboard input. May be used
+ * by gallery flows that do not use the unified workstation store.
+ */
+
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as THREE from 'three';
