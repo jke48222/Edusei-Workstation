@@ -1,9 +1,13 @@
+/**
+ * @file useKeyboardControls.ts
+ * @description Keyboard input for gallery avatar movement (WASD/arrows). Updates workstation
+ * store input state; getMovementVector derives normalized direction for physics.
+ */
+
 import { useEffect, useCallback, useRef } from 'react';
 import { useWorkstationStore } from '../store/store';
 
-/**
- * Key mappings for movement controls
- */
+/** Key-to-direction mappings for movement (WASD and arrow keys). */
 const KEY_MAPPINGS: Record<string, 'forward' | 'backward' | 'left' | 'right'> = {
   // WASD
   'w': 'forward',

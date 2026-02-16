@@ -1,7 +1,14 @@
+/**
+ * @file data.ts
+ * @description Central data module: profile, skills, work experience, leadership,
+ * projects, and terminal/help copy. All content consumed by professional view
+ * and immersive overlay. Exports typed interfaces and lookup helpers.
+ */
+
 import type { ViewState } from './store/store.ts';
 
 /**
- * Project data interface
+ * Project data interface (aligns with ViewState for 3D object mapping).
  */
 export interface ProjectData {
   id: ViewState;
@@ -30,15 +37,15 @@ export const profileData = {
   name: 'Jalen Edusei',
   title: 'Software Engineer',
   university: 'University of Georgia',
-  college: 'Morehead Honors College',
+  college: 'College of Engineering, Morehead Honors College',
   degree: 'B.S. Computer Systems Engineering',
   graduationYear: 2026,
-  gpa: 3.60,
   email: 'jalen.edusei@gmail.com',
   phone: '770.714.0190',
   linkedin: 'linkedin.com/in/jalenedusei',
   github: 'github.com/jke48222',
   resumeUrl: '/resume.pdf',
+  openForWork: true,
 };
 
 /**
@@ -51,8 +58,8 @@ export const skillsData = {
   ],
   software: [
     'Autodesk Fusion 360', 'Blender', 'CAD', 'Figma', 'Git', 
-    'GitHub', 'NASA F Prime', 'Unity3D', 'VR/MR Development',
-    'Xilinx', 'Zephyr', 'Microsoft Suite', 'WordPress', 'Wix'
+    'GitHub', 'Graphic Design', 'NASA F Prime', 'Unity3D', 'VR/MR Development',
+    'Website Development', 'Xilinx', 'Zephyr', 'Microsoft Suite', 'WordPress', 'Wix'
   ],
   hardware: [
     '2U CubeSat', 'Basys2 FPGA Boards', 'Raspberry Pi Pico 2W',
@@ -60,9 +67,9 @@ export const skillsData = {
     'STM32 Microcontrollers'
   ],
   core: [
-    'Business Case Development', 'Data Analysis', 'Critical Thinking',
+    'Business Case Development', 'Collaboration', 'Data Analysis', 'Critical Thinking',
     'Human-Computer Interaction', 'Problem Solving', 'Product Strategy',
-    'Project Management', 'Technical Communication'
+    'Project Management', 'Strategic Leadership', 'Technical Communication'
   ],
 };
 
@@ -104,6 +111,17 @@ export const workExperience = [
       'Analyzed data contributing to 2 peer-reviewed manuscripts.',
     ],
   },
+  {
+    title: 'Shift Leader',
+    company: 'Great American Cookies & Marble Slab Creamery',
+    location: 'Dallas, GA',
+    period: 'May 2022 – July 2022',
+    highlights: [
+      'Managed daily operations and supervised a team of 5 employees, increasing shift efficiency by 20%.',
+      'Processed 100+ customer orders daily with exemplary service, achieving top customer satisfaction ratings.',
+      'Trained new staff, improving onboarding time by 40%.',
+    ],
+  },
 ];
 
 /**
@@ -114,6 +132,11 @@ export const leadership = [
     role: 'Vice President',
     organization: 'National Society of Black Engineers',
     period: 'May 2025 – Present',
+    highlights: [
+      'Lead a 100+ member chapter in strategic planning, aligning operations with national initiatives.',
+      'Coordinate logistics for national and regional conventions, managing travel for 50+ members.',
+      'Design and implement a centralized digital resource hub for internship pipelines and alumni contacts.',
+    ],
   },
   {
     role: 'Member',
@@ -126,11 +149,58 @@ export const leadership = [
     period: 'January 2024 – Present',
   },
   {
+    role: 'Student Advisor',
+    organization: 'Louis Stokes Alliance for Minority Participation',
+    period: 'August 2023 – May 2025',
+    highlights: [
+      'Planned and executed 8+ workshops each semester supporting academic success for 30+ underrepresented STEM students.',
+      'Assisted in strategic programming and mentoring initiatives contributing to increased retention and engagement.',
+    ],
+  },
+  {
     role: 'Senator',
     organization: 'National Society of Black Engineers',
     period: 'May 2024 – May 2025',
+    highlights: [
+      'Represented chapter at regional and national levels, voting on legislation and advocating for student-centered initiatives.',
+      'Led conference interest meetings, managing all travel logistics and budget allocations.',
+      'Drafted and presented semester goals fostering alignment between chapter activities and national objectives.',
+    ],
+  },
+  {
+    role: 'ELS Peer Leader',
+    organization: 'Office of Engagement, Leadership, and Service',
+    period: 'January 2024 – May 2024',
+    highlights: [
+      'Selected for leadership coaching program supporting first- and second-year student engagement.',
+      'Conducted 1:1 mentorship sessions, connecting students to leadership opportunities and resources.',
+      'Facilitated interactive workshops on values-based leadership and self-discovery.',
+    ],
+  },
+  {
+    role: 'Telecom & Vice PR Chair',
+    organization: 'National Society of Black Engineers',
+    period: 'May 2023 – May 2024',
+    highlights: [
+      'Increased chapter social media engagement by 40% through data-driven content strategies.',
+      'Designed and launched a new chapter website to streamline communication and showcase events.',
+      'Created branded promotional materials that boosted event attendance by 15%.',
+    ],
   },
 ];
+
+/**
+ * Study Abroad
+ */
+export const studyAbroad = {
+  title: 'Study Abroad in Germany',
+  period: 'May 2023 – June 2023',
+  highlights: [
+    'Completed coursework on engineering ethics, professionalism, and global collaboration, earning 3 credit hours.',
+    'Delivered 3 technical presentations and authored 2 academic papers exploring case studies in ethical engineering practice.',
+    'Traveled independently to Germany, France, and Austria, building intercultural fluency and adaptability.',
+  ],
+};
 
 /**
  * Honors & Awards
@@ -138,7 +208,6 @@ export const leadership = [
 export const honors = [
   { title: 'Extraordinary Engineer', org: 'College of Engineering', date: 'February 2024' },
   { title: 'Presidential Scholar (2x)', org: 'University of Georgia', date: '2022-2023' },
-  { title: 'Dire Needs Project Fund: $1500 Grant', org: 'UGA', date: '2023-2024' },
 ];
 
 /**

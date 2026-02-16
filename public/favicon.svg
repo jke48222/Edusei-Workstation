@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- > : black chevron (more acute) -->
+  <path d="M6 6l11 10-11 10" stroke="#0a0a0a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- _ : underscore (longer) -->
+  <rect x="22" y="21" width="11" height="4" rx="0.5" fill="#0F4C81"/>
+</svg>

@@ -1,3 +1,10 @@
+/**
+ * @file store.ts
+ * @description Unified Zustand store for workstation views (monitor/car/dog/vr/satellite/tablet),
+ * view mode (immersive vs professional), and gallery/VR experience (scene transitions, avatar,
+ * camera, video, gaze bridge). Uses subscribeWithSelector for granular subscriptions.
+ */
+
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as THREE from 'three';
@@ -10,6 +17,13 @@ import * as THREE from 'three';
  * ViewState enum representing all possible camera positions in the workstation
  */
 export type ViewState = 'monitor' | 'car' | 'dog' | 'vr' | 'satellite' | 'tablet';
+
+/**
+ * High-level view mode for the site
+ * - 'immersive' keeps the existing 3D workstation + VR gallery
+ * - 'professional' mounts a DOM-first, recruiter-friendly view
+ */
+export type ViewMode = 'immersive' | 'professional';
 
 /**
  * Scene mode - tracks which major scene the user is in
@@ -56,6 +70,12 @@ interface GalleryState {
 
   // Headset dissolve effect
   headsetOpacity: number;
+
+  // Spirit Oasis — Gaze bridge state
+  gazeTargetIsland: string | null;
+  gazeProgress: number;
+  bridgeStates: Record<string, 'none' | 'building' | 'complete' | 'dissolving'>;
+  activeIslandId: string | null;
 }
 
 interface GalleryActions {
@@ -86,6 +106,12 @@ interface GalleryActions {
 
   // Headset effect
   setHeadsetOpacity: (opacity: number) => void;
+
+  // Spirit Oasis — Gaze bridge actions
+  setGazeTarget: (islandId: string | null) => void;
+  setGazeProgress: (progress: number) => void;
+  setBridgeState: (islandId: string, state: 'none' | 'building' | 'complete' | 'dissolving') => void;
+  setActiveIsland: (islandId: string | null) => void;
 }
 
 // ============================================================================
@@ -93,6 +119,9 @@ interface GalleryActions {
 // ============================================================================
 
 interface WorkstationState {
+  // High-level site mode
+  viewMode: ViewMode;
+
   currentView: ViewState;
   isAnimating: boolean;
   animationStartTime: number | null;
@@ -100,6 +129,7 @@ interface WorkstationState {
 }
 
 interface WorkstationActions {
+  setViewMode: (mode: ViewMode) => void;
   setView: (view: ViewState) => void;
   returnToMonitor: () => void;
   completeAnimation: () => void;
@@ -118,6 +148,7 @@ type StoreActions = WorkstationActions & GalleryActions;
 // ============================================================================
 
 const initialWorkstationState: WorkstationState = {
+  viewMode: 'professional',
   currentView: 'monitor',
   isAnimating: false,
   animationStartTime: null,
@@ -150,6 +181,11 @@ const initialGalleryState: GalleryState = {
   },
 
   headsetOpacity: 1,
+
+  gazeTargetIsland: null,
+  gazeProgress: 0,
+  bridgeStates: {},
+  activeIslandId: null,
 };
 
 // ============================================================================
@@ -166,15 +202,13 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
     // Workstation Actions (Original)
     // ========================================================================
 
+    setViewMode: (mode: ViewMode) => {
+      set({ viewMode: mode });
+    },
+
     setView: (view: ViewState) => {
       const state = get();
       if (state.isAnimating || state.currentView === view) return;
-      
-      // If clicking VR headset while at VR view, trigger gallery transition
-      if (view === 'vr' && state.currentView === 'vr') {
-        get().enterGallery();
-        return;
-      }
 
       set({
         currentView: view,
@@ -195,13 +229,6 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
 
     returnToMonitor: () => {
       const state = get();
-      
-      // If in gallery, exit gallery first
-      if (state.sceneMode === 'gallery') {
-        get().exitGallery();
-        return;
-      }
-
       if (state.isAnimating || state.currentView === 'monitor') return;
 
       set({
@@ -375,6 +402,31 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
     setHeadsetOpacity: (opacity: number) => {
       set({ headsetOpacity: Math.min(1, Math.max(0, opacity)) });
     },
+
+    // ========================================================================
+    // Spirit Oasis — Gaze Bridge
+    // ========================================================================
+
+    setGazeTarget: (islandId: string | null) => {
+      const state = get();
+      if (state.gazeTargetIsland !== islandId) {
+        set({ gazeTargetIsland: islandId, gazeProgress: 0 });
+      }
+    },
+
+    setGazeProgress: (progress: number) => {
+      set({ gazeProgress: Math.min(1, Math.max(0, progress)) });
+    },
+
+    setBridgeState: (islandId: string, state: 'none' | 'building' | 'complete' | 'dissolving') => {
+      set((prev) => ({
+        bridgeStates: { ...prev.bridgeStates, [islandId]: state },
+      }));
+    },
+
+    setActiveIsland: (islandId: string | null) => {
+      set({ activeIslandId: islandId });
+    },
   }))
 );
 
@@ -382,6 +434,7 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
 // Selectors for Optimized Re-renders
 // ============================================================================
 
+export const useViewMode = () => useWorkstationStore((state) => state.viewMode);
 export const useCurrentView = () => useWorkstationStore((state) => state.currentView);
 export const useIsAnimating = () => useWorkstationStore((state) => state.isAnimating);
 export const useCanNavigate = () => useWorkstationStore((state) => !state.isAnimating && state.sceneMode === 'workstation');
@@ -395,6 +448,12 @@ export const useInput = () => useWorkstationStore((state) => state.input);
 export const useIsInGallery = () => useWorkstationStore((state) => state.sceneMode === 'gallery');
 export const useTransitionProgress = () => useWorkstationStore((state) => state.transitionProgress);
 export const useHeadsetOpacity = () => useWorkstationStore((state) => state.headsetOpacity);
+
+// Spirit Oasis selectors
+export const useGazeTarget = () => useWorkstationStore((state) => state.gazeTargetIsland);
+export const useGazeProgress = () => useWorkstationStore((state) => state.gazeProgress);
+export const useBridgeStates = () => useWorkstationStore((state) => state.bridgeStates);
+export const useActiveIsland = () => useWorkstationStore((state) => state.activeIslandId);
 
 // ============================================================================
 // Debug subscriptions (development only)
