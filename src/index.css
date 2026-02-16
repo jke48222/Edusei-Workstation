@@ -1,8 +1,15 @@
+/**
+ * Global styles: Tailwind layers, base reset, and app-specific utilities.
+ * Sections: base/reset, iOS Safari zoom prevention, CRT/terminal components,
+ * scrollbar utilities, professional view scroll, terminal-scroll (themed), canvas/overlay containers.
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Base Styles */
+/* -----------------------------------------------------------------------------
+ * Base: reset and root layout
+ * ----------------------------------------------------------------------------- */
 * {
   margin: 0;
   padding: 0;
@@ -16,7 +23,9 @@ html, body, #root {
   font-family: 'IBM Plex Mono', monospace;
 }
 
-/* --- iOS Safari Zoom Prevention --- */
+/* -----------------------------------------------------------------------------
+ * iOS Safari: prevent zoom on input focus, overscroll, touch
+ * ----------------------------------------------------------------------------- */
 @supports (-webkit-touch-callout: none) {
   input,
   textarea,
@@ -31,9 +40,9 @@ html, body, #root {
 }
 
 
-/* CRT Monitor Simulation Effects */
+/* CRT / terminal simulation (scanlines, flicker, phosphor, cursor, glass, bezel, noise) */
 @layer components {
-  /* Scanline overlay effect */
+  /* Scanline overlay */
   .crt-scanlines {
     position: relative;
     overflow: hidden;
@@ -50,8 +59,8 @@ html, body, #root {
       0deg,
       transparent,
       transparent 2px,
-      rgba(0, 255, 65, 0.03) 2px,
-      rgba(0, 255, 65, 0.03) 4px
+      rgba(0, 0, 0, 0.02) 2px,
+      rgba(0, 0, 0, 0.02) 4px
     );
     pointer-events: none;
     z-index: 10;
@@ -69,22 +78,20 @@ html, body, #root {
     94% { opacity: 1; }
   }
   
-  /* Phosphor glow on text */
+  /* Phosphor glow on text — softer, easier on the eyes */
   .phosphor-text {
-    color: #00ff41;
+    color: #4ade80;
     text-shadow: 
-      0 0 5px #00ff41,
-      0 0 10px #00ff4180,
-      0 0 15px #00ff4140;
+      0 0 4px rgba(74,222,128,0.4),
+      0 0 8px rgba(74,222,128,0.2);
   }
   
   .phosphor-text-bright {
-    color: #33ff5c;
+    color: #86efac;
     text-shadow: 
-      0 0 5px #00ff41,
-      0 0 15px #00ff41,
-      0 0 25px #00ff4180,
-      0 0 35px #00ff4140;
+      0 0 5px rgba(74,222,128,0.5),
+      0 0 12px rgba(74,222,128,0.25),
+      0 0 20px rgba(74,222,128,0.1);
   }
   
   /* Terminal cursor */
@@ -92,7 +99,7 @@ html, body, #root {
     display: inline-block;
     width: 10px;
     height: 1.2em;
-    background-color: #00ff41;
+    background-color: #4ade80;
     margin-left: 2px;
     animation: blink 1s step-end infinite;
     vertical-align: text-bottom;
@@ -105,14 +112,14 @@ html, body, #root {
   
   /* Glass morphism card */
   .glass-card {
-    background: rgba(10, 10, 10, 0.85);
+    background: rgba(12, 12, 12, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 255, 65, 0.2);
+    border: 1px solid rgba(74, 222, 128, 0.15);
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.5),
-      0 0 60px rgba(0, 255, 65, 0.1),
-      inset 0 1px 0 rgba(0, 255, 65, 0.1);
+      0 0 40px rgba(74, 222, 128, 0.06),
+      inset 0 1px 0 rgba(74, 222, 128, 0.08);
   }
   
   /* Hover glow effect for clickable items */
@@ -122,15 +129,14 @@ html, body, #root {
   
   .hover-glow:hover {
     text-shadow: 
-      0 0 10px #00ff41,
-      0 0 20px #00ff41,
-      0 0 30px #00ff4180;
+      0 0 6px rgba(74,222,128,0.5),
+      0 0 12px rgba(74,222,128,0.25);
     transform: translateX(4px);
   }
   
   /* Terminal prompt styling */
   .terminal-prompt {
-    color: #00ff41;
+    color: #4ade80;
   }
   
   .terminal-prompt::before {
@@ -145,7 +151,7 @@ html, body, #root {
     border-radius: 8px;
     box-shadow: 
       inset 0 0 50px rgba(0, 0, 0, 0.5),
-      0 0 20px rgba(0, 255, 65, 0.15);
+      0 0 15px rgba(74, 222, 128, 0.08);
   }
   
   /* Noise texture overlay */
@@ -168,9 +174,9 @@ html, body, #root {
   
   /* Tech tag styling */
   .tech-tag {
-    background: rgba(0, 255, 65, 0.1);
-    border: 1px solid rgba(0, 255, 65, 0.3);
-    color: #00ff41;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    color: #4ade80;
     padding: 4px 12px;
     border-radius: 4px;
     font-size: 0.75rem;
@@ -180,7 +186,54 @@ html, body, #root {
   }
 }
 
-/* Canvas container */
+/* -----------------------------------------------------------------------------
+ * Scrollbar utilities: no-scrollbar, pro-scroll (professional view), terminal-scroll (themed)
+ * ----------------------------------------------------------------------------- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Professional View overrides */
+.pro-scroll {
+  scroll-behavior: smooth;
+}
+
+.pro-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pro-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pro-scroll::-webkit-scrollbar-thumb {
+  background: rgba(10, 10, 10, 0.15);
+  border-radius: 3px;
+}
+
+.pro-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 10, 10, 0.3);
+}
+
+/* Terminal scrollbar — themed via CSS custom properties */
+.terminal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.terminal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.terminal-scroll::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color, rgba(100,100,100,0.3));
+  border-radius: 3px;
+}
+.terminal-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-color-hover, rgba(100,100,100,0.5));
+}
+.terminal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color, rgba(100,100,100,0.3)) transparent;
+}
+
+/* Fixed full-viewport containers for canvas and overlay (z-index layering). */
 .canvas-container {
   position: fixed;
   top: 0;
@@ -203,4 +256,6 @@ html, body, #root {
 
 .overlay-container > * {
   pointer-events: auto;
+  touch-action: auto;
+  -webkit-overflow-scrolling: touch;
 }

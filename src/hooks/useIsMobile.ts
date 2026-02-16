@@ -1,7 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+/**
+ * @file useIsMobile.ts
+ * @description Hooks for device capability: mobile/touch detection (useIsMobile, useHasTouch)
+ * and viewport dimensions (useViewportSize). Used for responsive UI and input hints.
+ */
+
+import { useState, useEffect } from 'react';
 
 /**
- * Comprehensive mobile/touch device detection
+ * Comprehensive mobile/touch device detection.
  * 
  * Uses multiple signals:
  * - Screen width (< 768px)
@@ -59,10 +65,10 @@ function checkIsMobile(): boolean {
 
   // Decision logic:
   // - Narrow screen + touch = definitely mobile
-  // - Coarse pointer = likely tablet/mobile
+  // - Coarse pointer + narrow screen = likely tablet/mobile
   // - User agent match = mobile
-  // - Narrow screen alone = probably mobile browser
-  return (isNarrowScreen && hasTouch) || hasCoarsePointer || mobileUserAgent || isNarrowScreen;
+  // - Narrow screen ALONE is NOT enough (could be resized desktop browser)
+  return (isNarrowScreen && hasTouch) || (hasCoarsePointer && isNarrowScreen) || mobileUserAgent;
 }
 
 /**

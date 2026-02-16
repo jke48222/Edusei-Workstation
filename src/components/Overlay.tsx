@@ -1,110 +1,296 @@
+/**
+ * @file Overlay.tsx
+ * @description Terminal-style overlay for the immersive workstation: boot sequence, system
+ * status, project grid, command input, and contact links. Theme-driven colors; supports
+ * mobile detail panel with minimize/expand. CRT-style and scrollbar styling via theme.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkstationStore } from '../store/store';
-import { 
-  projectsData, 
-  profileData, 
-  bootSequence, 
-  asciiArt,
+import { useActiveTheme } from '../store/themeStore';
+import {
+  projectsData,
+  profileData,
+  bootSequence,
   getProjectById,
   helpText,
   skillsData,
 } from '../data';
 import type { ViewState } from '../store/store';
 
-/**
- * Hook to detect mobile viewport
- * Updated to check window immediately to prevent layout shift
- */
+/** Local responsive hook: true when viewport width < 768px. */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => {
-    // Check immediately if window is defined (client-side)
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 768;
-    }
+    if (typeof window !== 'undefined') return window.innerWidth < 768;
     return false;
   });
-  
+
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Add listener
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
-  
+
   return isMobile;
 }
 
-/**
- * Boot sequence animation
- */
+/** Framer Motion variants for terminal and list animations. */
+const terminalEnter = {
+  hidden: { opacity: 0, scale: 0.96, y: 12 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: { opacity: 0, scale: 0.96, transition: { duration: 0.3 } },
+};
+
+const staggerList = {
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+
+const fadeSlideUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/** Typewriter boot lines in terminal; calls onComplete when finished. */
 function BootSequence({ onComplete }: { onComplete: () => void }) {
-  const [visibleLines, setVisibleLines] = useState<number>(0);
-  
+  const theme = useActiveTheme();
+  const [visibleLines, setVisibleLines] = useState(0);
+
   useEffect(() => {
     if (visibleLines < bootSequence.length) {
-      const timer = setTimeout(() => {
-        setVisibleLines(prev => prev + 1);
-      }, 150);
+      const timer = setTimeout(() => setVisibleLines((p) => p + 1), 120);
       return () => clearTimeout(timer);
     } else {
-      const completeTimer = setTimeout(onComplete, 500);
-      return () => clearTimeout(completeTimer);
+      const done = setTimeout(onComplete, 400);
+      return () => clearTimeout(done);
     }
   }, [visibleLines, onComplete]);
-  
+
   return (
-    <div className="font-mono text-sm">
-      {bootSequence.slice(0, visibleLines).map((line, i) => (
-        <div key={i} className="phosphor-text opacity-70">
-          {line}
-        </div>
-      ))}
+    <div className="flex h-full flex-col items-center justify-center font-mono text-sm">
+      <div className="w-full max-w-md space-y-1">
+        {bootSequence.slice(0, visibleLines).map((line, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ color: theme.textDim }}
+          >
+            {line || '\u00A0'}
+          </motion.div>
+        ))}
+        {visibleLines < bootSequence.length && (
+          <span
+            className="inline-block h-4 w-2 animate-pulse"
+            style={{ backgroundColor: theme.accent, opacity: 0.6 }}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-/**
- * Main Terminal/CLI interface
- * Displays when currentView === 'monitor'
- */
+/** Sidebar block: clock and theme-driven styling. */
+function SystemStatus() {
+  const theme = useActiveTheme();
+  const [clock, setClock] = useState('');
+
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      setClock(now.toLocaleTimeString('en-US', { hour12: false }));
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const dimStyle = { color: theme.textDim };
+  const textStyle = { color: theme.text, opacity: 0.8 };
+  const labelStyle = { color: theme.textDim, opacity: 0.6 };
+
+  return (
+    <div className="space-y-5 font-mono text-[11px]">
+      <div>
+        <p className="mb-1 uppercase tracking-widest text-[9px]" style={labelStyle}>System</p>
+        <p className="tabular-nums" style={textStyle}>{clock}</p>
+      </div>
+
+      <div>
+        <p className="mb-1 uppercase tracking-widest text-[9px]" style={labelStyle}>User</p>
+        <p style={textStyle}>{profileData.name}</p>
+        <p className="text-[10px]" style={dimStyle}>{profileData.title}</p>
+      </div>
+
+      <div>
+        <p className="mb-1 uppercase tracking-widest text-[9px]" style={labelStyle}>Education</p>
+        <p className="text-[10px] leading-relaxed" style={dimStyle}>
+          {profileData.degree}
+          <br />
+          {profileData.university}
+          <br />
+          {profileData.college}
+        </p>
+      </div>
+
+      <div>
+        <p className="mb-1.5 uppercase tracking-widest text-[9px]" style={labelStyle}>Links</p>
+        <div className="space-y-1">
+          <a
+            href={`mailto:${profileData.email}`}
+            className="block transition-opacity hover:opacity-100"
+            style={{ color: theme.text, opacity: 0.6 }}
+          >
+            → {profileData.email}
+          </a>
+          <a
+            href={`https://${profileData.linkedin}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block transition-opacity hover:opacity-100"
+            style={{ color: theme.text, opacity: 0.6 }}
+          >
+            → LinkedIn
+          </a>
+          <a
+            href={`https://${profileData.github}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block transition-opacity hover:opacity-100"
+            style={{ color: theme.text, opacity: 0.6 }}
+          >
+            → GitHub
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-1 uppercase tracking-widest text-[9px]" style={labelStyle}>Modules</p>
+        <p style={dimStyle}>
+          {projectsData.length} projects loaded
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Project card ────────────────────────────────────────────────
+
+function ProjectCard({
+  project,
+  index,
+  onClick,
+  disabled,
+}: {
+  project: (typeof projectsData)[number];
+  index: number;
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  const theme = useActiveTheme();
+
+  return (
+    <motion.button
+      variants={fadeSlideUp}
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        group relative w-full text-left rounded-md
+        p-3 sm:p-4 font-mono transition-all duration-200
+        ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer active:scale-[0.99]'}
+      `}
+      style={{
+        border: `1px solid ${theme.projectBorder}`,
+        backgroundColor: theme.projectBg,
+      }}
+    >
+      {/* Accent bar — uses theme base color */}
+      <span
+        className="absolute left-0 top-0 h-full w-[3px] rounded-l-md transition-all group-hover:w-1"
+        style={{ backgroundColor: theme.accent }}
+      />
+
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px]" style={{ color: theme.textDim }}>
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <span className="text-sm font-medium truncate" style={{ color: theme.text }}>
+              {project.title}
+            </span>
+          </div>
+          <p className="mt-1 text-[10px] line-clamp-1" style={{ color: theme.textDim }}>
+            {project.tagline}
+          </p>
+        </div>
+
+        <span
+          className="shrink-0 rounded px-1.5 py-0.5 text-[9px] transition-colors"
+          style={{
+            backgroundColor: `${theme.accent}15`,
+            color: theme.textDim,
+          }}
+        >
+          run
+        </span>
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        {project.techStack.slice(0, 3).map((t) => (
+          <span
+            key={t}
+            className="rounded-sm px-1.5 py-0.5 text-[8px]"
+            style={{
+              backgroundColor: `${theme.accent}12`,
+              color: theme.textDim,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+    </motion.button>
+  );
+}
+
+// ─── Main Terminal View ──────────────────────────────────────────
+
 function TerminalView() {
   const { setView, isAnimating } = useWorkstationStore();
+  const theme = useActiveTheme();
   const [booted, setBooted] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [commandOutput, setCommandOutput] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const terminalRef = useRef<HTMLDivElement>(null);
-  
-  const handleTerminalClick = () => {
-    inputRef.current?.focus();
-  };
-  
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
   const handleCommand = (cmd: string) => {
     const trimmedCmd = cmd.trim().toLowerCase();
     let response: string[] = [];
-    
+
     if (trimmedCmd === 'help') {
       response = helpText;
     } else if (trimmedCmd === 'clear') {
-      setCommandHistory([]);
+      setCommandOutput([]);
       setInputValue('');
       return;
     } else if (trimmedCmd === 'list') {
-      response = [
-        'Available projects:',
-        ...projectsData.map(p => `  > run ${p.executable}`),
-      ];
+      response = ['Available projects:', ...projectsData.map((p) => `  → run ${p.executable}`)];
     } else if (trimmedCmd === 'about') {
       response = [
         `Name: ${profileData.name}`,
         `Title: ${profileData.title}`,
         `Education: ${profileData.degree}`,
         `University: ${profileData.university}`,
-        `GPA: ${profileData.gpa}`,
+        `College: ${profileData.college}`,
         `Email: ${profileData.email}`,
         `LinkedIn: ${profileData.linkedin}`,
         `GitHub: ${profileData.github}`,
@@ -125,13 +311,13 @@ function TerminalView() {
       window.open('/resume.pdf', '_blank');
     } else if (trimmedCmd.startsWith('run ')) {
       const executable = trimmedCmd.replace('run ', '');
-      const project = projectsData.find(p => 
-        p.executable.toLowerCase() === executable || 
-        p.executable.toLowerCase().replace('.exe', '') === executable
+      const project = projectsData.find(
+        (p) =>
+          p.executable.toLowerCase() === executable ||
+          p.executable.toLowerCase().replace('.exe', '') === executable,
       );
-      
       if (project) {
-        setCommandHistory(prev => [...prev, `> ${cmd}`, `Loading ${project.title}...`]);
+        setCommandOutput((prev) => [...prev, `> ${cmd}`, `Loading ${project.title}...`]);
         setInputValue('');
         setTimeout(() => setView(project.id), 300);
         return;
@@ -141,444 +327,505 @@ function TerminalView() {
     } else if (trimmedCmd) {
       response = [`Command not recognized: '${trimmedCmd}'. Type 'help' for commands.`];
     }
-    
-    setCommandHistory(prev => [...prev, `> ${cmd}`, ...response]);
+
+    setCommandOutput((prev) => [...prev, `> ${cmd}`, ...response]);
     setInputValue('');
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleCommand(inputValue);
-    }
+    if (e.key === 'Enter') handleCommand(inputValue);
   };
-  
+
   const handleProjectClick = (id: ViewState) => {
     if (!isAnimating) {
       const project = getProjectById(id);
       if (project) {
-        setCommandHistory(prev => [...prev, `> run ${project.executable}`, `Loading ${project.title}...`]);
+        setCommandOutput((prev) => [...prev, `> run ${project.executable}`, `Loading ${project.title}...`]);
         setTimeout(() => setView(id), 300);
       }
     }
   };
-  
+
   useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [commandHistory]);
-  
+  }, [commandOutput]);
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="absolute inset-0 flex items-center justify-center p-2 sm:p-4"
+      variants={terminalEnter}
+      initial="visible"
+      animate="visible"
+      exit="exit"
+      className="absolute inset-0 flex items-center justify-center p-3 sm:p-6"
+      onClick={() => inputRef.current?.focus()}
     >
-      <div 
-        className="w-full max-w-3xl h-[85vh] sm:h-[80vh] max-h-[700px] crt-bezel crt-scanlines noise-overlay"
-        onClick={handleTerminalClick}
+      <div
+        className="w-full max-w-5xl h-[92vh] sm:h-[82vh] max-h-[780px] flex flex-col rounded-xl overflow-hidden shadow-2xl crt-scanlines"
+        style={{
+          border: `1px solid ${theme.terminalBorder}`,
+          backgroundColor: theme.terminalBg,
+        }}
       >
-        <div className="w-full h-full bg-terminal-bg rounded overflow-hidden flex flex-col">
-          {/* Terminal header bar */}
-          <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-terminal-bglight border-b border-terminal-green/20">
+        {/* ── Window chrome ─────────────────────────────────── */}
+        <div
+          className="flex items-center justify-between px-4 py-2.5"
+          style={{
+            borderBottom: `1px solid ${theme.terminalBorder}`,
+            backgroundColor: theme.terminalBg === '#ffffff' ? '#f5f5f5' : `${theme.terminalBg}dd`,
+          }}
+        >
+          <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/80" />
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
             </div>
-            <span className="ml-2 text-terminal-green/60 text-[10px] sm:text-xs font-mono truncate">
-              EDUSEI_WORKSTATION — bash — 80x24
+            <span
+              className="ml-3 font-mono text-[10px] tracking-wider"
+              style={{ color: theme.textDim }}
+            >
+              EDUSEI WORKSTATION v2.026
             </span>
           </div>
-          
-          {/* Terminal content */}
-          <div 
-            ref={terminalRef}
-            className="flex-1 overflow-y-auto p-3 sm:p-4 font-mono text-xs sm:text-sm crt-flicker"
+          <span
+            className="font-mono text-[10px] hidden sm:block"
+            style={{ color: theme.textDim, opacity: 0.5 }}
           >
-            {!booted ? (
-              <BootSequence onComplete={() => setBooted(true)} />
-            ) : (
-              <>
-                {/* ASCII Art Header - desktop only */}
-                <pre className="phosphor-text text-[10px] leading-tight mb-4 hidden md:block whitespace-pre">
-                  {asciiArt}
-                </pre>
-                
-                {/* Mobile header */}
-                <div className="md:hidden mb-4 border border-terminal-green/30 p-3 rounded">
-                  <div className="phosphor-text-bright text-base font-bold">EDUSEI WORKSTATION</div>
-                  <div className="phosphor-text text-xs mt-1">[SOFTWARE ENGINEER]</div>
-                </div>
-                
-                {/* Profile info */}
-                <div className="mb-4 phosphor-text">
-                  <div className="text-phosphor-dim text-xs sm:text-sm">
-                    // {profileData.name} | {profileData.title}
-                  </div>
-                  <div className="text-phosphor-dim text-[10px] sm:text-xs">
-                    // {profileData.university} | Class of {profileData.graduationYear}
-                  </div>
-                </div>
-                
-                {/* Divider */}
-                <div className="phosphor-text opacity-30 mb-4 overflow-hidden">
-                  {'─'.repeat(50)}
-                </div>
-                
-                {/* Command history */}
-                {commandHistory.map((line, i) => (
-                  <div 
-                    key={i} 
-                    className={`phosphor-text text-xs sm:text-sm ${line.startsWith('>') ? 'text-phosphor-text' : 'text-phosphor-dim'}`}
+            bash · {profileData.name.toLowerCase().replace(' ', '_')}@workstation
+          </span>
+        </div>
+
+        {/* ── Body ──────────────────────────────────────────── */}
+        {!booted ? (
+          <div className="flex-1 p-4">
+            <BootSequence onComplete={() => setBooted(true)} />
+          </div>
+        ) : (
+          <div className="flex flex-1 min-h-0">
+            {/* ── Main content ─────────────────────────────── */}
+            <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+              <div
+                className="flex-1 overflow-y-auto p-4 sm:p-5 terminal-scroll"
+                ref={scrollRef}
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                  touchAction: 'pan-y',
+                  overscrollBehavior: 'contain',
+                  '--scrollbar-color': `${theme.scrollbar}50`,
+                  '--scrollbar-color-hover': `${theme.scrollbar}80`,
+                } as React.CSSProperties}
+              >
+                {/* Welcome header */}
+                <div
+                  className="mb-5 pb-4"
+                  style={{ borderBottom: `1px solid ${theme.projectBorder}` }}
+                >
+                  <h1
+                    className="text-lg sm:text-xl font-bold tracking-tight"
+                    style={{ color: theme.text }}
                   >
-                    {line}
-                  </div>
-                ))}
-                
-                {/* Projects list */}
-                <div className="mb-4">
-                  <div className="phosphor-text mb-2 text-phosphor-dim text-xs sm:text-sm">
-                    SELECT PROJECT TO EXECUTE:
-                  </div>
-                  
-                  {projectsData.map((project) => (
-                    <motion.button
-                      key={project.id}
-                      onClick={() => handleProjectClick(project.id)}
-                      disabled={isAnimating}
-                      className={`
-                        block w-full text-left py-2 px-2 sm:px-3 my-1 rounded
-                        font-mono text-xs sm:text-sm border border-transparent
-                        transition-all duration-200
-                        ${isAnimating 
-                          ? 'opacity-50 cursor-not-allowed' 
-                          : 'hover:border-terminal-green/50 hover:bg-terminal-green/5 cursor-pointer active:bg-terminal-green/10'
-                        }
-                      `}
-                      whileTap={{}}
+                    {profileData.name}
+                  </h1>
+                  <p className="mt-0.5 font-mono text-[11px]" style={{ color: theme.textDim }}>
+                    {profileData.title} · {profileData.university} · Class of {profileData.graduationYear}
+                  </p>
+                  {/* Contact links — visible on mobile where sidebar is hidden */}
+                  <div className="mt-2 flex flex-wrap gap-2 md:hidden">
+                    <a
+                      href={`mailto:${profileData.email}`}
+                      className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
+                      style={{
+                        border: `1px solid ${theme.accent}30`,
+                        color: theme.text,
+                        opacity: 0.7,
+                      }}
                     >
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <span className="phosphor-text-bright text-[10px] sm:text-sm">[EXEC]</span>
-                        <span className="phosphor-text text-xs sm:text-sm">run {project.executable}</span>
-                      </div>
-                      <div className="text-phosphor-dim text-[10px] sm:text-xs mt-0.5 ml-10 sm:ml-14">
-                        // {project.tagline}
-                      </div>
-                    </motion.button>
-                  ))}
+                      Email
+                    </a>
+                    <a
+                      href={`https://${profileData.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
+                      style={{
+                        border: `1px solid ${theme.accent}30`,
+                        color: theme.text,
+                        opacity: 0.7,
+                      }}
+                    >
+                      LinkedIn
+                    </a>
+                    <a
+                      href={`https://${profileData.github}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
+                      style={{
+                        border: `1px solid ${theme.accent}30`,
+                        color: theme.text,
+                        opacity: 0.7,
+                      }}
+                    >
+                      GitHub
+                    </a>
+                    <a
+                      href="/resume.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
+                      style={{
+                        border: `1px solid ${theme.accent}30`,
+                        color: theme.text,
+                        opacity: 0.7,
+                      }}
+                    >
+                      Resume
+                    </a>
+                  </div>
                 </div>
-                
-                {/* Command input */}
-                <div className="flex items-center phosphor-text text-xs sm:text-sm">
-                  <span className="text-phosphor-text mr-1 sm:mr-2">guest@edusei:~$</span>
+
+                {/* Projects grid — always at top, shifts up when output present */}
+                <div className="mb-4">
+                  <p
+                    className="mb-3 font-mono text-[10px] uppercase tracking-widest"
+                    style={{ color: theme.textDim, opacity: 0.6 }}
+                  >
+                    Select project
+                  </p>
+                  <motion.div
+                    variants={staggerList}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+                  >
+                    {projectsData.map((project, i) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        index={i}
+                        onClick={() => handleProjectClick(project.id)}
+                        disabled={isAnimating}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+
+                {/* Command output — appears BELOW the projects */}
+                {commandOutput.length > 0 && (
+                  <div
+                    className="mt-2 pt-4 space-y-0.5 font-mono text-[11px] sm:text-xs"
+                    style={{ borderTop: `1px solid ${theme.projectBorder}` }}
+                  >
+                    <p
+                      className="mb-2 font-mono text-[10px] uppercase tracking-widest"
+                      style={{ color: theme.textDim, opacity: 0.6 }}
+                    >
+                      Output
+                    </p>
+                    {commandOutput.map((line, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          color: line.startsWith('>')
+                            ? theme.text
+                            : theme.textDim,
+                          opacity: line.startsWith('>') ? 0.8 : 0.6,
+                        }}
+                      >
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* ── Command input bar ───────────────────────── */}
+              <div
+                className="px-4 py-3"
+                style={{
+                  borderTop: `1px solid ${theme.terminalBorder}`,
+                  backgroundColor: theme.terminalBg === '#ffffff' ? '#fafafa' : `${theme.terminalBg}`,
+                }}
+              >
+                <div className="flex items-center gap-2 font-mono text-xs sm:text-sm">
+                  <span className="shrink-0" style={{ color: theme.textDim }}>
+                    guest@edusei:~$
+                  </span>
                   <input
                     ref={inputRef}
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="flex-1 bg-transparent outline-none phosphor-text min-w-0 text-base sm:text-sm"
-                    style={{ caretColor: '#00ff41' }}
+                    className="flex-1 min-w-0 bg-transparent outline-none"
+                    style={{
+                      color: theme.text,
+                      caretColor: theme.accent,
+                    }}
+                    placeholder="type 'help' for commands"
                     autoFocus
                   />
                 </div>
-                
-                {/* Help hint */}
-                <div className="mt-4 text-phosphor-dim text-[10px] sm:text-xs">
-                  Type 'help' for commands • 'resume' to download CV
-                </div>
-              </>
+              </div>
+            </div>
+
+            {/* ── Sidebar (desktop only) ───────────────────── */}
+            {!isMobile && (
+              <aside
+                className="hidden md:block w-52 shrink-0 p-4 overflow-y-auto"
+                style={{
+                  borderLeft: `1px solid ${theme.terminalBorder}`,
+                  backgroundColor: theme.terminalBg === '#ffffff' ? '#f8f8f8' : `${theme.terminalBg}`,
+                }}
+              >
+                <SystemStatus />
+              </aside>
             )}
           </div>
-        </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-/**
- * Project Detail Panel - RESPONSIVE
- * Desktop: Right side of screen (50% width)
- * Mobile: Bottom sheet overlay (full width)
- */
+// ─── Project Detail Panel ────────────────────────────────────────
+
 function ProjectDetailPanel() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
+  const theme = useActiveTheme();
   const isMobile = useIsMobile();
   const project = getProjectById(currentView);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const [showAdditionalDescription, setShowAdditionalDescription] = useState<{ [id: string]: boolean }>({});
-  const [minimized, setMinimized] = useState(false);
+  const [expandedRelated, setExpandedRelated] = useState<Record<number, boolean>>({});
+  const [mobileExpanded, setMobileExpanded] = useState(true);
 
   if (!project || currentView === 'monitor') return null;
 
-  // Mobile: Bottom sheet layout with Minimize button
   if (isMobile) {
     return (
       <motion.div
         initial={{ opacity: 0, y: '100%' }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 1, y: mobileExpanded ? 0 : 'calc(100% - 56px)' }}
         exit={{ opacity: 0, y: '100%' }}
-        transition={{
-          duration: 0.4,
-          delay: 0.3,
-          ease: [0.25, 0.1, 0.25, 1],
-        }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
         className="absolute bottom-0 left-0 right-0 z-10"
+        style={{ maxHeight: '85vh' }}
       >
-        <motion.div
-          animate={{ height: minimized ? 50 : 'auto' }}
-          transition={{ duration: 0.3 }}
-          className="glass-card rounded-t-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        <div
+          className="rounded-t-2xl backdrop-blur-md overflow-hidden"
+          style={{
+            borderTop: `1px solid ${theme.terminalBorder}`,
+            backgroundColor: `${theme.terminalBg}f2`,
+          }}
         >
-          {/* Minimize / Expand button */}
-          <motion.button
-            onClick={() => setMinimized(prev => !prev)}
-            className="
-              mb-3 px-3 py-1.5 rounded-lg
-              border border-terminal-green/50
-              font-mono text-xs phosphor-text
-              transition-all duration-200
-            "
-          >
-            {minimized ? '⬆︎ Expand' : '⬇︎ Minimize'}
-          </motion.button>
+          {/* Header with minimize/expand + back */}
+          <div className="flex items-center justify-between px-4 py-3"
+            style={{ borderBottom: `1px solid ${theme.projectBorder}` }}>
+            <button
+              onClick={() => !isAnimating && returnToMonitor()}
+              disabled={isAnimating}
+              className="font-mono text-xs transition-colors disabled:opacity-40"
+              style={{ color: theme.textDim }}
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setMobileExpanded(!mobileExpanded)}
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors"
+              style={{
+                border: `1px solid ${theme.accent}30`,
+                color: theme.textDim,
+              }}
+            >
+              {mobileExpanded ? '▼ Minimize' : '▲ Expand'}
+            </button>
+          </div>
 
-          {/* Panel content */}
-          <div className={`overflow-hidden transition-all duration-300 ${minimized ? 'h-0 opacity-0' : 'h-auto opacity-100'}`}>
-            <div className="overflow-y-auto pr-1 max-h-[75vh]">
-              {/* Back button */}
-              <motion.button
-                onClick={() => !isAnimating && returnToMonitor()}
-                disabled={isAnimating}
-                className={`
-                  mb-3 px-3 py-1.5 rounded-lg
-                  border border-terminal-green/50
-                  font-mono text-xs phosphor-text
-                  transition-all duration-200
-                  ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'active:bg-terminal-green/10'}
-                `}
-              >
-                ← Back
-              </motion.button>
+          {mobileExpanded && (
+            <div
+              className="overflow-y-auto px-4 pb-6 terminal-scroll"
+              style={{
+                maxHeight: 'calc(85vh - 56px)',
+                '--scrollbar-color': `${theme.scrollbar}50`,
+                '--scrollbar-color-hover': `${theme.scrollbar}80`,
+              } as React.CSSProperties}
+            >
+              <div className="pt-3">
+                <h1 className="text-lg font-bold" style={{ color: theme.text }}>{project.title}</h1>
+                <p className="mt-0.5 font-mono text-[10px]" style={{ color: theme.textDim }}>
+                  {project.period} · {project.location}
+                </p>
 
-              {/* Title */}
-              <h1 className="text-lg font-bold phosphor-text-bright mb-1">{project.title}</h1>
-
-              {/* Period & Location */}
-              <p className="text-phosphor-dim text-[10px] font-mono mb-3">
-                {project.period} • {project.location}
-              </p>
-
-              {/* GitHub Button */}
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mb-3 px-3 py-1.5 rounded-lg bg-terminal-green/10 border border-terminal-green text-xs font-mono text-terminal-green hover:bg-terminal-green/20 transition"
-                >
-                  View on GitHub
-                </a>
-              )}
-
-              {/* Description */}
-              <div className="space-y-2 mb-3">
-                {(showFullDescription ? project.description : project.description.slice(0, 2)).map((paragraph, i) => (
-                  <p key={i} className="text-gray-300 text-[11px] leading-relaxed font-mono">
-                    • {paragraph}
-                  </p>
-                ))}
-
-                {project.description.length > 2 && (
-                  <button
-                    onClick={() => setShowFullDescription(prev => !prev)}
-                    className="text-phosphor-dim text-[10px] font-mono underline"
+                {project.github && (
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-block rounded-md px-3 py-1.5 font-mono text-[11px] transition-colors"
+                    style={{
+                      border: `1px solid ${theme.accent}50`,
+                      backgroundColor: `${theme.accent}12`,
+                      color: theme.text,
+                      opacity: 0.8,
+                    }}
                   >
-                    {showFullDescription ? 'Show Less' : `+${project.description.length - 2} more details...`}
-                  </button>
+                    GitHub ↗
+                  </a>
                 )}
-              </div>
 
-              {/* Tech Stack */}
-              <div className="mb-3">
-                <h3 className="text-phosphor-dim text-[9px] uppercase tracking-wider mb-1.5 font-mono">
-                  Technologies
-                </h3>
-                <div className="flex flex-wrap gap-1">
-                  {project.techStack.map((tech) => (
-                    <span
-                      key={tech}
-                      className="text-[9px] px-1.5 py-0.5 rounded border border-terminal-green/40 text-terminal-green/80 font-mono"
-                    >
-                      {tech}
-                    </span>
+                <div className="mt-4 space-y-2">
+                  {project.description.map((line, i) => (
+                    <p key={i} className="font-mono text-[11px] leading-relaxed" style={{ color: theme.textDim }}>
+                      • {line}
+                    </p>
                   ))}
                 </div>
-              </div>
 
-              {/* Related Projects */}
-              {project.additionalProjects?.length ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2 }}
-                >
-                  <h3 className="text-phosphor-dim text-xs uppercase tracking-wider mb-4 font-mono">
-                    Related Projects
-                  </h3>
-                  {project.additionalProjects.map((addProject, i) => (
-                    <div key={i} className="mb-4 pl-4 border-l-2 border-terminal-green/30">
-                      <h4 className="text-phosphor-text font-mono text-sm font-semibold">{addProject.title}</h4>
-                      <p className="text-phosphor-dim text-xs mb-2">{addProject.period}</p>
+                <div className="mt-4">
+                  <p className="mb-1.5 font-mono text-[9px] uppercase tracking-widest" style={{ color: theme.textDim, opacity: 0.6 }}>
+                    Tech Stack
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.techStack.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded px-2 py-0.5 font-mono text-[10px]"
+                        style={{
+                          border: `1px solid ${theme.accent}30`,
+                          color: theme.textDim,
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-                      {/* GitHub Button for additional project */}
-                      {addProject.github && (
-                        <a
-                          href={addProject.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block mb-2 px-3 py-1 rounded-lg bg-terminal-green/10 border border-terminal-green text-xs font-mono text-terminal-green hover:bg-terminal-green/20 transition"
-                        >
-                          View on GitHub
-                        </a>
-                      )}
-
-                      {/* Expandable description */}
-                      <div className="space-y-1">
-                        {(showAdditionalDescription[i] ? addProject.description : []).map((desc, j) => (
-                          <p key={j} className="text-gray-400 text-xs leading-relaxed mb-1">
-                            • {desc}
-                          </p>
-                        ))}
-
-                        {addProject.description.length > 0 && (
-                          <button
-                            onClick={() =>
-                              setShowAdditionalDescription(prev => ({
-                                ...prev,
-                                [i]: !prev[i],
-                              }))
-                            }
-                            className="text-phosphor-dim text-[10px] font-mono underline"
-                          >
-                            {showAdditionalDescription[i] ? 'Show Less' : `+${addProject.description.length} more details...`}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              ) : null}
-
-              {/* Hint */}
-              <div className="text-center pt-2 border-t border-terminal-green/20 mt-2">
-                <span className="text-phosphor-dim text-[9px] font-mono">
-                  Press Back to Return
-                </span>
+                {project.additionalProjects?.map((add, i) => (
+                  <div key={i} className="mt-4 pl-3" style={{ borderLeft: `2px solid ${theme.accent}30` }}>
+                    <h4 className="font-mono text-xs font-medium" style={{ color: theme.text, opacity: 0.8 }}>
+                      {add.title}
+                    </h4>
+                    <p className="font-mono text-[10px]" style={{ color: theme.textDim }}>{add.period}</p>
+                    {add.github && (
+                      <a href={add.github} target="_blank" rel="noopener noreferrer"
+                        className="mt-1 inline-block font-mono text-[10px] underline"
+                        style={{ color: theme.textDim }}>
+                        GitHub ↗
+                      </a>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        </motion.div>
+          )}
+        </div>
       </motion.div>
     );
   }
 
-  // Desktop: Right side panel (unchanged)
   return (
     <motion.div
-      initial={{ opacity: 0, x: 100 }}
+      initial={{ opacity: 0, x: 80 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 100 }}
-      transition={{
-        duration: 0.6,
-        delay: 0.5,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
-      className="absolute top-0 right-0 w-full md:w-1/2 h-full flex items-center justify-center p-8"
+      exit={{ opacity: 0, x: 80 }}
+      transition={{ duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute right-0 top-0 h-full flex items-center justify-center p-8 w-full md:w-[48%]"
     >
-      <div className="glass-card rounded-xl p-8 w-full max-w-xl max-h-[90vh] overflow-y-auto">
-        {/* Back button */}
+      <div
+        className="w-full max-w-xl max-h-[88vh] overflow-y-auto rounded-xl p-6 sm:p-8 shadow-2xl backdrop-blur-sm terminal-scroll"
+        style={{
+          border: `1px solid ${theme.terminalBorder}`,
+          backgroundColor: `${theme.terminalBg}f2`,
+          '--scrollbar-color': `${theme.scrollbar}50`,
+          '--scrollbar-color-hover': `${theme.scrollbar}80`,
+        } as React.CSSProperties}
+      >
         <motion.button
           onClick={() => !isAnimating && returnToMonitor()}
           disabled={isAnimating}
-          className={`
-            mb-6 px-4 py-2 rounded-lg
-            border border-terminal-green/50
-            font-mono text-sm phosphor-text
-            transition-all duration-200
-            ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-terminal-green/10 hover:border-terminal-green'}
-          `}
-          whileHover={!isAnimating ? { scale: 1.02 } : {}}
-          whileTap={{}}
+          className="mb-5 font-mono text-xs transition-colors disabled:opacity-40"
+          style={{ color: theme.textDim }}
+          whileHover={!isAnimating ? { x: -3 } : {}}
         >
           ← Back to Terminal
         </motion.button>
 
-        {/* Title */}
-        <motion.h1
-          className="text-3xl font-bold phosphor-text-bright mb-2"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
-          {project.title}
-        </motion.h1>
-
-        {/* Period & Location */}
-        <motion.p
-          className="text-phosphor-dim text-sm font-mono mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          {project.period} • {project.location}
-        </motion.p>
-
-        {/* GitHub Button */}
-        {project.github && (
-          <a
-            href={project.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mb-6 px-4 py-2 rounded-lg bg-terminal-green/10 border border-terminal-green text-sm font-mono text-terminal-green hover:bg-terminal-green/20 transition"
-          >
-            View on GitHub
-          </a>
-        )}
-
-        {/* Description */}
         <motion.div
-          className="space-y-4 mb-8"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
+          transition={{ delay: 0.5 }}
         >
-          {project.description.map((paragraph, i) => (
-            <p key={i} className="text-gray-300 text-sm leading-relaxed font-mono">
-              • {paragraph}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold" style={{ color: theme.text }}>{project.title}</h1>
+              <p className="mt-1 font-mono text-xs" style={{ color: theme.textDim }}>
+                {project.period} · {project.location}
+              </p>
+            </div>
+            <span
+              className="mt-1 h-3 w-3 shrink-0 rounded-full"
+              style={{ backgroundColor: theme.accent }}
+            />
+          </div>
+
+          {project.github && (
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block rounded-md px-4 py-2 font-mono text-xs transition-colors"
+              style={{
+                border: `1px solid ${theme.accent}40`,
+                backgroundColor: `${theme.accent}12`,
+                color: theme.text,
+                opacity: 0.8,
+              }}
+            >
+              View on GitHub ↗
+            </a>
+          )}
+        </motion.div>
+
+        <motion.div
+          className="mt-6 space-y-3"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          {project.description.map((para, i) => (
+            <p key={i} className="font-mono text-[13px] leading-relaxed" style={{ color: theme.textDim }}>
+              • {para}
             </p>
           ))}
         </motion.div>
 
-        {/* Tech Stack */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          className="mt-6"
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-          className="mb-8"
+          transition={{ delay: 0.7 }}
         >
-          <h3 className="text-phosphor-dim text-xs uppercase tracking-wider mb-3 font-mono">Technologies</h3>
+          <p
+            className="mb-2 font-mono text-[10px] uppercase tracking-widest"
+            style={{ color: theme.textDim, opacity: 0.6 }}
+          >
+            Technologies
+          </p>
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((tech, i) => (
               <motion.span
                 key={tech}
-                className="tech-tag"
-                initial={{ opacity: 0, scale: 0.8 }}
+                className="rounded px-2.5 py-1 font-mono text-[11px]"
+                style={{
+                  border: `1px solid ${theme.accent}30`,
+                  backgroundColor: `${theme.accent}08`,
+                  color: theme.textDim,
+                }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.1 + i * 0.03 }}
+                transition={{ delay: 0.75 + i * 0.03 }}
               >
                 {tech}
               </motion.span>
@@ -586,146 +833,153 @@ function ProjectDetailPanel() {
           </div>
         </motion.div>
 
-        {/* Additional/Related Projects */}
         {project.additionalProjects?.length ? (
-          <details className="mb-2">
-            <summary className="text-phosphor-dim text-[9px] uppercase tracking-wider font-mono cursor-pointer">
-              + {project.additionalProjects.length} Related Project{project.additionalProjects.length > 1 ? 's' : ''}
-            </summary>
-            <div className="mt-2 space-y-2">
-              {project.additionalProjects.map((addProject, i) => (
-                <div key={i} className="pl-2 border-l border-terminal-green/30">
-                  <h4 className="text-phosphor-text font-mono text-[10px] font-semibold">{addProject.title}</h4>
-                  <p className="text-phosphor-dim text-[9px]">{addProject.period}</p>
+          <motion.div
+            className="mt-8"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <p
+              className="mb-3 font-mono text-[10px] uppercase tracking-widest"
+              style={{ color: theme.textDim, opacity: 0.6 }}
+            >
+              Related Projects
+            </p>
+            <div className="space-y-3">
+              {project.additionalProjects.map((add, i) => (
+                <div key={i} className="pl-4" style={{ borderLeft: `2px solid ${theme.accent}25` }}>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-mono text-sm font-medium" style={{ color: theme.text, opacity: 0.8 }}>
+                      {add.title}
+                    </h4>
+                    {add.github && (
+                      <a
+                        href={add.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[10px] underline transition-opacity hover:opacity-100"
+                        style={{ color: theme.textDim, opacity: 0.6 }}
+                      >
+                        GitHub ↗
+                      </a>
+                    )}
+                  </div>
+                  <p className="font-mono text-[10px]" style={{ color: theme.textDim, opacity: 0.6 }}>{add.period}</p>
 
-                  {/* GitHub Button for additional project */}
-                  {addProject.github && (
-                    <a
-                      href={addProject.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-1 mb-2 px-2 py-1 rounded-lg bg-terminal-green/10 border border-terminal-green text-[9px] font-mono text-terminal-green hover:bg-terminal-green/20 transition"
+                  <AnimatePresence>
+                    {expandedRelated[i] && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-2 space-y-1.5">
+                          {add.description.map((d, j) => (
+                            <p key={j} className="font-mono text-[11px] leading-relaxed" style={{ color: theme.textDim }}>
+                              • {d}
+                            </p>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {add.description.length > 0 && (
+                    <button
+                      onClick={() =>
+                        setExpandedRelated((prev) => ({ ...prev, [i]: !prev[i] }))
+                      }
+                      className="mt-1 font-mono text-[10px] underline transition-opacity hover:opacity-100"
+                      style={{ color: theme.textDim, opacity: 0.6 }}
                     >
-                      View on GitHub
-                    </a>
+                      {expandedRelated[i] ? 'collapse' : `+${add.description.length} details`}
+                    </button>
                   )}
                 </div>
               ))}
             </div>
-          </details>
+          </motion.div>
         ) : null}
 
-        {/* Drag hint */}
         <motion.div
-          className="mt-6 pt-4 border-t border-terminal-green/20 text-center"
+          className="mt-8 pt-4 text-center"
+          style={{ borderTop: `1px solid ${theme.projectBorder}` }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 }}
+          transition={{ delay: 1.1 }}
         >
-          <span className="text-phosphor-dim text-xs font-mono">↺ Drag the 3D model to rotate</span>
+          <span className="font-mono text-[10px]" style={{ color: theme.textDim, opacity: 0.5 }}>
+            ↺ Drag the 3D model to rotate · ESC to return
+          </span>
         </motion.div>
       </div>
     </motion.div>
   );
 }
 
+// ─── Transition indicator ────────────────────────────────────────
 
-/**
- * Loading/Transition indicator
- */
 function TransitionIndicator() {
   const { isAnimating, currentView } = useWorkstationStore();
-  
+  const theme = useActiveTheme();
   if (!isAnimating) return null;
-  
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute top-4 left-1/2 -translate-x-1/2 z-50"
-    >
-      <div className="glass-card px-3 py-1.5 rounded-full">
-        <div className="flex items-center gap-2 phosphor-text text-xs font-mono">
-          <motion.span
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-          >
-            ◐
-          </motion.span>
-          {currentView === 'monitor' ? 'Returning...' : 'Loading...'}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-/**
- * Social links - repositioned on mobile
- */
-function SocialLinks() {
-  const { currentView } = useWorkstationStore();
-  const isMobile = useIsMobile();
-  
-  // Hide completely when viewing a project on mobile (bottom sheet covers it)
-  if (currentView !== 'monitor' && isMobile) return null;
-  
-  return (
-    <motion.div 
-      className={`absolute ${currentView === 'monitor' ? 'bottom-16 right-4' : 'bottom-16 left-4'}`}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: currentView === 'monitor' ? 2 : 0.8 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="absolute left-1/2 top-4 z-50 -translate-x-1/2"
     >
-      <div className="flex gap-2 sm:gap-3">
-        <a
-          href={`https://${profileData.linkedin}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-2 sm:px-3 py-1 sm:py-1.5 rounded border border-terminal-green/30 text-phosphor-dim text-[10px] sm:text-xs font-mono transition-all hover:border-terminal-green hover:text-terminal-green"
+      <div
+        className="flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs backdrop-blur-sm"
+        style={{
+          border: `1px solid ${theme.terminalBorder}`,
+          backgroundColor: `${theme.terminalBg}e6`,
+          color: theme.textDim,
+        }}
+      >
+        <motion.span
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
         >
-          LinkedIn
-        </a>
-        <a
-          href={`https://${profileData.github}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-2 sm:px-3 py-1 sm:py-1.5 rounded border border-terminal-green/30 text-phosphor-dim text-[10px] sm:text-xs font-mono transition-all hover:border-terminal-green hover:text-terminal-green"
-        >
-          GitHub
-        </a>
-        <a
-          href={`mailto:${profileData.email}`}
-          className="px-2 sm:px-3 py-1 sm:py-1.5 rounded border border-terminal-green/30 text-phosphor-dim text-[10px] sm:text-xs font-mono transition-all hover:border-terminal-green hover:text-terminal-green"
-        >
-          Email
-        </a>
+          ◐
+        </motion.span>
+        {currentView === 'monitor' ? 'Returning...' : 'Loading...'}
       </div>
     </motion.div>
   );
 }
 
-/**
- * Main Overlay Component
- */
+// ─── Main Overlay Export ─────────────────────────────────────────
+
 export function Overlay() {
   const { currentView } = useWorkstationStore();
-  
+  const isMonitor = currentView === 'monitor';
+
+  // Keep TerminalView mounted and toggle visibility so "Back" never shows a black frame
   return (
     <div className="overlay-container">
-      <AnimatePresence mode="wait">
-        {currentView === 'monitor' ? (
-          <TerminalView key="terminal" />
-        ) : (
-          <ProjectDetailPanel key="project-detail" />
-        )}
+      <div
+        className="absolute inset-0"
+        style={{
+          visibility: isMonitor ? 'visible' : 'hidden',
+          pointerEvents: isMonitor ? 'auto' : 'none',
+          zIndex: isMonitor ? 1 : 0,
+        }}
+      >
+        <TerminalView />
+      </div>
+      <AnimatePresence mode="sync">
+        {!isMonitor && <ProjectDetailPanel key="project-detail" />}
       </AnimatePresence>
-      
+
       <AnimatePresence>
         <TransitionIndicator key="transition" />
       </AnimatePresence>
-      
-      <SocialLinks />
     </div>
   );
 }
