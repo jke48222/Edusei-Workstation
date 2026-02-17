@@ -63,10 +63,10 @@ function BootSequence({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     if (visibleLines < bootSequence.length) {
-      const timer = setTimeout(() => setVisibleLines((p) => p + 1), 120);
+      const timer = setTimeout(() => setVisibleLines((p) => p + 1), 220);
       return () => clearTimeout(timer);
     } else {
-      const done = setTimeout(onComplete, 400);
+      const done = setTimeout(onComplete, 1600);
       return () => clearTimeout(done);
     }
   }, [visibleLines, onComplete]);
