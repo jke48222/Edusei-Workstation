@@ -63,10 +63,10 @@ function BootSequence({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     if (visibleLines < bootSequence.length) {
-      const timer = setTimeout(() => setVisibleLines((p) => p + 1), 220);
+      const timer = setTimeout(() => setVisibleLines((p) => p + 1), 250);
       return () => clearTimeout(timer);
     } else {
-      const done = setTimeout(onComplete, 1600);
+      const done = setTimeout(onComplete, 2000);
       return () => clearTimeout(done);
     }
   }, [visibleLines, onComplete]);
@@ -263,9 +263,8 @@ function ProjectCard({
 // ─── Main Terminal View ──────────────────────────────────────────
 
 function TerminalView() {
-  const { setView, isAnimating } = useWorkstationStore();
+  const { setView, isAnimating, terminalBooted, setTerminalBooted } = useWorkstationStore();
   const theme = useActiveTheme();
-  const [booted, setBooted] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [commandOutput, setCommandOutput] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -398,9 +397,9 @@ function TerminalView() {
         </div>
 
         {/* ── Body ──────────────────────────────────────────── */}
-        {!booted ? (
+        {!terminalBooted ? (
           <div className="flex-1 p-4">
-            <BootSequence onComplete={() => setBooted(true)} />
+            <BootSequence onComplete={() => setTerminalBooted(true)} />
           </div>
         ) : (
           <div className="flex flex-1 min-h-0">
@@ -574,11 +573,13 @@ function TerminalView() {
             {/* ── Sidebar (desktop only) ───────────────────── */}
             {!isMobile && (
               <aside
-                className="hidden md:block w-52 shrink-0 p-4 overflow-y-auto"
+                className="hidden md:block w-52 shrink-0 p-4 overflow-y-auto terminal-scroll"
                 style={{
                   borderLeft: `1px solid ${theme.terminalBorder}`,
                   backgroundColor: theme.terminalBg === '#ffffff' ? '#f8f8f8' : `${theme.terminalBg}`,
-                }}
+                  '--scrollbar-color': `${theme.scrollbar}50`,
+                  '--scrollbar-color-hover': `${theme.scrollbar}80`,
+                } as React.CSSProperties}
               >
                 <SystemStatus />
               </aside>
