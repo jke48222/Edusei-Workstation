@@ -93,7 +93,7 @@ export function PortfolioSearch() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Search portfolio"
-        className="fixed top-3 right-14 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg backdrop-blur-xl transition-all hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 dark:border-white/20 dark:bg-[#262626] dark:text-white/90 dark:hover:border-white/40 dark:hover:bg-[#333] sm:right-[10.8rem]"
+        className="fixed top-3 left-3 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg backdrop-blur-xl transition-all hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 dark:border-white/20 dark:bg-[#262626] dark:text-white/90 dark:hover:border-white/40 dark:hover:bg-[#333] sm:left-auto sm:right-[10.8rem]"
       >
         <SearchIcon className="h-4 w-4" />
       </button>
