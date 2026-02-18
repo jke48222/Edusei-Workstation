@@ -100,7 +100,7 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
         position={[0, 4, 0]}
         angle={0.4}
         penumbra={0.8}
-        intensity={isActive ? 2 : 0.5}
+        intensity={(isActive ? 2 : 0.5) * theme.spotlightIntensity}
         color={theme.spotlightColor}
         castShadow
       />
@@ -320,13 +320,18 @@ function WorkstationContent() {
   const theme = useActiveTheme();
   const activeTheme = useThemeStore((s) => s.activeTheme);
   const bgColor = activeTheme === 'uga' ? theme.accent : theme.bg; // Bulldog Red: accent on both viewports
+  const isUga = activeTheme === 'uga';
+  // Bulldog Red: dim environment so the white pedestal spotlight dominates; more ambient fill so objects aren't silhouetted
+  const envIntensity = isUga ? 0.15 : 1;
+  const ambientIntensity = isUga ? 0.45 : 0.08;
+  const directionalIntensity = isUga ? 0.6 : 0.3;
 
   return (
     <>
       <color attach="background" args={[bgColor]} />
       <fog attach="fog" args={[theme.fogColor, 10, 50]} />
       
-      <Environment preset="night" />
+      <Environment preset="night" environmentIntensity={envIntensity} />
       
       <Stars 
         radius={100} 
@@ -338,11 +343,11 @@ function WorkstationContent() {
         speed={0.5}
       />
       
-      <ambientLight intensity={0.08} />
+      <ambientLight intensity={ambientIntensity} />
       
       <directionalLight
         position={[10, 20, 10]}
-        intensity={0.3}
+        intensity={directionalIntensity}
         castShadow
         shadow-mapSize={[2048, 2048]}
       />

@@ -605,6 +605,11 @@ function ProjectDetailPanel() {
   const d = prefersReducedMotion ? 0 : 0.25;
   const delay = prefersReducedMotion ? 0 : 0.1;
 
+  // Reset minimized state when switching to desktop so the panel isn't stuck minimized with no expand button
+  useEffect(() => {
+    if (!isMobile) setMobileExpanded(true);
+  }, [isMobile]);
+
   if (!project || currentView === 'monitor') return null;
 
   if (isMobile) {
