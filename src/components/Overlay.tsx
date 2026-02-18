@@ -263,7 +263,12 @@ function ProjectCard({
 
 // ─── Main Terminal View ──────────────────────────────────────────
 
-/** Map theme name (user input) to theme id. */
+/** Theme display name to command form (no spaces), e.g. "Bulldog Red" -> "bulldogred". */
+function toThemeCommand(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '');
+}
+
+/** Map theme name (user input) to theme id. Uses no-space command forms for multi-word themes. */
 const THEME_NAME_TO_ID: Record<string, string> = {
   light: 'clean',
   modern: 'clean',
@@ -273,12 +278,12 @@ const THEME_NAME_TO_ID: Record<string, string> = {
   sky: 'blue',
   blue: 'blue',
   cherry: 'pink',
-  'cherry blossom': 'pink',
+  cherryblossom: 'pink',
   pink: 'pink',
   nova: 'purple',
   purple: 'purple',
   bulldog: 'uga',
-  'bulldog red': 'uga',
+  bulldogred: 'uga',
   uga: 'uga',
   red: 'uga',
   apollo: 'grayBlue',
@@ -303,12 +308,21 @@ const COMPLETE_COMMANDS = ['help', 'list', 'run', 'theme', 'about', 'skills', 'r
 
 const MAX_HISTORY = 50;
 
-/** Theme names for "theme " completion (same order as theme list). */
+/** One-line (or multi-line) teaser shown before "Loading [title]..." when running a project (terminal or click). */
+const PROJECT_TEASERS: Partial<Record<ViewState, string | string[]>> = {
+  car: 'Vroom vroom 🏎️',
+  dog: 'Go Dawgs! 🐾',
+  vr: 'Entering virtual reality...',
+  satellite: 'lol',
+  tablet: ['Still open for work...', `https://${profileData.linkedin}`],
+};
+
+/** Theme command names for "theme " completion (no spaces; same order as theme list). */
 function getThemeCompletionCandidates(): string[] {
   return [
     'system',
     ...(['clean', 'dark', 'classic', 'blue', 'pink', 'purple', 'uga', 'grayBlue'] as const).map(
-      (id) => themePresets[id].name.toLowerCase(),
+      (id) => toThemeCommand(themePresets[id].name),
     ),
   ];
 }
@@ -320,7 +334,8 @@ function getCompletionSuffix(inputValue: string): string {
 
   const lower = trimmed.toLowerCase();
   if (lower.startsWith('run ')) {
-    const prefix = lower.slice(4).trimStart();
+    const rawAfterRun = lower.slice(4);
+    const prefix = rawAfterRun.trim(); // trim so "kitchen " -> "kitchen", suffix includes space e.g. " chaos"
     if (!prefix) return ''; // no suggestion until at least one character after "run "
     const candidates = projectsData.map((p) => p.executable.toLowerCase());
     const matches = candidates.filter((c) => c.startsWith(prefix));
@@ -333,7 +348,7 @@ function getCompletionSuffix(inputValue: string): string {
     return common.length > prefix.length ? common.slice(prefix.length) : matches[0].slice(prefix.length);
   }
   if (lower.startsWith('theme ')) {
-    const prefix = lower.slice(6).trimStart();
+    const prefix = lower.slice(6).trim();
     if (!prefix) return ''; // no suggestion until at least one character after "theme "
     const candidates = getThemeCompletionCandidates();
     const matches = candidates.filter((c) => c.startsWith(prefix));
@@ -376,6 +391,12 @@ function TerminalView() {
   const isMobile = useIsMobile();
 
   const completionSuggestion = useMemo(() => getCompletionSuffix(inputValue), [inputValue]);
+  // Avoid double space when input already ends with space (e.g. "run kitchen " + " chaos" -> "chaos")
+  const completionToShow = useMemo(() => {
+    if (!completionSuggestion) return '';
+    if (inputValue.endsWith(' ') && completionSuggestion.startsWith(' ')) return completionSuggestion.trimStart();
+    return completionSuggestion;
+  }, [inputValue, completionSuggestion]);
 
   useLayoutEffect(() => {
     if (mirrorRef.current) setCaretLeft(mirrorRef.current.offsetWidth);
@@ -439,13 +460,14 @@ function TerminalView() {
       const themeList = [
         '  → theme system',
         ...(['clean', 'dark', 'classic', 'blue', 'pink', 'purple', 'uga', 'grayBlue'] as const).map(
-          (id) => `  → theme ${themePresets[id].name.toLowerCase()}`,
+          (id) => `  → theme ${toThemeCommand(themePresets[id].name)}`,
         ),
       ];
       if (!name) {
         response = ['Available themes:', ...themeList];
       } else {
-        const themeId = THEME_NAME_TO_ID[name] ?? Object.keys(themePresets).find((id) => themePresets[id].name.toLowerCase() === name);
+        const normalizedName = toThemeCommand(name);
+        const themeId = THEME_NAME_TO_ID[normalizedName] ?? THEME_NAME_TO_ID[name] ?? Object.keys(themePresets).find((id) => toThemeCommand(themePresets[id].name) === normalizedName);
         if (themeId && (themeId === SYSTEM_THEME_ID || themePresets[themeId])) {
           setTheme(themeId);
           response = [`Theme set to ${themePresets[themeId]?.name ?? 'System'}.`];
@@ -466,9 +488,21 @@ function TerminalView() {
           setCommandHistory((h) => (h[h.length - 1] === raw ? h : [...h.slice(-(MAX_HISTORY - 1)), raw]));
         }
         setHistoryIndex(-1);
-        setCommandOutput((prev) => [...prev, `> ${cmd}`, `Loading ${project.title}...`]);
+        const teaser = PROJECT_TEASERS[project.id];
+        const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
+        const lineDelayMs = 400;
+        setCommandOutput((prev) => [...prev, `> ${cmd}`]);
         setInputValue('');
-        setTimeout(() => setView(project.id), 300);
+        teaserLines.forEach((line, i) => {
+          setTimeout(() => setCommandOutput((prev) => [...prev, line]), (i + 1) * lineDelayMs);
+        });
+        const loadingLine = `Loading ${project.title}...`;
+        const viewId = project.id;
+        const loadingAt = (teaserLines.length + 1) * lineDelayMs;
+        setTimeout(() => {
+          setCommandOutput((prev) => [...prev, loadingLine]);
+          setTimeout(() => setView(viewId), 500);
+        }, loadingAt);
         return;
       } else {
         response = [
@@ -490,9 +524,9 @@ function TerminalView() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Tab' && completionSuggestion) {
+    if (e.key === 'Tab' && completionToShow) {
       e.preventDefault();
-      setInputValue((prev) => prev + completionSuggestion);
+      setInputValue((prev) => prev + completionToShow);
       return;
     }
     if (e.key === 'ArrowUp') {
@@ -531,8 +565,19 @@ function TerminalView() {
     if (!isAnimating) {
       const project = getProjectById(id);
       if (project) {
-        setCommandOutput((prev) => [...prev, `> run ${project.executable}`, `Loading ${project.title}...`]);
-        setTimeout(() => setView(id), 300);
+        const teaser = PROJECT_TEASERS[id];
+        const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
+        const lineDelayMs = 400;
+        setCommandOutput((prev) => [...prev, `> run ${project.executable}`]);
+        teaserLines.forEach((line, i) => {
+          setTimeout(() => setCommandOutput((prev) => [...prev, line]), (i + 1) * lineDelayMs);
+        });
+        const loadingLine = `Loading ${project.title}...`;
+        const loadingAt = (teaserLines.length + 1) * lineDelayMs;
+        setTimeout(() => {
+          setCommandOutput((prev) => [...prev, loadingLine]);
+          setTimeout(() => setView(id), 500);
+        }, loadingAt);
       }
     }
   };
@@ -752,7 +797,17 @@ function TerminalView() {
                           opacity: line.startsWith('>') ? 0.8 : 0.6,
                         }}
                       >
-                        {line}
+                        {line.startsWith('Email: ') ? (
+                          <>Email: <a href={`mailto:${profileData.email}`} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-90" style={{ color: theme.accent }}>{profileData.email}</a></>
+                        ) : line.startsWith('LinkedIn: ') ? (
+                          <>LinkedIn: <a href={`https://${profileData.linkedin}`} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-90" style={{ color: theme.accent }}>{profileData.linkedin}</a></>
+                        ) : line.startsWith('GitHub: ') ? (
+                          <>GitHub: <a href={`https://${profileData.github}`} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-90" style={{ color: theme.accent }}>{profileData.github}</a></>
+                        ) : line.startsWith('http://') || line.startsWith('https://') ? (
+                          <a href={line} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-90" style={{ color: theme.accent }}>{line}</a>
+                        ) : (
+                          line
+                        )}
                       </div>
                     ))}
                   </div>
@@ -791,7 +846,7 @@ function TerminalView() {
                       {inputValue ? (
                         <>
                           <span style={{ color: theme.text }}>{inputValue}</span>
-                          <span style={{ color: theme.textDim, opacity: 0.35 }}>{completionSuggestion}</span>
+                          <span style={{ color: theme.textDim, opacity: 0.35 }}>{completionToShow}</span>
                         </>
                       ) : (
                         <span style={{ color: theme.textDim, opacity: 0.6 }}>type 'help' for commands</span>
