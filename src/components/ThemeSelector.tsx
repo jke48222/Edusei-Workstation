@@ -47,7 +47,7 @@ export function ThemeSelector() {
       }`}
       initial={{ opacity: 0, x: isMobile ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 1, duration: 0.4 }}
+      transition={{ delay: 0.2, duration: 0.25 }}
     >
       {/* Toggle button — clean: black bg; uga: white bg + black border; other: transparent */}
       <button
