@@ -214,6 +214,25 @@ html, body, #root {
   background: rgba(10, 10, 10, 0.3);
 }
 
+/* Timeline horizontal scroll — dark grey (no neon green) */
+.timeline-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: rgba(10, 10, 10, 0.25);
+  border-radius: 3px;
+}
+.timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 10, 10, 0.4);
+}
+.timeline-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 10, 10, 0.25) transparent;
+}
+
 /* Terminal scrollbar — themed via CSS custom properties */
 .terminal-scroll::-webkit-scrollbar {
   width: 6px;
@@ -233,7 +252,25 @@ html, body, #root {
   scrollbar-color: var(--scrollbar-color, rgba(100,100,100,0.3)) transparent;
 }
 
-/* Command input placeholder — matches "Loading..." output color (theme.textDim, 0.6 opacity) */
+/* Command input — text cursor on hover; custom blinking caret */
+.terminal-input-wrap .terminal-input {
+  cursor: text;
+}
+.terminal-input-wrap.cursor-text {
+  cursor: text;
+}
+@keyframes terminal-caret-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.terminal-caret {
+  animation: terminal-caret-blink 1s step-end infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .terminal-caret {
+    animation: none;
+  }
+}
 .terminal-input-wrap .terminal-input::placeholder {
   color: var(--placeholder-color);
   opacity: var(--placeholder-opacity, 0.6);

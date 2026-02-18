@@ -5,7 +5,7 @@
  * mobile detail panel with minimize/expand. CRT-style and scrollbar styling via theme.
  */
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkstationStore } from '../store/store';
 import { useActiveTheme, useThemeStore, themePresets, SYSTEM_THEME_ID } from '../store/themeStore';
@@ -298,6 +298,65 @@ const GAG_COMMANDS: Record<string, string[]> = {
   'sudo rm -rf /': ['Nice try.'],
 };
 
+/** Commands that can be tab-completed (no secrets). */
+const COMPLETE_COMMANDS = ['help', 'list', 'run', 'theme', 'about', 'skills', 'resume', 'cv', 'clear'];
+
+const MAX_HISTORY = 50;
+
+/** Theme names for "theme " completion (same order as theme list). */
+function getThemeCompletionCandidates(): string[] {
+  return [
+    'system',
+    ...(['clean', 'dark', 'classic', 'blue', 'pink', 'purple', 'uga', 'grayBlue'] as const).map(
+      (id) => themePresets[id].name.toLowerCase(),
+    ),
+  ];
+}
+
+/** Returns the suffix to append for tab completion, or '' if none. */
+function getCompletionSuffix(inputValue: string): string {
+  const trimmed = inputValue.trimStart();
+  if (!trimmed.length) return '';
+
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('run ')) {
+    const prefix = lower.slice(4).trimStart();
+    if (!prefix) return ''; // no suggestion until at least one character after "run "
+    const candidates = projectsData.map((p) => p.executable.toLowerCase());
+    const matches = candidates.filter((c) => c.startsWith(prefix));
+    if (matches.length === 0) return '';
+    const common = matches.reduce((a, b) => {
+      let i = 0;
+      while (i < a.length && i < b.length && a[i] === b[i]) i++;
+      return a.slice(0, i);
+    });
+    return common.length > prefix.length ? common.slice(prefix.length) : matches[0].slice(prefix.length);
+  }
+  if (lower.startsWith('theme ')) {
+    const prefix = lower.slice(6).trimStart();
+    if (!prefix) return ''; // no suggestion until at least one character after "theme "
+    const candidates = getThemeCompletionCandidates();
+    const matches = candidates.filter((c) => c.startsWith(prefix));
+    if (matches.length === 0) return '';
+    const common = matches.reduce((a, b) => {
+      let i = 0;
+      while (i < a.length && i < b.length && a[i] === b[i]) i++;
+      return a.slice(0, i);
+    });
+    return common.length > prefix.length ? common.slice(prefix.length) : matches[0].slice(prefix.length);
+  }
+
+  const prefix = lower.split(/\s/)[0] ?? '';
+  const matches = COMPLETE_COMMANDS.filter((c) => c.startsWith(prefix));
+  if (matches.length === 0) return '';
+  const common = matches.reduce((a, b) => {
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    return a.slice(0, i);
+  });
+  return common.length > prefix.length ? common.slice(prefix.length) : matches[0].slice(prefix.length);
+}
+
 function TerminalView() {
   const { setView, isAnimating, terminalBooted, setTerminalBooted, prefersReducedMotion, soundMuted, setSoundMuted } = useWorkstationStore();
   const setTheme = useThemeStore((s) => s.setTheme);
@@ -306,12 +365,25 @@ function TerminalView() {
   const fadeSlideUp = useMemo(() => getFadeSlideUp(prefersReducedMotion), [prefersReducedMotion]);
   const [inputValue, setInputValue] = useState('');
   const [commandOutput, setCommandOutput] = useState<string[]>([]);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [caretLeft, setCaretLeft] = useState(0);
+  const [inputFocused, setInputFocused] = useState(true);
+  const draftRef = useRef('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const mirrorRef = useRef<HTMLSpanElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
+  const completionSuggestion = useMemo(() => getCompletionSuffix(inputValue), [inputValue]);
+
+  useLayoutEffect(() => {
+    if (mirrorRef.current) setCaretLeft(mirrorRef.current.offsetWidth);
+  }, [inputValue]);
+
   const handleCommand = (cmd: string) => {
-    const trimmedCmd = cmd.trim().toLowerCase();
+    const raw = cmd.trim();
+    const trimmedCmd = raw.toLowerCase();
     let response: string[] = [];
 
     if (trimmedCmd === 'help') {
@@ -324,7 +396,11 @@ function TerminalView() {
       response = ['Theme set to Gold.'];
     } else if (GAG_COMMANDS[trimmedCmd]) {
       response = GAG_COMMANDS[trimmedCmd];
-    } else if (trimmedCmd === 'clear') {
+    } else     if (trimmedCmd === 'clear') {
+      if (raw) {
+        setCommandHistory((h) => (h[h.length - 1] === raw ? h : [...h.slice(-(MAX_HISTORY - 1)), raw]));
+      }
+      setHistoryIndex(-1);
       setCommandOutput([]);
       setInputValue('');
       return;
@@ -386,6 +462,10 @@ function TerminalView() {
         (p) => p.executable.toLowerCase() === normalized,
       );
       if (project) {
+        if (raw) {
+          setCommandHistory((h) => (h[h.length - 1] === raw ? h : [...h.slice(-(MAX_HISTORY - 1)), raw]));
+        }
+        setHistoryIndex(-1);
         setCommandOutput((prev) => [...prev, `> ${cmd}`, `Loading ${project.title}...`]);
         setInputValue('');
         setTimeout(() => setView(project.id), 300);
@@ -401,11 +481,42 @@ function TerminalView() {
       response = [`Command not recognized: '${trimmedCmd}'. Type 'help' for commands.`];
     }
 
+    if (raw) {
+      setCommandHistory((h) => (h[h.length - 1] === raw ? h : [...h.slice(-(MAX_HISTORY - 1)), raw]));
+    }
+    setHistoryIndex(-1);
     setCommandOutput((prev) => [...prev, `> ${cmd}`, ...response]);
     setInputValue('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Tab' && completionSuggestion) {
+      e.preventDefault();
+      setInputValue((prev) => prev + completionSuggestion);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      if (commandHistory.length === 0) return;
+      e.preventDefault();
+      if (historyIndex === -1) draftRef.current = inputValue;
+      const nextIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
+      setHistoryIndex(nextIndex);
+      setInputValue(commandHistory[nextIndex] ?? '');
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      if (historyIndex === -1) return;
+      e.preventDefault();
+      if (historyIndex >= commandHistory.length - 1) {
+        setHistoryIndex(-1);
+        setInputValue(draftRef.current);
+      } else {
+        const nextIndex = historyIndex + 1;
+        setHistoryIndex(nextIndex);
+        setInputValue(commandHistory[nextIndex] ?? '');
+      }
+      return;
+    }
     if (e.key === 'Enter') {
       handleCommand(inputValue);
       return;
@@ -517,6 +628,22 @@ function TerminalView() {
                   <p className="mt-0.5 font-mono text-[11px]" style={{ color: theme.textDim }}>
                     {profileData.title} · {profileData.university} · Class of {profileData.graduationYear}
                   </p>
+                  {profileData.openForWork && (
+                    <a
+                      href={`https://${profileData.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] transition-opacity hover:opacity-90"
+                      style={{
+                        borderColor: `${theme.accent}50`,
+                        color: theme.accent,
+                        backgroundColor: `${theme.accent}12`,
+                      }}
+                      aria-label="Open for work – view LinkedIn"
+                    >
+                      <span className="h-1 w-1 rounded-full bg-current animate-pulse" aria-hidden /> Open for work
+                    </a>
+                  )}
                   {/* Contact links — visible on mobile where sidebar is hidden. Backgrounds use theme.projectBg; edit here or in themeStore presets. */}
                   <div className="mt-2 flex flex-wrap gap-2 md:hidden">
                     <a
@@ -634,7 +761,7 @@ function TerminalView() {
 
               {/* ── Command input bar ───────────────────────── */}
               <div
-                className="px-4 py-3 terminal-input-wrap"
+                className="px-4 py-3 terminal-input-wrap cursor-text"
                 style={{
                   borderTop: `1px solid ${theme.terminalBorder}`,
                   backgroundColor: theme.terminalBg === '#ffffff' ? '#fafafa' : `${theme.terminalBg}`,
@@ -642,25 +769,75 @@ function TerminalView() {
                   ['--placeholder-opacity' as string]: '0.6',
                 }}
               >
-                <div className="flex items-center gap-2 font-mono text-xs sm:text-sm">
+                <div className="flex items-center gap-2 font-mono text-xs sm:text-sm cursor-text">
                   <span className="shrink-0" style={{ color: theme.textDim }}>
                     guest@edusei:~$
                   </span>
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onFocus={resumeAudioContext}
-                    className="terminal-input flex-1 min-w-0 bg-transparent outline-none"
-                    style={{
-                      color: theme.text,
-                      caretColor: theme.accent,
-                    }}
-                    placeholder="type 'help' for commands"
-                    autoFocus
-                  />
+                  <div className="relative flex-1 min-w-0 flex items-center cursor-text">
+                    {/* Mirror span to measure input width for custom caret */}
+                    <span
+                      ref={mirrorRef}
+                      className="invisible absolute left-0 font-mono text-xs sm:text-sm whitespace-pre"
+                      style={{ font: 'inherit' }}
+                      aria-hidden
+                    >
+                      {inputValue}
+                    </span>
+                    {/* Visible text: typed value + completion suggestion; when empty show placeholder */}
+                    <div
+                      className="absolute left-0 flex items-center overflow-hidden pointer-events-none font-mono text-xs sm:text-sm whitespace-nowrap"
+                      aria-hidden
+                    >
+                      {inputValue ? (
+                        <>
+                          <span style={{ color: theme.text }}>{inputValue}</span>
+                          <span style={{ color: theme.textDim, opacity: 0.35 }}>{completionSuggestion}</span>
+                        </>
+                      ) : (
+                        <span style={{ color: theme.textDim, opacity: 0.6 }}>type 'help' for commands</span>
+                      )}
+                    </div>
+                    {/* Custom blinking caret (accent color; inverse for light/dark) */}
+                    {inputFocused && (
+                      <span
+                        className="terminal-caret absolute top-1/2 -translate-y-1/2 w-0.5 pointer-events-none"
+                        style={{
+                          left: caretLeft,
+                          height: '1em',
+                          backgroundColor: (() => {
+                            const bg = theme.bg.toLowerCase();
+                            if (bg === '#ffffff' || bg.startsWith('#fff') || bg === '#fafaf8') return '#0a0a0a';
+                            if (bg === '#0a0a0a' || bg === '#141414') return '#fafafa';
+                            return theme.accent;
+                          })(),
+                        }}
+                        aria-hidden
+                      />
+                    )}
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => {
+                        setHistoryIndex(-1);
+                        setInputValue(e.target.value);
+                      }}
+                      onKeyDown={handleKeyDown}
+                      onFocus={() => {
+                        setInputFocused(true);
+                        resumeAudioContext();
+                      }}
+                      onBlur={() => setInputFocused(false)}
+                      className="terminal-input absolute inset-0 z-10 w-full bg-transparent outline-none font-mono text-xs sm:text-sm cursor-text"
+                      style={{
+                        color: theme.text,
+                        caretColor: 'transparent',
+                        cursor: 'text',
+                      }}
+                      placeholder="type 'help' for commands"
+                      autoFocus
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={() => setSoundMuted(!soundMuted)}
@@ -1050,11 +1227,12 @@ function TransitionIndicator() {
 
   return (
     <motion.div
-      initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: -8, x: '-50%' }}
+      animate={{ opacity: 1, y: 0, x: '-50%' }}
+      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8, x: '-50%' }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
-      className="absolute left-1/2 top-4 z-50 -translate-x-1/2"
+      className="fixed top-4 z-50"
+      style={{ left: '50%' }}
     >
       <div
         className="flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs backdrop-blur-sm"
