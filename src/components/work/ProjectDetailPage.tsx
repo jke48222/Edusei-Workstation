@@ -124,16 +124,29 @@ export function ProjectDetailPage() {
                 Related projects
               </h2>
               <ul className="mt-4 list-none space-y-4">
-                {project.relatedProjects?.map((rel, i) => (
-                  <li key={i} className="text-[#0a0a0a]/80">
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      <Link to={`/work/${rel.slug}`} className="font-semibold text-[#0a0a0a] underline underline-offset-2 hover:opacity-80">
-                        {rel.title}
-                      </Link>
-                      {rel.period && <span className="font-mono text-[11px] text-[#0a0a0a]/40">{rel.period}</span>}
-                    </div>
-                  </li>
-                ))}
+                {project.relatedProjects?.map((rel, i) => {
+                  const relatedProject = getProjectBySlug(rel.slug);
+                  return (
+                    <li key={i} className="text-[#0a0a0a]/80">
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <Link to={`/work/${rel.slug}`} className="font-semibold text-[#0a0a0a] underline underline-offset-2 hover:opacity-80">
+                          {rel.title}
+                        </Link>
+                        {rel.period && <span className="font-mono text-[11px] text-[#0a0a0a]/40">{rel.period}</span>}
+                        {relatedProject?.github && (
+                          <a
+                            href={relatedProject.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-xs text-[#0a0a0a]/50 underline underline-offset-2 hover:text-[#0a0a0a]"
+                          >
+                            GitHub ↗
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
                 {project.additionalProjects?.map((add, i) => {
                   const slug = RELATED_TITLE_TO_SLUG[add.title];
                   return (
