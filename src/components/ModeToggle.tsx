@@ -28,7 +28,7 @@ export function ModeToggle() {
         onClick={handleToggle}
         role="switch"
         aria-checked={isPro}
-        aria-label="Toggle view mode"
+        aria-label={isPro ? 'View mode: Portfolio. Switch to Workstation.' : 'View mode: Workstation. Switch to Portfolio.'}
         className="group flex items-center gap-2.5 rounded-full px-3 py-2 text-[11px] font-mono backdrop-blur-xl transition-all duration-200 focus:outline-none focus-visible:ring-2"
         style={
           isPro

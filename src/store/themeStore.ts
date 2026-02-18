@@ -198,16 +198,30 @@ export const themePresets: Record<string, ThemePreset> = {
   },
 };
 
+const THEME_STORAGE_KEY = 'edusei-workstation-theme';
+
+function getStoredTheme(): string {
+  if (typeof window === 'undefined') return 'clean';
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored && stored in themePresets) return stored;
+  } catch (_) {}
+  return 'clean';
+}
+
 interface ThemeState {
   activeTheme: string;
   setTheme: (themeId: string) => void;
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  activeTheme: 'clean',
+  activeTheme: getStoredTheme(),
   setTheme: (themeId: string) => {
     if (themePresets[themeId]) {
       set({ activeTheme: themeId });
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, themeId);
+      } catch (_) {}
     }
   },
 }));

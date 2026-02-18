@@ -92,6 +92,26 @@ export function useHasTouch(): boolean {
 }
 
 /**
+ * Hook to detect user's prefers-reduced-motion setting (accessibility).
+ * When true, UI and 3D camera should minimize or disable animations.
+ */
+export function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = () => setPrefersReducedMotion(mq.matches);
+    mq.addEventListener('change', handleChange);
+    return () => mq.removeEventListener('change', handleChange);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
+/**
  * Hook to get current viewport dimensions
  */
 export function useViewportSize(): { width: number; height: number } {

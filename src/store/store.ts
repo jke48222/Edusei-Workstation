@@ -129,6 +129,9 @@ interface WorkstationState {
 
   /** Terminal boot sequence has completed (show only once per session). */
   terminalBooted: boolean;
+
+  /** User prefers reduced motion (from prefers-reduced-motion media query). */
+  prefersReducedMotion: boolean;
 }
 
 interface WorkstationActions {
@@ -138,6 +141,7 @@ interface WorkstationActions {
   completeAnimation: () => void;
   canNavigate: () => boolean;
   setTerminalBooted: (booted: boolean) => void;
+  setPrefersReducedMotion: (value: boolean) => void;
 }
 
 // ============================================================================
@@ -151,13 +155,25 @@ type StoreActions = WorkstationActions & GalleryActions;
 // Initial States
 // ============================================================================
 
+const VIEW_MODE_STORAGE_KEY = 'edusei-workstation-viewMode';
+
+function getStoredViewMode(): ViewMode {
+  if (typeof window === 'undefined') return 'professional';
+  try {
+    const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    if (stored === 'immersive' || stored === 'professional') return stored;
+  } catch (_) {}
+  return 'professional';
+}
+
 const initialWorkstationState: WorkstationState = {
-  viewMode: 'professional',
+  viewMode: getStoredViewMode(),
   currentView: 'monitor',
   isAnimating: false,
   animationStartTime: null,
   transitionDuration: 1500,
   terminalBooted: false,
+  prefersReducedMotion: false,
 };
 
 const initialGalleryState: GalleryState = {
@@ -209,11 +225,16 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
 
     setViewMode: (mode: ViewMode) => {
       set({ viewMode: mode });
+      try {
+        localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+      } catch (_) {}
     },
 
     setView: (view: ViewState) => {
       const state = get();
       if (state.isAnimating || state.currentView === view) return;
+
+      const duration = state.prefersReducedMotion ? 0 : state.transitionDuration;
 
       set({
         currentView: view,
@@ -225,16 +246,19 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
         const currentState = get();
         if (currentState.isAnimating && currentState.animationStartTime) {
           const elapsed = Date.now() - currentState.animationStartTime;
-          if (elapsed >= currentState.transitionDuration * 0.9) {
+          const effectiveDuration = currentState.prefersReducedMotion ? 0 : currentState.transitionDuration;
+          if (elapsed >= effectiveDuration * 0.9 || effectiveDuration === 0) {
             set({ isAnimating: false, animationStartTime: null });
           }
         }
-      }, state.transitionDuration + 200);
+      }, duration + 200);
     },
 
     returnToMonitor: () => {
       const state = get();
       if (state.isAnimating || state.currentView === 'monitor') return;
+
+      const duration = state.prefersReducedMotion ? 0 : state.transitionDuration;
 
       set({
         currentView: 'monitor',
@@ -247,7 +271,7 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
         if (currentState.isAnimating) {
           set({ isAnimating: false, animationStartTime: null });
         }
-      }, state.transitionDuration + 200);
+      }, duration + 200);
     },
 
     completeAnimation: () => {
@@ -260,6 +284,8 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
     },
 
     setTerminalBooted: (booted: boolean) => set({ terminalBooted: booted }),
+
+    setPrefersReducedMotion: (value: boolean) => set({ prefersReducedMotion: value }),
 
     // ========================================================================
     // Gallery Scene Transitions

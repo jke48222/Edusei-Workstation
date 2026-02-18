@@ -5,13 +5,14 @@
  * mobile detail panel with minimize/expand. CRT-style and scrollbar styling via theme.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkstationStore } from '../store/store';
 import { useActiveTheme } from '../store/themeStore';
 import {
   projectsData,
   profileData,
+  getSayHiMailto,
   bootSequence,
   getProjectById,
   helpText,
@@ -35,30 +36,33 @@ function useIsMobile() {
   return isMobile;
 }
 
-/** Framer Motion variants for list animations. */
-const staggerList = {
-  visible: { transition: { staggerChildren: 0.015 } },
-};
-
-const fadeSlideUp = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } },
-};
+/** Framer Motion variants for list animations (duration/stagger zero when reduced motion). */
+function getStaggerList(reducedMotion: boolean) {
+  return { visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.015 } } };
+}
+function getFadeSlideUp(reducedMotion: boolean) {
+  return {
+    hidden: { opacity: 0, y: reducedMotion ? 0 : 8 },
+    visible: { opacity: 1, y: 0, transition: { duration: reducedMotion ? 0 : 0.25, ease: [0.22, 1, 0.36, 1] } },
+  };
+}
 
 /** Typewriter boot lines in terminal; calls onComplete when finished. */
-function BootSequence({ onComplete }: { onComplete: () => void }) {
+function BootSequence({ onComplete, reducedMotion }: { onComplete: () => void; reducedMotion?: boolean }) {
   const theme = useActiveTheme();
   const [visibleLines, setVisibleLines] = useState(0);
+  const lineDelay = reducedMotion ? 0 : 250;
+  const doneDelay = reducedMotion ? 100 : 2000;
 
   useEffect(() => {
     if (visibleLines < bootSequence.length) {
-      const timer = setTimeout(() => setVisibleLines((p) => p + 1), 250);
+      const timer = setTimeout(() => setVisibleLines((p) => p + 1), lineDelay);
       return () => clearTimeout(timer);
     } else {
-      const done = setTimeout(onComplete, 2000);
+      const done = setTimeout(onComplete, doneDelay);
       return () => clearTimeout(done);
     }
-  }, [visibleLines, onComplete]);
+  }, [visibleLines, onComplete, lineDelay, doneDelay]);
 
   return (
     <div className="flex h-full flex-col items-center justify-center font-mono text-sm">
@@ -66,9 +70,9 @@ function BootSequence({ onComplete }: { onComplete: () => void }) {
         {bootSequence.slice(0, visibleLines).map((line, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: -6 }}
+            initial={{ opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : -6 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: reducedMotion ? 0 : 0.15 }}
             style={{ color: theme.textDim }}
           >
             {line || '\u00A0'}
@@ -176,18 +180,21 @@ function ProjectCard({
   index,
   onClick,
   disabled,
+  variants,
 }: {
   project: (typeof projectsData)[number];
   index: number;
   onClick: () => void;
   disabled: boolean;
+  variants?: { hidden: { opacity: number; y: number }; visible: { opacity: number; y: number; transition: object } };
 }) {
   const theme = useActiveTheme();
+  const cardVariants = variants ?? getFadeSlideUp(false);
 
   return (
     <motion.button
       layout={false}
-      variants={fadeSlideUp}
+      variants={cardVariants}
       onClick={onClick}
       disabled={disabled}
       className={`
@@ -253,8 +260,10 @@ function ProjectCard({
 // ─── Main Terminal View ──────────────────────────────────────────
 
 function TerminalView() {
-  const { setView, isAnimating, terminalBooted, setTerminalBooted } = useWorkstationStore();
+  const { setView, isAnimating, terminalBooted, setTerminalBooted, prefersReducedMotion } = useWorkstationStore();
   const theme = useActiveTheme();
+  const staggerList = useMemo(() => getStaggerList(prefersReducedMotion), [prefersReducedMotion]);
+  const fadeSlideUp = useMemo(() => getFadeSlideUp(prefersReducedMotion), [prefersReducedMotion]);
   const [inputValue, setInputValue] = useState('');
   const [commandOutput, setCommandOutput] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -385,7 +394,7 @@ function TerminalView() {
         {/* ── Body ──────────────────────────────────────────── */}
         {!terminalBooted ? (
           <div className="flex-1 p-4">
-            <BootSequence onComplete={() => setTerminalBooted(true)} />
+            <BootSequence onComplete={() => setTerminalBooted(true)} reducedMotion={prefersReducedMotion} />
           </div>
         ) : (
           <div className="flex flex-1 min-h-0">
@@ -419,7 +428,7 @@ function TerminalView() {
                   {/* Contact links — visible on mobile where sidebar is hidden. Backgrounds use theme.projectBg; edit here or in themeStore presets. */}
                   <div className="mt-2 flex flex-wrap gap-2 md:hidden">
                     <a
-                      href={`mailto:${profileData.email}`}
+                      href={getSayHiMailto()}
                       className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
                       style={{
                         border: `1px solid ${theme.accent}30`,
@@ -428,7 +437,7 @@ function TerminalView() {
                         opacity: 0.7,
                       }}
                     >
-                      Email
+                      Say hi
                     </a>
                     <a
                       href={`https://${profileData.linkedin}`}
@@ -496,6 +505,7 @@ function TerminalView() {
                         index={i}
                         onClick={() => handleProjectClick(project.id)}
                         disabled={isAnimating}
+                        variants={fadeSlideUp}
                       />
                     ))}
                   </motion.div>
@@ -586,22 +596,24 @@ function TerminalView() {
 // ─── Project Detail Panel ────────────────────────────────────────
 
 function ProjectDetailPanel() {
-  const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
+  const { currentView, returnToMonitor, isAnimating, prefersReducedMotion } = useWorkstationStore();
   const theme = useActiveTheme();
   const isMobile = useIsMobile();
   const project = getProjectById(currentView);
   const [expandedRelated, setExpandedRelated] = useState<Record<number, boolean>>({});
   const [mobileExpanded, setMobileExpanded] = useState(true);
+  const d = prefersReducedMotion ? 0 : 0.25;
+  const delay = prefersReducedMotion ? 0 : 0.1;
 
   if (!project || currentView === 'monitor') return null;
 
   if (isMobile) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: '100%' }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: '100%' }}
         animate={{ opacity: 1, y: mobileExpanded ? 0 : 'calc(100% - 56px)' }}
-        exit={{ opacity: 0, y: '100%' }}
-        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+        exit={prefersReducedMotion ? undefined : { opacity: 0, y: '100%' }}
+        transition={{ duration: d, ease: [0.25, 0.1, 0.25, 1] }}
         className="absolute bottom-0 left-0 right-0 z-10"
         style={{ maxHeight: '85vh' }}
       >
@@ -720,10 +732,10 @@ function ProjectDetailPanel() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 48 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, x: 48 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 48 }}
-      transition={{ duration: 0.25, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+      exit={prefersReducedMotion ? undefined : { opacity: 0, x: 48 }}
+      transition={{ duration: d, delay, ease: [0.22, 1, 0.36, 1] }}
       className="absolute right-0 top-0 h-full flex items-center justify-center p-8 w-full md:w-[48%]"
     >
       <div
@@ -740,15 +752,15 @@ function ProjectDetailPanel() {
           disabled={isAnimating}
           className="mb-5 font-mono text-xs transition-colors disabled:opacity-40"
           style={{ color: theme.textDim }}
-          whileHover={!isAnimating ? { x: -3 } : {}}
+          whileHover={!isAnimating && !prefersReducedMotion ? { x: -3 } : {}}
         >
           ← Back to Terminal
         </motion.button>
 
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.1 }}
+          transition={{ duration: d, delay }}
         >
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -783,9 +795,9 @@ function ProjectDetailPanel() {
 
         <motion.div
           className="mt-6 space-y-3"
-          initial={{ opacity: 0, y: 8 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.15 }}
+          transition={{ duration: d, delay: delay + 0.05 }}
         >
           {project.description.map((para, i) => (
             <p key={i} className="font-mono text-[13px] leading-relaxed" style={{ color: theme.textDim }}>
@@ -796,9 +808,9 @@ function ProjectDetailPanel() {
 
         <motion.div
           className="mt-6"
-          initial={{ opacity: 0, y: 8 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.2 }}
+          transition={{ duration: d, delay: delay * 2 }}
         >
           <p
             className="mb-2 font-mono text-[10px] uppercase tracking-widest"
@@ -826,9 +838,9 @@ function ProjectDetailPanel() {
         {project.additionalProjects?.length ? (
           <motion.div
             className="mt-8"
-            initial={{ opacity: 0, y: 8 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: 0.25 }}
+            transition={{ duration: d, delay: delay * 2.5 }}
           >
             <p
               className="mb-3 font-mono text-[10px] uppercase tracking-widest"
@@ -863,7 +875,7 @@ function ProjectDetailPanel() {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: d }}
                         className="overflow-hidden"
                       >
                         <div className="mt-2 space-y-1.5">
@@ -897,9 +909,9 @@ function ProjectDetailPanel() {
         <motion.div
           className="mt-8 pt-4 text-center"
           style={{ borderTop: `1px solid ${theme.projectBorder}` }}
-          initial={{ opacity: 0 }}
+          initial={prefersReducedMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.2, delay: 0.3 }}
+          transition={{ duration: d, delay: delay * 3 }}
         >
           <span className="font-mono text-[10px]" style={{ color: theme.textDim, opacity: 0.5 }}>
             ↺ Drag the 3D model to rotate · ESC to return
@@ -913,15 +925,16 @@ function ProjectDetailPanel() {
 // ─── Transition indicator ────────────────────────────────────────
 
 function TransitionIndicator() {
-  const { isAnimating, currentView } = useWorkstationStore();
+  const { isAnimating, currentView, prefersReducedMotion } = useWorkstationStore();
   const theme = useActiveTheme();
   if (!isAnimating) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -8 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
+      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
       className="absolute left-1/2 top-4 z-50 -translate-x-1/2"
     >
       <div
