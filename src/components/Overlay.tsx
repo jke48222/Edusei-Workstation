@@ -889,7 +889,6 @@ function TerminalView() {
                         caretColor: 'transparent',
                         cursor: 'text',
                       }}
-                      placeholder="type 'help' for commands"
                       autoFocus
                     />
                   </div>
