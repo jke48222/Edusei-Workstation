@@ -1,16 +1,16 @@
 /**
  * @file FloatingDock.tsx
- * @description Fixed bottom navigation for professional view: Work, Experience, Skills, Contact.
+ * @description Fixed bottom navigation for professional view: Experience, Work, Skills, Contact.
  * Scroll-spy highlights the current section; smooth scroll on click. Centered on all viewports.
  */
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-/** Section ids and labels for scroll-spy and anchor links. */
+/** Section ids and labels for scroll-spy and anchor links (order matches page). */
 const sections = [
-  { id: 'work', label: 'Work' },
   { id: 'experience', label: 'Experience' },
+  { id: 'work', label: 'Work' },
   { id: 'skills', label: 'Skills' },
   { id: 'contact', label: 'Contact' },
 ];
