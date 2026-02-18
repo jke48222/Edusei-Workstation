@@ -430,13 +430,14 @@ function TerminalView() {
                   <p className="mt-0.5 font-mono text-[11px]" style={{ color: theme.textDim }}>
                     {profileData.title} · {profileData.university} · Class of {profileData.graduationYear}
                   </p>
-                  {/* Contact links — visible on mobile where sidebar is hidden */}
+                  {/* Contact links — visible on mobile where sidebar is hidden. Backgrounds use theme.projectBg; edit here or in themeStore presets. */}
                   <div className="mt-2 flex flex-wrap gap-2 md:hidden">
                     <a
                       href={`mailto:${profileData.email}`}
                       className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
                       style={{
                         border: `1px solid ${theme.accent}30`,
+                        backgroundColor: theme.projectBg,
                         color: theme.text,
                         opacity: 0.7,
                       }}
@@ -450,6 +451,7 @@ function TerminalView() {
                       className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
                       style={{
                         border: `1px solid ${theme.accent}30`,
+                        backgroundColor: theme.projectBg,
                         color: theme.text,
                         opacity: 0.7,
                       }}
@@ -463,6 +465,7 @@ function TerminalView() {
                       className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
                       style={{
                         border: `1px solid ${theme.accent}30`,
+                        backgroundColor: theme.projectBg,
                         color: theme.text,
                         opacity: 0.7,
                       }}
@@ -476,6 +479,7 @@ function TerminalView() {
                       className="rounded-md px-2.5 py-1 font-mono text-[10px] transition-colors"
                       style={{
                         border: `1px solid ${theme.accent}30`,
+                        backgroundColor: theme.projectBg,
                         color: theme.text,
                         opacity: 0.7,
                       }}
@@ -542,10 +546,12 @@ function TerminalView() {
 
               {/* ── Command input bar ───────────────────────── */}
               <div
-                className="px-4 py-3"
+                className="px-4 py-3 terminal-input-wrap"
                 style={{
                   borderTop: `1px solid ${theme.terminalBorder}`,
                   backgroundColor: theme.terminalBg === '#ffffff' ? '#fafafa' : `${theme.terminalBg}`,
+                  ['--placeholder-color' as string]: theme.textDim,
+                  ['--placeholder-opacity' as string]: '0.6',
                 }}
               >
                 <div className="flex items-center gap-2 font-mono text-xs sm:text-sm">
@@ -558,7 +564,7 @@ function TerminalView() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="flex-1 min-w-0 bg-transparent outline-none"
+                    className="terminal-input flex-1 min-w-0 bg-transparent outline-none"
                     style={{
                       color: theme.text,
                       caretColor: theme.accent,

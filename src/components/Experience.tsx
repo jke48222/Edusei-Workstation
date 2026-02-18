@@ -16,8 +16,9 @@ import {
   Stars,
 } from '@react-three/drei';
 import { Group } from 'three';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { useWorkstationStore } from '../store/store';
-import { useActiveTheme } from '../store/themeStore';
+import { useActiveTheme, useThemeStore } from '../store/themeStore';
 import { CameraRig } from './CameraRig';
 import type { ViewState } from '../store/store';
 
@@ -318,10 +319,13 @@ function ModelFallback() {
  */
 function WorkstationContent() {
   const theme = useActiveTheme();
-  
+  const activeTheme = useThemeStore((s) => s.activeTheme);
+  const isMobile = useIsMobile();
+  const bgColor = isMobile && activeTheme === 'uga' ? theme.accent : theme.bg;
+
   return (
     <>
-      <color attach="background" args={[theme.bg]} />
+      <color attach="background" args={[bgColor]} />
       <fog attach="fog" args={[theme.fogColor, 10, 50]} />
       
       <Environment preset="night" />
