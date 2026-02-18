@@ -15,6 +15,7 @@ import { useWorkstationStore, useViewMode } from './store/store';
 import { useActiveTheme, useThemeStore, useResolvedThemeId, SYSTEM_THEME_ID } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
 import { PortfolioDarkToggle } from './components/PortfolioDarkToggle';
+import { PortfolioSearch } from './components/PortfolioSearch';
 import { ProfessionalView } from './components/professional/ProfessionalView';
 import { ThemeSelector } from './components/ThemeSelector';
 import { profileData } from './data';
@@ -165,7 +166,12 @@ function App() {
   return (
     <>
       <ModeToggle />
-      {viewMode === 'professional' && <PortfolioDarkToggle />}
+      {viewMode === 'professional' && (
+        <>
+          <PortfolioSearch />
+          <PortfolioDarkToggle />
+        </>
+      )}
       <div>
         {viewMode === 'professional' ? <ProfessionalView /> : <ImmersiveExperience />}
         {viewMode === 'professional' && (
