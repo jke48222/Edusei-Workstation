@@ -388,6 +388,7 @@ function TerminalView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const mirrorRef = useRef<HTMLSpanElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
   const completionSuggestion = useMemo(() => getCompletionSuffix(inputValue), [inputValue]);
@@ -587,6 +588,21 @@ function TerminalView() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [commandOutput]);
+
+  // Scroll input into view on mobile when keyboard appears
+  useEffect(() => {
+    if (isMobile && inputFocused && inputRef.current) {
+      // Small delay to ensure keyboard has appeared
+      const timeoutId = setTimeout(() => {
+        inputRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest',
+        });
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [inputFocused, isMobile]);
 
   return (
     <div
@@ -816,6 +832,7 @@ function TerminalView() {
 
               {/* ── Command input bar ───────────────────────── */}
               <div
+                ref={inputWrapperRef}
                 className="px-4 py-3 terminal-input-wrap cursor-text"
                 style={{
                   borderTop: `1px solid ${theme.terminalBorder}`,
