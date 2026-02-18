@@ -17,8 +17,8 @@ export function PortfolioDarkToggle() {
       aria-label={portfolioDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={
         portfolioDark
-          ? 'fixed top-3 right-24 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-[#262626] text-white/90 shadow-lg backdrop-blur-xl transition-all hover:border-white/40 hover:bg-[#333] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 sm:right-[11rem]'
-          : 'fixed top-3 right-24 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg backdrop-blur-xl transition-all hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 sm:right-[11rem]'
+          ? 'fixed top-3 right-30 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-[#262626] text-white/90 shadow-lg backdrop-blur-xl transition-all hover:border-white/40 hover:bg-[#333] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 sm:right-[13.55rem]'
+          : 'fixed top-3 right-30 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg backdrop-blur-xl transition-all hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 sm:right-[13.55rem]'
       }
     >
       {portfolioDark ? (

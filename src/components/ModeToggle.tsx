@@ -29,15 +29,14 @@ export function ModeToggle() {
         role="switch"
         aria-checked={isPro}
         aria-label={isPro ? 'View mode: Portfolio. Switch to Workstation.' : 'View mode: Workstation. Switch to Portfolio.'}
-        className="group flex items-center gap-2.5 rounded-full px-3 py-2 text-[11px] font-mono backdrop-blur-xl transition-all duration-200 focus:outline-none focus-visible:ring-2"
+        className={`group flex h-9 items-center gap-2.5 rounded-full px-3 text-[11px] font-mono backdrop-blur-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 dark:focus-visible:ring-white/30 ${
+          isPro
+            ? 'border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg dark:border-white/20 dark:bg-[#262626] dark:text-white/90 hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0 dark:hover:border-white/40 dark:hover:bg-[#333]'
+            : 'py-2'
+        }`}
         style={
           isPro
-            ? {
-                border: '1px solid rgba(10,10,10,0.1)',
-                backgroundColor: 'rgba(255,255,255,0.8)',
-                color: theme.accent,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-              }
+            ? undefined
             : {
                 border: `1px solid ${theme.accent}40`,
                 backgroundColor: `${theme.terminalBg}cc`,
@@ -45,8 +44,8 @@ export function ModeToggle() {
               }
         }
       >
-        {/* Label — accent color set on span so it isn’t overridden */}
-        <span className="hidden sm:inline" style={{ color: theme.accent }}>
+        {/* Label — in pro view inherits button text color; in workstation view uses theme accent */}
+        <span className="hidden sm:inline" style={isPro ? undefined : { color: theme.accent }}>
           {isPro ? 'Workstation' : 'Portfolio'}
         </span>
 
