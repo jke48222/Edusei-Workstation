@@ -5,3 +5,4 @@
  */
 export { useIsMobile, useHasTouch, useViewportSize, usePrefersReducedMotion } from './useIsMobile';
 export { useKeyboardControls, useIsAnyKeyPressed, getMovementVector } from './useKeyboardControls';
+export { useKonamiCode, wasKonamiTriggered } from './useKonamiCode';
