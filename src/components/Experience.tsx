@@ -16,7 +16,6 @@ import {
   Stars,
 } from '@react-three/drei';
 import { Group } from 'three';
-import { useIsMobile } from '../hooks/useIsMobile';
 import { useWorkstationStore } from '../store/store';
 import { useActiveTheme, useThemeStore } from '../store/themeStore';
 import { CameraRig } from './CameraRig';
@@ -320,8 +319,7 @@ function ModelFallback() {
 function WorkstationContent() {
   const theme = useActiveTheme();
   const activeTheme = useThemeStore((s) => s.activeTheme);
-  const isMobile = useIsMobile();
-  const bgColor = isMobile && activeTheme === 'uga' ? theme.accent : theme.bg;
+  const bgColor = activeTheme === 'uga' ? theme.accent : theme.bg; // Bulldog Red: accent on both viewports
 
   return (
     <>
