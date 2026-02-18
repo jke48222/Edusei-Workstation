@@ -100,6 +100,17 @@ This project uses the following 3D models under Creative Commons Attribution lic
 
 Additional models (Robot Car, Sleeping Dog, Satellite) are included in `/public/models/`.
 
+## 📱 PWA / Home screen icon
+
+The “Add to Home Screen” icon uses `icon-192.png` and `icon-512.png`. To generate them from the favicon:
+
+1. Run `npm run dev`.
+2. Open **http://localhost:5173/export-pwa-icons.html** in your browser.
+3. Click **Download 192×192** and **Download 512×512**.
+4. Move the downloaded files into `public/` and name them `icon-192.png` and `icon-512.png`.
+
+Redeploy so the new icons are served; then add to home screen again to see your favicon.
+
 ## 📄 Adding Your Resume
 
 Place your resume PDF in the `public/` folder as `resume.pdf`. Users can then type `resume` in the terminal or the download link will work.
