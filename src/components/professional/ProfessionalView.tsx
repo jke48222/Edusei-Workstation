@@ -165,8 +165,8 @@ function Stats() {
 
 function AboutBand() {
   return (
-    <section id="about" className="bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
-      <Section className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-20">
+    <section id="about" className="w-full min-w-full bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
+      <Section className="w-full px-6 py-16 md:px-12 lg:px-20">
       <motion.div variants={fadeUp} className="grid gap-10 md:grid-cols-[1.4fr,1fr]">
         <div>
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">I work across the full stack —<br /><span className="text-[#0a0a0a]/40 dark:text-[#fafafa]/40">from circuits to interfaces.</span></h2>
@@ -226,20 +226,22 @@ function ProjectRow({ project, index, cardId }: { project: (typeof projectsData)
 /** Selected Work section: project rows (original design). Timeline clicks scroll to card-{project.id}. */
 function ProjectsList() {
   return (
-    <section id="work" className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-20 bg-[#fafaf8] dark:bg-[#0a0a0a] transition-colors duration-300 ease-in-out">
-      <Section>
-        <motion.div variants={fadeUp} className="mb-2 flex flex-wrap items-baseline justify-between gap-4">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Selected Work</h2>
-          <Link to="/work" className="font-mono text-xs text-[#0a0a0a]/50 dark:text-[#fafafa]/50 underline-offset-2 transition-colors hover:text-[#0a0a0a] dark:hover:text-[#fafafa]">
-            View all →
-          </Link>
-        </motion.div>
-        <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Projects across VR, embedded systems, and product engineering.</motion.p>
-      </Section>
-      <div className="space-y-4">
-        {projectsData.map((project, i) => (
-          <ProjectRow key={project.id} project={project} index={i} cardId={`card-${project.id}`} />
-        ))}
+    <section id="work" className="w-full min-w-full bg-[#fafaf8] dark:bg-[#0a0a0a] transition-colors duration-300 ease-in-out">
+      <div className="w-full px-6 py-16 md:px-12 lg:px-20">
+        <Section>
+          <motion.div variants={fadeUp} className="mb-2 flex flex-wrap items-baseline justify-between gap-4">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Selected Work</h2>
+            <Link to="/work" className="font-mono text-xs text-[#0a0a0a]/50 dark:text-[#fafafa]/50 underline-offset-2 transition-colors hover:text-[#0a0a0a] dark:hover:text-[#fafafa]">
+              View all →
+            </Link>
+          </motion.div>
+          <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Projects across VR, embedded systems, and product engineering.</motion.p>
+        </Section>
+        <div className="space-y-4">
+          {projectsData.map((project, i) => (
+            <ProjectRow key={project.id} project={project} index={i} cardId={`card-${project.id}`} />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -294,28 +296,30 @@ function scrollToCard(id: string) {
 function Timeline() {
   const nodes = getTimelineNodes();
   return (
-    <section id="timeline" className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-20 bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
-      <Section>
-        <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Timeline</motion.h2>
-        <motion.p variants={fadeUp} className="mb-8 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Education, experience, and projects. Click a title to jump to its section.</motion.p>
-      </Section>
-      <div className="timeline-scroll overflow-x-auto pb-4 -mx-6 px-6 md:-mx-12 md:px-12">
-        <div className="relative flex items-start gap-8 md:gap-12 min-w-max pt-1">
-          <div className="absolute left-0 right-0 top-[6px] h-px bg-[#0a0a0a]/15 dark:bg-[#333333] min-w-full" aria-hidden />
-          {nodes.map((node) => (
-            <button
-              key={node.id}
-              type="button"
-              onClick={() => scrollToCard(node.id)}
-              className="group relative z-10 flex shrink-0 flex-col items-center text-center transition-colors hover:text-[#0a0a0a] dark:hover:text-[#fafafa]"
-            >
-              <span className="h-3 w-3 rounded-full border-2 border-[#0a0a0a]/25 bg-[#fafaf8] dark:border-[#333333] dark:bg-[#141414] shrink-0 group-hover:border-[#0a0a0a]/50 dark:group-hover:border-[#404040]" aria-hidden />
-              <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[#0a0a0a]/50 dark:text-[#fafafa]/50 whitespace-nowrap">{node.date}</p>
-              <span className="mt-1 max-w-[140px] text-xs font-semibold text-[#0a0a0a]/80 dark:text-[#fafafa]/80 underline-offset-2 group-hover:underline md:max-w-[180px] md:text-sm">
-                {node.title}
-              </span>
-            </button>
-          ))}
+    <section id="timeline" className="w-full min-w-full bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
+      <div className="w-full px-6 py-16 md:px-12 lg:px-20">
+        <Section>
+          <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Timeline</motion.h2>
+          <motion.p variants={fadeUp} className="mb-8 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Education, experience, and projects. Click a title to jump to its section.</motion.p>
+        </Section>
+        <div className="timeline-scroll overflow-x-auto pb-4 -mx-6 px-6 md:-mx-12 md:px-12">
+          <div className="relative flex items-start gap-8 md:gap-12 min-w-max pt-1">
+            <div className="absolute left-0 right-0 top-[6px] h-px bg-[#0a0a0a]/15 dark:bg-[#333333] min-w-full" aria-hidden />
+            {nodes.map((node) => (
+              <button
+                key={node.id}
+                type="button"
+                onClick={() => scrollToCard(node.id)}
+                className="group relative z-10 flex shrink-0 flex-col items-center text-center transition-colors hover:text-[#0a0a0a] dark:hover:text-[#fafafa]"
+              >
+                <span className="h-3 w-3 rounded-full border-2 border-[#0a0a0a]/25 bg-[#fafaf8] dark:border-[#333333] dark:bg-[#141414] shrink-0 group-hover:border-[#0a0a0a]/50 dark:group-hover:border-[#404040]" aria-hidden />
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[#0a0a0a]/50 dark:text-[#fafafa]/50 whitespace-nowrap">{node.date}</p>
+                <span className="mt-1 max-w-[140px] text-xs font-semibold text-[#0a0a0a]/80 dark:text-[#fafafa]/80 underline-offset-2 group-hover:underline md:max-w-[180px] md:text-sm">
+                  {node.title}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -372,22 +376,23 @@ function ExperienceSection() {
 
 function SkillsCloud() {
   return (
-    <section id="skills" className="mx-auto max-w-6xl px-6 py-20 md:px-12 lg:px-20 bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
-      <Section>
-        <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Toolkit</motion.h2>
-        <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Languages, frameworks, hardware, and core strengths.</motion.p>
-      </Section>
-      <div className="grid gap-8 md:grid-cols-2">
-        <Section className="space-y-6">
-          <SkillCategory label="Programming" items={skillsData.programming} />
-          <SkillCategory label="Software & Tools" items={skillsData.software} />
+    <section id="skills" className="w-full min-w-full bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
+      <div className="w-full px-6 py-20 md:px-12 lg:px-20">
+        <Section>
+          <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Toolkit</motion.h2>
+          <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Languages, frameworks, hardware, and core strengths.</motion.p>
         </Section>
-        <Section className="space-y-6">
-          <SkillCategory label="Hardware" items={skillsData.hardware} />
-          <SkillCategory label="Core Strengths" items={skillsData.core} />
-        </Section>
-      </div>
-      <Section className="mt-16 grid gap-8 border-t border-[#0a0a0a]/10 pt-10 dark:border-[#333333] md:grid-cols-2">
+        <div className="grid gap-8 md:grid-cols-2">
+          <Section className="space-y-6">
+            <SkillCategory label="Programming" items={skillsData.programming} />
+            <SkillCategory label="Software & Tools" items={skillsData.software} />
+          </Section>
+          <Section className="space-y-6">
+            <SkillCategory label="Hardware" items={skillsData.hardware} />
+            <SkillCategory label="Core Strengths" items={skillsData.core} />
+          </Section>
+        </div>
+        <Section className="mt-16 grid gap-8 border-t border-[#0a0a0a]/10 pt-10 dark:border-[#333333] md:grid-cols-2">
         <motion.div variants={fadeUp}>
           <h3 className="mb-4 text-lg font-bold dark:text-[#fafafa]">Leadership & Community</h3>
           <ul className="space-y-2">
@@ -411,6 +416,7 @@ function SkillsCloud() {
           </ul>
         </motion.div>
       </Section>
+      </div>
     </section>
   );
 }
