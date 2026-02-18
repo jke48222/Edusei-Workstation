@@ -14,10 +14,12 @@ import {
   Center,
   PresentationControls,
   Stars,
+  Html,
 } from '@react-three/drei';
 import { Group } from 'three';
 import { useWorkstationStore } from '../store/store';
 import { useActiveTheme, useThemeStore } from '../store/themeStore';
+import { getProjectById } from '../data';
 import { CameraRig } from './CameraRig';
 import type { ViewState } from '../store/store';
 
@@ -81,21 +83,38 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
   const theme = useActiveTheme();
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<Group>(null);
-  
+  const project = getProjectById(viewId);
+  const tooltipLabel = project?.title ?? viewId;
+
   const canClick = !isAnimating && currentView === 'monitor';
-  
+
   const handleClick = (e: import('@react-three/fiber').ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (canClick) {
       setView(viewId);
     }
   };
-  
+
   return (
     <group ref={groupRef} position={position}>
       <FloatingPlatform position={[0, 0, 0]} />
       <PlatformRing position={[0, 0, 0]} />
-      
+
+      {hovered && canClick && (
+        <Html position={[0, 1.4, 0]} center distanceFactor={8} zIndexRange={[0, 0]}>
+          <div
+            className="pointer-events-none whitespace-nowrap rounded px-2 py-1 font-mono text-xs shadow-lg"
+            style={{
+              color: theme.text,
+              backgroundColor: theme.terminalBg,
+              border: `1px solid ${theme.terminalBorder}`,
+            }}
+          >
+            {tooltipLabel}
+          </div>
+        </Html>
+      )}
+
       <spotLight
         position={[0, 4, 0]}
         angle={0.4}
