@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -31,7 +32,7 @@ export default {
         'flicker': 'flicker 0.15s infinite',
         'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
         'typing': 'typing 3.5s steps(40, end)',
-        'marquee': 'marquee 30s linear infinite',
+        'marquee': 'marquee 22s linear infinite',
       },
       keyframes: {
         blink: {

@@ -9,6 +9,8 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotFound } from './components/NotFound';
+import { WorkPage } from './components/work/WorkPage';
+import { ProjectDetailPage } from './components/work/ProjectDetailPage';
 import './index.css';
 import App from './App.tsx';
 
@@ -24,6 +26,8 @@ createRoot(document.getElementById('root') as HTMLElement).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/work" element={<WorkPage />} />
+          <Route path="/work/:projectId" element={<ProjectDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

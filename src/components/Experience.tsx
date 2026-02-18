@@ -35,11 +35,11 @@ useGLTF.preload('/models/desk_set.glb');
 /** World-space positions for each workstation object (aligned with CameraRig). */
 export const OBJECT_POSITIONS = {
   monitor: { x: 0, y: 1, z: 0 },
-  car: { x: 25, y: 1.5, z: 0 },
-  dog: { x: 50, y: 1.5, z: 0 },
-  vr: { x: 75, y: 1.5, z: 0 },
-  satellite: { x: 100, y: 1.5, z: 0 },
-  tablet: { x: 125, y: 1.5, z: 0 },
+  'audio-tracking-car': { x: 25, y: 1.5, z: 0 },
+  animaldot: { x: 50, y: 1.5, z: 0 },
+  'kitchen-chaos-vr': { x: 75, y: 1.5, z: 0 },
+  memesat: { x: 100, y: 1.5, z: 0 },
+  'capital-one': { x: 125, y: 1.5, z: 0 },
 };
 
 /** Themed cylinder platform under each clickable object. */
@@ -227,10 +227,10 @@ function RobotCar() {
   const { scene } = useGLTF('/models/robot_car.glb');
   const { currentView } = useWorkstationStore();
   const clonedScene = scene.clone();
-  const pos = OBJECT_POSITIONS.car;
+  const pos = OBJECT_POSITIONS['audio-tracking-car'];
   
   return (
-    <ClickableObject viewId="car" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'car'}>
+    <ClickableObject viewId="audio-tracking-car" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'audio-tracking-car'}>
       <Center>
         <primitive object={clonedScene} scale={0.012} rotation={[Math.PI / 2, 0, 0]} />
       </Center>
@@ -242,10 +242,10 @@ function SleepingDog() {
   const { scene } = useGLTF('/models/sleeping_dog.glb');
   const { currentView } = useWorkstationStore();
   const clonedScene = scene.clone();
-  const pos = OBJECT_POSITIONS.dog;
+  const pos = OBJECT_POSITIONS.animaldot;
   
   return (
-    <ClickableObject viewId="dog" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'dog'}>
+    <ClickableObject viewId="animaldot" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'animaldot'}>
       <Center>
         <primitive object={clonedScene} scale={0.6} rotation={[0, 0, 0]} />
       </Center>
@@ -257,10 +257,10 @@ function VRHeadset() {
   const { scene } = useGLTF('/models/quest3.glb');
   const { currentView } = useWorkstationStore();
   const clonedScene = scene.clone();
-  const pos = OBJECT_POSITIONS.vr;
+  const pos = OBJECT_POSITIONS['kitchen-chaos-vr'];
   
   return (
-    <ClickableObject viewId="vr" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'vr'}>
+    <ClickableObject viewId="kitchen-chaos-vr" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'kitchen-chaos-vr'}>
       <Center>
         <primitive object={clonedScene} scale={6} rotation={[0, 0, 0]} />
       </Center>
@@ -272,10 +272,10 @@ function CubeSat() {
   const { scene } = useGLTF('/models/satellite.glb');
   const { currentView } = useWorkstationStore();
   const clonedScene = scene.clone();
-  const pos = OBJECT_POSITIONS.satellite;
+  const pos = OBJECT_POSITIONS.memesat;
   
   return (
-    <ClickableObject viewId="satellite" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'satellite'}>
+    <ClickableObject viewId="memesat" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'memesat'}>
       <Center>
         <primitive object={clonedScene} scale={0.5} rotation={[Math.PI / 2, 0, 0]} />
       </Center>
@@ -287,10 +287,10 @@ function CapitalOneLogo() {
   const { scene } = useGLTF('/models/capital_one.glb');
   const { currentView } = useWorkstationStore();
   const clonedScene = scene.clone();
-  const pos = OBJECT_POSITIONS.tablet;
+  const pos = OBJECT_POSITIONS['capital-one'];
   
   return (
-    <ClickableObject viewId="tablet" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'tablet'}>
+    <ClickableObject viewId="capital-one" position={[pos.x, pos.y, pos.z]} isActive={currentView === 'capital-one'}>
       <Center>
         <primitive object={clonedScene} scale={8.0} rotation={[0, 0, 0]} />
       </Center>
