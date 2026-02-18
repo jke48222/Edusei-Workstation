@@ -8,17 +8,18 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkstationStore } from '../store/store';
-import { useActiveTheme } from '../store/themeStore';
+import { useActiveTheme, useThemeStore, themePresets, SYSTEM_THEME_ID } from '../store/themeStore';
 import {
   projectsData,
   profileData,
   getSayHiMailto,
-  bootSequence,
+  getBootSequence,
   getProjectById,
   helpText,
   skillsData,
 } from '../data';
 import type { ViewState } from '../store/store';
+import { resumeAudioContext, playKeystroke, playBootComplete } from '../utils/terminalSound';
 
 /** Local responsive hook: true when viewport width < 768px. */
 function useIsMobile() {
@@ -48,26 +49,26 @@ function getFadeSlideUp(reducedMotion: boolean) {
 }
 
 /** Typewriter boot lines in terminal; calls onComplete when finished. */
-function BootSequence({ onComplete, reducedMotion }: { onComplete: () => void; reducedMotion?: boolean }) {
+function BootSequence({ lines, onComplete, reducedMotion }: { lines: string[]; onComplete: () => void; reducedMotion?: boolean }) {
   const theme = useActiveTheme();
   const [visibleLines, setVisibleLines] = useState(0);
   const lineDelay = reducedMotion ? 0 : 250;
   const doneDelay = reducedMotion ? 100 : 2000;
 
   useEffect(() => {
-    if (visibleLines < bootSequence.length) {
+    if (visibleLines < lines.length) {
       const timer = setTimeout(() => setVisibleLines((p) => p + 1), lineDelay);
       return () => clearTimeout(timer);
     } else {
       const done = setTimeout(onComplete, doneDelay);
       return () => clearTimeout(done);
     }
-  }, [visibleLines, onComplete, lineDelay, doneDelay]);
+  }, [visibleLines, lines.length, onComplete, lineDelay, doneDelay]);
 
   return (
     <div className="flex h-full flex-col items-center justify-center font-mono text-sm">
       <div className="w-full max-w-md space-y-1">
-        {bootSequence.slice(0, visibleLines).map((line, i) => (
+        {lines.slice(0, visibleLines).map((line, i) => (
           <motion.div
             key={i}
             initial={{ opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : -6 }}
@@ -78,7 +79,7 @@ function BootSequence({ onComplete, reducedMotion }: { onComplete: () => void; r
             {line || '\u00A0'}
           </motion.div>
         ))}
-        {visibleLines < bootSequence.length && (
+        {visibleLines < lines.length && (
           <span
             className="inline-block h-4 w-2 animate-pulse"
             style={{ backgroundColor: theme.accent, opacity: 0.6 }}
@@ -89,15 +90,17 @@ function BootSequence({ onComplete, reducedMotion }: { onComplete: () => void; r
   );
 }
 
-/** Sidebar block: clock and theme-driven styling. */
+/** Sidebar block: clock, date, and theme-driven styling. */
 function SystemStatus() {
   const theme = useActiveTheme();
   const [clock, setClock] = useState('');
+  const [date, setDate] = useState('');
 
   useEffect(() => {
     const tick = () => {
       const now = new Date();
       setClock(now.toLocaleTimeString('en-US', { hour12: false }));
+      setDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }));
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -112,6 +115,7 @@ function SystemStatus() {
     <div className="space-y-5 font-mono text-[11px]">
       <div>
         <p className="mb-1 uppercase tracking-widest text-[9px]" style={labelStyle}>System</p>
+        <p className="tabular-nums" style={textStyle}>{date}</p>
         <p className="tabular-nums" style={textStyle}>{clock}</p>
       </div>
 
@@ -259,8 +263,44 @@ function ProjectCard({
 
 // ─── Main Terminal View ──────────────────────────────────────────
 
+/** Map theme name (user input) to theme id. */
+const THEME_NAME_TO_ID: Record<string, string> = {
+  light: 'clean',
+  modern: 'clean',
+  dark: 'dark',
+  crt: 'classic',
+  classic: 'classic',
+  sky: 'blue',
+  blue: 'blue',
+  cherry: 'pink',
+  'cherry blossom': 'pink',
+  pink: 'pink',
+  nova: 'purple',
+  purple: 'purple',
+  bulldog: 'uga',
+  'bulldog red': 'uga',
+  uga: 'uga',
+  red: 'uga',
+  apollo: 'grayBlue',
+  grayblue: 'grayBlue',
+  greyblue: 'grayBlue',
+  system: SYSTEM_THEME_ID,
+  secret: 'gold',
+  golden: 'gold',
+};
+
+/** Gag commands that print a fun response instead of running. */
+const GAG_COMMANDS: Record<string, string[]> = {
+  'rm -rf /': ['Nice try.'],
+  'rm -rf *': ['Nice try.'],
+  'format c:': ['Access denied.'],
+  'del system32': ['Nice try.'],
+  'sudo rm -rf /': ['Nice try.'],
+};
+
 function TerminalView() {
-  const { setView, isAnimating, terminalBooted, setTerminalBooted, prefersReducedMotion } = useWorkstationStore();
+  const { setView, isAnimating, terminalBooted, setTerminalBooted, prefersReducedMotion, soundMuted, setSoundMuted } = useWorkstationStore();
+  const setTheme = useThemeStore((s) => s.setTheme);
   const theme = useActiveTheme();
   const staggerList = useMemo(() => getStaggerList(prefersReducedMotion), [prefersReducedMotion]);
   const fadeSlideUp = useMemo(() => getFadeSlideUp(prefersReducedMotion), [prefersReducedMotion]);
@@ -276,6 +316,14 @@ function TerminalView() {
 
     if (trimmedCmd === 'help') {
       response = helpText;
+    } else if (trimmedCmd === 'go dawgs' || trimmedCmd === 'uga') {
+      setTheme('uga');
+      response = ['Go Dawgs! 🐾 Theme set to Bulldog Red.'];
+    } else if (trimmedCmd === 'golden' || trimmedCmd === 'secret') {
+      setTheme('gold');
+      response = ['Theme set to Gold.'];
+    } else if (GAG_COMMANDS[trimmedCmd]) {
+      response = GAG_COMMANDS[trimmedCmd];
     } else if (trimmedCmd === 'clear') {
       setCommandOutput([]);
       setInputValue('');
@@ -307,12 +355,35 @@ function TerminalView() {
     } else if (trimmedCmd === 'resume') {
       response = ['Opening resume...'];
       window.open('/resume.pdf', '_blank');
+    } else if (trimmedCmd === 'cv') {
+      response = ['Opening CV...'];
+      window.open('/cv.pdf', '_blank');
+    } else if (trimmedCmd === 'theme' || trimmedCmd.startsWith('theme ')) {
+      const name = trimmedCmd === 'theme' ? '' : trimmedCmd.replace('theme ', '').trim();
+      const themeList = [
+        '  → theme system',
+        ...(['clean', 'dark', 'classic', 'blue', 'pink', 'purple', 'uga', 'grayBlue'] as const).map(
+          (id) => `  → theme ${themePresets[id].name.toLowerCase()}`,
+        ),
+      ];
+      if (!name) {
+        response = ['Available themes:', ...themeList];
+      } else {
+        const themeId = THEME_NAME_TO_ID[name] ?? Object.keys(themePresets).find((id) => themePresets[id].name.toLowerCase() === name);
+        if (themeId && (themeId === SYSTEM_THEME_ID || themePresets[themeId])) {
+          setTheme(themeId);
+          response = [`Theme set to ${themePresets[themeId]?.name ?? 'System'}.`];
+        } else {
+          response = [`Theme '${name}' not found.`, 'Available themes:', ...themeList];
+        }
+      }
+    } else if (trimmedCmd === 'run') {
+      response = ['Available projects:', ...projectsData.map((p) => `  → run ${p.executable}`)];
     } else if (trimmedCmd.startsWith('run ')) {
-      const executable = trimmedCmd.replace('run ', '');
+      const raw = trimmedCmd.replace('run ', '').trim();
+      const normalized = raw.toLowerCase().replace(/\.exe$/i, '').trim();
       const project = projectsData.find(
-        (p) =>
-          p.executable.toLowerCase() === executable ||
-          p.executable.toLowerCase().replace('.exe', '') === executable,
+        (p) => p.executable.toLowerCase() === normalized,
       );
       if (project) {
         setCommandOutput((prev) => [...prev, `> ${cmd}`, `Loading ${project.title}...`]);
@@ -320,7 +391,11 @@ function TerminalView() {
         setTimeout(() => setView(project.id), 300);
         return;
       } else {
-        response = [`Error: '${executable}' not found. Type 'list' for available projects.`];
+        response = [
+          `Error: '${raw}' not found.`,
+          'Available projects:',
+          ...projectsData.map((p) => `  → run ${p.executable}`),
+        ];
       }
     } else if (trimmedCmd) {
       response = [`Command not recognized: '${trimmedCmd}'. Type 'help' for commands.`];
@@ -331,7 +406,14 @@ function TerminalView() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleCommand(inputValue);
+    if (e.key === 'Enter') {
+      handleCommand(inputValue);
+      return;
+    }
+    if (!soundMuted && !prefersReducedMotion && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      resumeAudioContext();
+      playKeystroke();
+    }
   };
 
   const handleProjectClick = (id: ViewState) => {
@@ -394,7 +476,17 @@ function TerminalView() {
         {/* ── Body ──────────────────────────────────────────── */}
         {!terminalBooted ? (
           <div className="flex-1 p-4">
-            <BootSequence onComplete={() => setTerminalBooted(true)} reducedMotion={prefersReducedMotion} />
+            <BootSequence
+              lines={getBootSequence()}
+              onComplete={() => {
+                setTerminalBooted(true);
+                if (!soundMuted && !prefersReducedMotion) {
+                  resumeAudioContext();
+                  playBootComplete();
+                }
+              }}
+              reducedMotion={prefersReducedMotion}
+            />
           </div>
         ) : (
           <div className="flex flex-1 min-h-0">
@@ -560,6 +652,7 @@ function TerminalView() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    onFocus={resumeAudioContext}
                     className="terminal-input flex-1 min-w-0 bg-transparent outline-none"
                     style={{
                       color: theme.text,
@@ -568,6 +661,27 @@ function TerminalView() {
                     placeholder="type 'help' for commands"
                     autoFocus
                   />
+                  <button
+                    type="button"
+                    onClick={() => setSoundMuted(!soundMuted)}
+                    className="shrink-0 rounded p-1.5 transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-transparent"
+                    style={{ color: theme.textDim }}
+                    aria-label={soundMuted ? 'Unmute terminal sound' : 'Mute terminal sound'}
+                    title={soundMuted ? 'Unmute terminal sound' : 'Mute terminal sound'}
+                  >
+                    {soundMuted ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                        <line x1="23" y1="9" x2="17" y2="15" />
+                        <line x1="17" y1="9" x2="23" y2="15" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

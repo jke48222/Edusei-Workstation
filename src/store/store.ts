@@ -132,6 +132,9 @@ interface WorkstationState {
 
   /** User prefers reduced motion (from prefers-reduced-motion media query). */
   prefersReducedMotion: boolean;
+
+  /** Terminal sound muted (persisted to localStorage). */
+  soundMuted: boolean;
 }
 
 interface WorkstationActions {
@@ -142,6 +145,7 @@ interface WorkstationActions {
   canNavigate: () => boolean;
   setTerminalBooted: (booted: boolean) => void;
   setPrefersReducedMotion: (value: boolean) => void;
+  setSoundMuted: (muted: boolean) => void;
 }
 
 // ============================================================================
@@ -156,6 +160,7 @@ type StoreActions = WorkstationActions & GalleryActions;
 // ============================================================================
 
 const VIEW_MODE_STORAGE_KEY = 'edusei-workstation-viewMode';
+const SOUND_MUTED_STORAGE_KEY = 'edusei-workstation-soundMuted';
 
 function getStoredViewMode(): ViewMode {
   if (typeof window === 'undefined') return 'professional';
@@ -166,6 +171,15 @@ function getStoredViewMode(): ViewMode {
   return 'professional';
 }
 
+function getStoredSoundMuted(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const stored = localStorage.getItem(SOUND_MUTED_STORAGE_KEY);
+    if (stored === 'true' || stored === 'false') return stored === 'true';
+  } catch (_) {}
+  return false;
+}
+
 const initialWorkstationState: WorkstationState = {
   viewMode: getStoredViewMode(),
   currentView: 'monitor',
@@ -174,6 +188,7 @@ const initialWorkstationState: WorkstationState = {
   transitionDuration: 1500,
   terminalBooted: false,
   prefersReducedMotion: false,
+  soundMuted: getStoredSoundMuted(),
 };
 
 const initialGalleryState: GalleryState = {
@@ -286,6 +301,13 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
     setTerminalBooted: (booted: boolean) => set({ terminalBooted: booted }),
 
     setPrefersReducedMotion: (value: boolean) => set({ prefersReducedMotion: value }),
+
+    setSoundMuted: (muted: boolean) => {
+      set({ soundMuted: muted });
+      try {
+        localStorage.setItem(SOUND_MUTED_STORAGE_KEY, String(muted));
+      } catch (_) {}
+    },
 
     // ========================================================================
     // Gallery Scene Transitions

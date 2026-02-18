@@ -68,9 +68,15 @@ function Hero() {
           <div className="mb-5 flex flex-wrap items-center gap-3">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#0a0a0a]/50">Computer Systems Engineering · University of Georgia</p>
             {profileData.openForWork && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+              <a
+                href={`https://${profileData.linkedin}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-200"
+                aria-label="Open for work – view my LinkedIn"
+              >
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Open for Work
-              </span>
+              </a>
             )}
           </div>
           <h1 className="font-display text-[clamp(3.5rem,14vw,12rem)] font-extrabold leading-[0.85] tracking-tighter text-[#0a0a0a]">JALEN<br />EDUSEI</h1>

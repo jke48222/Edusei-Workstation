@@ -5,6 +5,7 @@
  * the current preset object for consumers.
  */
 
+import { useState, useEffect } from 'react';
 import { create } from 'zustand';
 
 /**
@@ -37,7 +38,7 @@ export interface ThemePreset {
 
 export const themePresets: Record<string, ThemePreset> = {
   clean: {
-    name: 'Modern',
+    name: 'Light',
     bg: '#ffffff',
     terminalBg: '#ffffff',
     terminalBorder: '#0a0a0a',
@@ -59,6 +60,30 @@ export const themePresets: Record<string, ThemePreset> = {
     spotlightColor: '#ffffff',
     spotlightIntensity: 1,
     glowColor: '#666666',
+  },
+  dark: {
+    name: 'Dark',
+    bg: '#0a0a0a',
+    terminalBg: '#141414',
+    terminalBorder: '#333333',
+    text: '#fafafa',
+    textDim: 'rgba(250,250,250,0.6)',
+    accent: '#a3a3a3',
+    particles: '#525252',
+    podiumColor: '#262626',
+    podiumMetalness: 0.9,
+    podiumRoughness: 0.15,
+    podiumEmissive: '#171717',
+    podiumEmissiveIntensity: 0.05,
+    ringColor: '#404040',
+    scrollbar: '#525252',
+    projectBorder: 'rgba(255,255,255,0.1)',
+    projectBg: '#1a1a1a',
+    fogColor: '#0a0a0a',
+    floorColor: '#171717',
+    spotlightColor: '#e5e5e5',
+    spotlightIntensity: 1,
+    glowColor: '#737373',
   },
   classic: {
     name: 'CRT',
@@ -204,17 +229,50 @@ export const themePresets: Record<string, ThemePreset> = {
     spotlightIntensity: 1,
     glowColor: '#8a9bb5',
   },
+  gold: {
+    name: 'Gold',
+    bg: '#1a1510',
+    terminalBg: '#2a2218',
+    terminalBorder: '#b8860b',
+    text: '#f4e4bc',
+    textDim: 'rgba(244,228,188,0.65)',
+    accent: '#daa520',
+    particles: '#b8860b',
+    podiumColor: '#8b6914',
+    podiumMetalness: 0.95,
+    podiumRoughness: 0.15,
+    podiumEmissive: '#5c4a0a',
+    podiumEmissiveIntensity: 0.12,
+    ringColor: '#daa520',
+    scrollbar: '#b8860b',
+    projectBorder: 'rgba(218,165,32,0.25)',
+    projectBg: '#352a1a',
+    fogColor: '#1a1510',
+    floorColor: '#252018',
+    spotlightColor: '#f4e4bc',
+    spotlightIntensity: 1.8,
+    glowColor: '#daa520',
+  },
 };
 
 const THEME_STORAGE_KEY = 'edusei-workstation-theme';
 
+export const SYSTEM_THEME_ID = 'system';
+
 function getStoredTheme(): string {
-  if (typeof window === 'undefined') return 'clean';
+  if (typeof window === 'undefined') return SYSTEM_THEME_ID;
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === SYSTEM_THEME_ID) return stored;
     if (stored && stored in themePresets) return stored;
   } catch (_) {}
-  return 'clean';
+  return SYSTEM_THEME_ID;
+}
+
+/** Resolve system preference: dark -> dark theme, light -> clean (Modern). */
+function resolveSystemThemeId(): 'clean' | 'dark' {
+  if (typeof window === 'undefined') return 'clean';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'clean';
 }
 
 interface ThemeState {
@@ -225,7 +283,7 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>((set) => ({
   activeTheme: getStoredTheme(),
   setTheme: (themeId: string) => {
-    if (themePresets[themeId]) {
+    if (themeId === SYSTEM_THEME_ID || themePresets[themeId]) {
       set({ activeTheme: themeId });
       try {
         localStorage.setItem(THEME_STORAGE_KEY, themeId);
@@ -234,10 +292,33 @@ export const useThemeStore = create<ThemeState>((set) => ({
   },
 }));
 
+/** Resolved theme id (system -> clean or dark by prefers-color-scheme). Re-renders when OS theme changes. */
+export function useResolvedThemeId(): string {
+  const activeTheme = useThemeStore((s) => s.activeTheme);
+  const [resolved, setResolved] = useState(() =>
+    activeTheme === SYSTEM_THEME_ID ? resolveSystemThemeId() : activeTheme
+  );
+
+  useEffect(() => {
+    if (activeTheme !== SYSTEM_THEME_ID) {
+      setResolved(activeTheme);
+      return;
+    }
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const update = () => setResolved(resolveSystemThemeId());
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, [activeTheme]);
+
+  return activeTheme === SYSTEM_THEME_ID ? resolved : activeTheme;
+}
+
 /**
- * Convenience selector — returns the full theme preset object
+ * Convenience selector — returns the full theme preset object.
+ * When activeTheme is 'system', returns clean (Modern) or dark based on prefers-color-scheme.
  */
 export const useActiveTheme = (): ThemePreset => {
-  const activeTheme = useThemeStore((s) => s.activeTheme);
-  return themePresets[activeTheme] ?? themePresets.clean;
+  const resolvedId = useResolvedThemeId();
+  return themePresets[resolvedId] ?? themePresets.clean;
 };
