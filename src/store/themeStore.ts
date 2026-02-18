@@ -31,6 +31,7 @@ export interface ThemePreset {
   fogColor: string;
   floorColor: string;
   spotlightColor: string;
+  spotlightIntensity: number;  // multiplier for pedestal spotlight (1 = default)
   glowColor: string;    // point light glow on objects
 }
 
@@ -56,6 +57,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#ffffff',
     floorColor: '#e8e8e8',
     spotlightColor: '#ffffff',
+    spotlightIntensity: 1,
     glowColor: '#666666',
   },
   classic: {
@@ -79,6 +81,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#000000',
     floorColor: '#050505',
     spotlightColor: '#224422',
+    spotlightIntensity: 1,
     glowColor: '#33FF00',
   },
   blue: {
@@ -102,6 +105,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#5E9BCF',
     floorColor: '#90C9F5',
     spotlightColor: '#B8DFFF',
+    spotlightIntensity: 1,
     glowColor: '#73AEDE',
   },
   pink: {
@@ -125,6 +129,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#CF7896',
     floorColor: '#F5A3C1',
     spotlightColor: '#FFC2D9',
+    spotlightIntensity: 1,
     glowColor: '#E38AAA',
   },
   purple: {
@@ -148,6 +153,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#9B8CC4',
     floorColor: '#D1C4E9',
     spotlightColor: '#E5DFF5',
+    spotlightIntensity: 1,
     glowColor: '#8676B0',
   },
   uga: {
@@ -171,6 +177,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#000000',
     floorColor: '#050505',
     spotlightColor: '#FFFFFF',
+    spotlightIntensity: 10,
     glowColor: '#BA0C2F',
   },
   grayBlue: {
@@ -194,6 +201,7 @@ export const themePresets: Record<string, ThemePreset> = {
     fogColor: '#3d4f66',
     floorColor: '#4a5d75',
     spotlightColor: '#6b7c94',
+    spotlightIntensity: 1,
     glowColor: '#8a9bb5',
   },
 };
