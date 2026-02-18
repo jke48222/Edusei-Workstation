@@ -239,6 +239,15 @@ html, body, #root {
   opacity: var(--placeholder-opacity, 0.6);
 }
 
+/* Transition indicator spinner — CSS-only to avoid framer-motion per-frame cost */
+@keyframes overlay-spin {
+  to { transform: rotate(360deg); }
+}
+.overlay-spinner {
+  display: inline-block;
+  animation: overlay-spin 1s linear infinite;
+}
+
 /* Fixed full-viewport containers for canvas and overlay (z-index layering). */
 .canvas-container {
   position: fixed;
