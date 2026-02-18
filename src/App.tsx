@@ -9,6 +9,7 @@ import { Suspense, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
+import { usePrefersReducedMotion } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
 import { useActiveTheme, useThemeStore } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
@@ -73,7 +74,13 @@ function ImmersiveExperience() {
  */
 function App() {
   const viewMode = useViewMode();
-  
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const setPrefersReducedMotion = useWorkstationStore((s) => s.setPrefersReducedMotion);
+
+  useEffect(() => {
+    setPrefersReducedMotion(prefersReducedMotion);
+  }, [prefersReducedMotion, setPrefersReducedMotion]);
+
   return (
     <>
       <ModeToggle />

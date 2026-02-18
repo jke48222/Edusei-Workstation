@@ -49,6 +49,18 @@ export const profileData = {
 };
 
 /**
+ * Pre-filled "Say hi" mailto URL (subject + body) for portfolio contact.
+ * Use for Get in touch, Contact section, and overlay Email link.
+ */
+export function getSayHiMailto(): string {
+  const subject = encodeURIComponent(`Portfolio – Say hi from ${profileData.name}`);
+  const body = encodeURIComponent(
+    `Hi ${profileData.name},\n\nI came across your portfolio and wanted to reach out.\n\n`
+  );
+  return `mailto:${profileData.email}?subject=${subject}&body=${body}`;
+}
+
+/**
  * Skills organized by category
  */
 export const skillsData = {

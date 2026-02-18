@@ -2,7 +2,7 @@
 
 An immersive 3D portfolio website built with React Three Fiber, featuring a retro CRT terminal interface and cinematic camera transitions.
 
-🌐 **Live Portfolio**: https://jalenedusei.com
+🌐 **Live Portfolio**: https://www.jalenedusei.com
 
 ## 🚀 Quick Start
 
@@ -107,5 +107,5 @@ Place your resume PDF in the `public/` folder as `resume.pdf`. Users can then ty
 ---
 
 **Jalen Edusei**  
-🌐 https://jalenedusei.com  
+🌐 https://www.jalenedusei.com  
 Engineering Portfolio and Interactive Workstation
