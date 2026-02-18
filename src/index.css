@@ -232,6 +232,23 @@ html, body, #root {
   scrollbar-width: thin;
   scrollbar-color: rgba(10, 10, 10, 0.25) transparent;
 }
+/* Timeline scrollbar in dark mode (portfolio) — white. */
+.dark .timeline-scroll::-webkit-scrollbar-track,
+.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark .timeline-scroll::-webkit-scrollbar-thumb,
+.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+.dark .timeline-scroll::-webkit-scrollbar-thumb:hover,
+.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+.dark .timeline-scroll,
+.pro-scroll.dark .timeline-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
 
 /* Terminal scrollbar — themed via CSS custom properties */
 .terminal-scroll::-webkit-scrollbar {
@@ -310,6 +327,49 @@ html, body, #root {
   pointer-events: auto;
   touch-action: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* /work and /work/:id scrollbar — neutral gray (overrides global green). */
+.work-page-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.work-page-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+.work-page-scroll::-webkit-scrollbar-thumb {
+  background: #a3a3a3;
+  border-radius: 4px;
+}
+.work-page-scroll::-webkit-scrollbar-thumb:hover {
+  background: #737373;
+}
+
+/* Portfolio scrollbar — light: neutral gray; dark: white. */
+.pro-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.pro-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+.pro-scroll::-webkit-scrollbar-thumb {
+  background: #a3a3a3;
+  border-radius: 4px;
+}
+.pro-scroll::-webkit-scrollbar-thumb:hover {
+  background: #737373;
+}
+/* When portfolio root has .dark (toggle), or when .dark is an ancestor (e.g. html) */
+.dark .pro-scroll::-webkit-scrollbar-track,
+.pro-scroll.dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark .pro-scroll::-webkit-scrollbar-thumb,
+.pro-scroll.dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+.dark .pro-scroll::-webkit-scrollbar-thumb:hover,
+.pro-scroll.dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
 }
 
 /* -----------------------------------------------------------------------------

@@ -16,7 +16,7 @@ import * as THREE from 'three';
 /**
  * ViewState enum representing all possible camera positions in the workstation
  */
-export type ViewState = 'monitor' | 'car' | 'dog' | 'vr' | 'satellite' | 'tablet';
+export type ViewState = 'monitor' | 'audio-tracking-car' | 'animaldot' | 'kitchen-chaos-vr' | 'memesat' | 'capital-one';
 
 /**
  * High-level view mode for the site

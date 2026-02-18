@@ -67,6 +67,7 @@ export function FloatingDock() {
           rounded-full border border-[#0a0a0a]/10 bg-white/80
           px-1 sm:px-1.5 py-1 sm:py-1.5 font-mono text-[10px] sm:text-xs
           shadow-xl shadow-black/5 backdrop-blur-xl
+          dark:border-[#333333] dark:bg-[#141414]/90
           overflow-x-auto no-scrollbar w-fit max-w-[calc(100vw-2rem)]
         "
       >
@@ -78,8 +79,8 @@ export function FloatingDock() {
               relative shrink-0 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 transition-colors duration-200
               ${
                 active === s.id
-                  ? 'text-white'
-                  : 'text-[#0a0a0a]/60 hover:text-[#0a0a0a]'
+                  ? 'text-white dark:text-[#0a0a0a]'
+                  : 'text-[#0a0a0a]/60 hover:text-[#0a0a0a] dark:text-[#fafafa]/60 dark:hover:text-[#fafafa]'
               }
             `}
             onClick={(e) => {
@@ -90,7 +91,7 @@ export function FloatingDock() {
             {active === s.id && (
               <motion.span
                 layoutId="dock-pill"
-                className="absolute inset-0 rounded-full bg-[#0a0a0a]"
+                className="absolute inset-0 rounded-full bg-[#0a0a0a] dark:bg-white"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

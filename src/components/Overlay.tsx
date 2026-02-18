@@ -310,11 +310,11 @@ const MAX_HISTORY = 50;
 
 /** One-line (or multi-line) teaser shown before "Loading [title]..." when running a project (terminal or click). */
 const PROJECT_TEASERS: Partial<Record<ViewState, string | string[]>> = {
-  car: 'Vroom vroom 🏎️',
-  dog: 'Go Dawgs! 🐾',
-  vr: 'Entering virtual reality...',
-  satellite: 'lol',
-  tablet: ['Still open for work...', `https://${profileData.linkedin}`],
+  'audio-tracking-car': 'Vroom vroom 🏎️',
+  animaldot: 'Go Dawgs! 🐾',
+  'kitchen-chaos-vr': 'Entering virtual reality...',
+  memesat: 'lol',
+  'capital-one': ['Still open for work...', `https://${profileData.linkedin}`],
 };
 
 /** Theme command names for "theme " completion (no spaces; same order as theme list). */

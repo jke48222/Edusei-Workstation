@@ -45,6 +45,7 @@ export const profileData = {
   linkedin: 'linkedin.com/in/jalenedusei',
   github: 'github.com/jke48222',
   resumeUrl: '/resume.pdf',
+  cvUrl: '/cv.pdf',
   openForWork: true,
   /** MM-DD for time-based boot message (e.g. '09-28' for September 28). */
   birthday: '09-28',
@@ -229,7 +230,7 @@ export const honors = [
  */
 export const projectsData: ProjectData[] = [
   {
-    id: 'car',
+    id: 'audio-tracking-car',
     executable: 'audiocar',
     title: 'Audio Tracking Car',
     tagline: 'Autonomous audio-frequency navigation system',
@@ -264,7 +265,7 @@ export const projectsData: ProjectData[] = [
     ],
   },
   {
-    id: 'dog',
+    id: 'animaldot',
     executable: 'animaldot',
     title: 'AnimalDot',
     tagline: 'Contactless smart sensing bed for animal vitals',
@@ -291,7 +292,7 @@ export const projectsData: ProjectData[] = [
     ],
   },
   {
-    id: 'vr',
+    id: 'kitchen-chaos-vr',
     executable: 'kitchenchaos',
     title: 'Kitchen Chaos VR',
     tagline: 'Immersive multiplayer VR experiences on Quest 3',
@@ -330,7 +331,7 @@ export const projectsData: ProjectData[] = [
     ],
   },
   {
-    id: 'satellite',
+    id: 'memesat',
     executable: 'memesat',
     title: 'MEMESat-1 Flight Software',
     tagline: 'CubeSat software for NASA space mission',
@@ -365,7 +366,7 @@ export const projectsData: ProjectData[] = [
     ],
   },
   {
-    id: 'tablet',
+    id: 'capital-one',
     executable: 'capitalone',
     title: 'Capital One Internship',
     tagline: 'Business Analyst - CreditWise 60M+ users',
@@ -423,11 +424,249 @@ export const asciiArt = `
 `;
 
 /**
- * Get project by ID
+ * Get project by ID (for 3D workstation / ViewState only).
  */
 export const getProjectById = (id: ViewState): ProjectData | undefined => {
   return projectsData.find(project => project.id === id);
 };
+
+/**
+ * Work project for /work page: main projects plus flattened additional projects.
+ * Used for full resume-style project list and detail pages by slug.
+ */
+/** Map related project title (from additionalProjects or display name) to /work slug. */
+export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
+  'AnimalDot': 'animaldot',
+  'Kitchen Chaos VR': 'kitchen-chaos-vr',
+  'BreakBuddy': 'break-buddy',
+  'VR Portfolio 2': 'vr-portfolio-2',
+  'Virtual Reality Portfolio 2': 'vr-portfolio-2',
+  'Smart Plant Watering Assistant': 'smart-plant-watering-assistant',
+  'VR Portfolio 1': 'vr-portfolio-1',
+  'Virtual Reality Portfolio 1': 'vr-portfolio-1',
+  'Audio Tracking Car': 'audio-tracking-car',
+  'LED Frequency Filter': 'led-frequency-filter',
+  'MEMESat-1 Flight Software': 'memesat',
+  'Website Development': 'website-development',
+  'Creation and Development of Websites': 'website-development',
+  'Travel Itinerary Application': 'travel-itinerary-application',
+  'Capital One Internship': 'capital-one',
+};
+
+export interface WorkProject {
+  id: string;
+  title: string;
+  tagline: string;
+  description: string[];
+  techStack: string[];
+  period: string;
+  location: string;
+  github?: string;
+  additionalProjects?: { title: string; period: string; github?: string; description: string[] }[];
+  /** For standalone projects: links to related /work pages. */
+  relatedProjects?: { title: string; slug: string; period: string }[];
+}
+
+/** All projects for /work in resume order: main entries plus each additional as standalone. */
+export function getAllProjectsForWork(): WorkProject[] {
+  const list: WorkProject[] = [];
+
+  const main = projectsData;
+  const defaultLocation = 'Athens, GA';
+
+  const animaldot = main.find(p => p.id === 'animaldot')!;
+  const kitchen = main.find(p => p.id === 'kitchen-chaos-vr')!;
+  const audioCar = main.find(p => p.id === 'audio-tracking-car')!;
+  const memesat = main.find(p => p.id === 'memesat')!;
+  const capital = main.find(p => p.id === 'capital-one')!;
+
+  // 1. AnimalDot (main)
+  list.push({
+    id: animaldot.id,
+    title: animaldot.title,
+    tagline: animaldot.tagline,
+    description: animaldot.description,
+    techStack: animaldot.techStack,
+    period: animaldot.period,
+    location: animaldot.location,
+    github: animaldot.github,
+    additionalProjects: animaldot.additionalProjects,
+  });
+  // 2. Kitchen Chaos VR (main)
+  list.push({
+    id: kitchen.id,
+    title: kitchen.title,
+    tagline: kitchen.tagline,
+    description: kitchen.description,
+    techStack: kitchen.techStack,
+    period: kitchen.period,
+    location: kitchen.location,
+    github: kitchen.github,
+    additionalProjects: kitchen.additionalProjects,
+  });
+  // 3. BreakBuddy (additional under AnimalDot)
+  const breakBuddy = animaldot.additionalProjects?.find(a => a.title === 'BreakBuddy');
+  if (breakBuddy) {
+    list.push({
+      id: 'break-buddy',
+      title: breakBuddy.title,
+      tagline: breakBuddy.description[0] ?? breakBuddy.title,
+      description: breakBuddy.description,
+      techStack: ['User Research', 'Figma', 'HCI', 'Prototyping'],
+      period: breakBuddy.period,
+      location: defaultLocation,
+      github: breakBuddy.github,
+      relatedProjects: [{ title: 'AnimalDot', slug: 'animaldot', period: animaldot.period }],
+    });
+  }
+  // 4. Virtual Reality Portfolio 2
+  const vr2 = kitchen.additionalProjects?.find(a => a.title === 'VR Portfolio 2');
+  if (vr2) {
+    list.push({
+      id: 'vr-portfolio-2',
+      title: 'Virtual Reality Portfolio 2',
+      tagline: vr2.description[0] ?? vr2.title,
+      description: vr2.description,
+      techStack: ['Unity', 'C#', 'Meta Quest 3', 'OpenXR', 'Wit.ai'],
+      period: vr2.period,
+      location: defaultLocation,
+      github: vr2.github,
+      relatedProjects: [
+        { title: 'Kitchen Chaos VR', slug: 'kitchen-chaos-vr', period: kitchen.period },
+        { title: 'Virtual Reality Portfolio 1', slug: 'vr-portfolio-1', period: (kitchen.additionalProjects?.find(a => a.title === 'VR Portfolio 1'))?.period ?? '' },
+      ],
+    });
+  }
+  // 5. Smart Plant Watering Assistant
+  const smartPlant = audioCar.additionalProjects?.find(a => a.title === 'Smart Plant Watering Assistant');
+  if (smartPlant) {
+    list.push({
+      id: 'smart-plant-watering-assistant',
+      title: smartPlant.title,
+      tagline: smartPlant.description[0] ?? smartPlant.title,
+      description: smartPlant.description,
+      techStack: ['Raspberry Pi Pico 2W', 'Sensors', 'Kalman Filtering', 'Signal Conditioning'],
+      period: smartPlant.period,
+      location: defaultLocation,
+      github: smartPlant.github,
+      relatedProjects: [{ title: 'Audio Tracking Car', slug: 'audio-tracking-car', period: audioCar.period }],
+    });
+  }
+  // 6. Virtual Reality Portfolio 1
+  const vr1 = kitchen.additionalProjects?.find(a => a.title === 'VR Portfolio 1');
+  if (vr1) {
+    list.push({
+      id: 'vr-portfolio-1',
+      title: 'Virtual Reality Portfolio 1',
+      tagline: vr1.description[0] ?? vr1.title,
+      description: vr1.description,
+      techStack: ['Unity', 'C#', 'VR', 'Spatial Audio'],
+      period: vr1.period,
+      location: defaultLocation,
+      github: vr1.github,
+      relatedProjects: [
+        { title: 'Kitchen Chaos VR', slug: 'kitchen-chaos-vr', period: kitchen.period },
+        { title: 'Virtual Reality Portfolio 2', slug: 'vr-portfolio-2', period: (kitchen.additionalProjects?.find(a => a.title === 'VR Portfolio 2'))?.period ?? '' },
+      ],
+    });
+  }
+  // 7. Audio Tracking Car (main)
+  list.push({
+    id: audioCar.id,
+    title: audioCar.title,
+    tagline: audioCar.tagline,
+    description: audioCar.description,
+    techStack: audioCar.techStack,
+    period: audioCar.period,
+    location: audioCar.location,
+    github: audioCar.github,
+    additionalProjects: audioCar.additionalProjects,
+  });
+  // 8. LED Frequency Filter
+  const ledFilter = audioCar.additionalProjects?.find(a => a.title === 'LED Frequency Filter');
+  if (ledFilter) {
+    list.push({
+      id: 'led-frequency-filter',
+      title: ledFilter.title,
+      tagline: ledFilter.description[0] ?? ledFilter.title,
+      description: ledFilter.description,
+      techStack: ['Circuit Design', 'Signal Processing', 'Oscilloscope'],
+      period: ledFilter.period,
+      location: defaultLocation,
+      github: ledFilter.github,
+      relatedProjects: [
+        { title: 'Audio Tracking Car', slug: 'audio-tracking-car', period: audioCar.period },
+        { title: 'Smart Plant Watering Assistant', slug: 'smart-plant-watering-assistant', period: smartPlant?.period ?? '' },
+      ],
+    });
+  }
+  // 9. MEMESat-1 Flight Software (main)
+  list.push({
+    id: memesat.id,
+    title: 'MEMESat-1 Flight Software',
+    tagline: memesat.tagline,
+    description: memesat.description,
+    techStack: memesat.techStack,
+    period: memesat.period,
+    location: memesat.location,
+    github: memesat.github,
+    additionalProjects: memesat.additionalProjects,
+  });
+  // 10. Creation and Development of Websites
+  const websites = memesat.additionalProjects?.find(a => a.title === 'Website Development');
+  if (websites) {
+    list.push({
+      id: 'website-development',
+      title: 'Creation and Development of Websites',
+      tagline: websites.description[0] ?? websites.title,
+      description: websites.description,
+      techStack: ['WordPress', 'JavaScript', 'UX'],
+      period: websites.period,
+      location: defaultLocation,
+      github: websites.github,
+      relatedProjects: [
+        { title: 'MEMESat-1 Flight Software', slug: 'memesat', period: memesat.period },
+        { title: 'Travel Itinerary Application', slug: 'travel-itinerary-application', period: (memesat.additionalProjects?.find(a => a.title === 'Travel Itinerary Application'))?.period ?? '' },
+      ],
+    });
+  }
+  // 11. Travel Itinerary Application
+  const travelApp = memesat.additionalProjects?.find(a => a.title === 'Travel Itinerary Application');
+  if (travelApp) {
+    list.push({
+      id: 'travel-itinerary-application',
+      title: travelApp.title,
+      tagline: travelApp.description[0] ?? travelApp.title,
+      description: travelApp.description,
+      techStack: ['JavaFX', 'REST APIs', 'Google Places'],
+      period: travelApp.period,
+      location: defaultLocation,
+      github: travelApp.github,
+      relatedProjects: [
+        { title: 'MEMESat-1 Flight Software', slug: 'memesat', period: memesat.period },
+        { title: 'Creation and Development of Websites', slug: 'website-development', period: websites?.period ?? '' },
+      ],
+    });
+  }
+  // 12. Capital One (main)
+  list.push({
+    id: capital.id,
+    title: capital.title,
+    tagline: capital.tagline,
+    description: capital.description,
+    techStack: capital.techStack,
+    period: capital.period,
+    location: capital.location,
+    github: capital.github,
+  });
+
+  return list;
+}
+
+/** Get a single work project by slug (main or additional). */
+export function getProjectBySlug(slug: string): WorkProject | undefined {
+  return getAllProjectsForWork().find(p => p.id === slug);
+}
 
 /**
  * Help text for terminal

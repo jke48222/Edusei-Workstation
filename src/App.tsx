@@ -5,15 +5,16 @@
  * screen, theme-aware layout, and top-level headshot in professional mode.
  */
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
 import { useKonamiCode } from './hooks/useKonamiCode';
 import { usePrefersReducedMotion } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
-import { useActiveTheme, useThemeStore } from './store/themeStore';
+import { useActiveTheme, useThemeStore, useResolvedThemeId, SYSTEM_THEME_ID } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
+import { PortfolioDarkToggle } from './components/PortfolioDarkToggle';
 import { ProfessionalView } from './components/professional/ProfessionalView';
 import { ThemeSelector } from './components/ThemeSelector';
 import { profileData } from './data';
@@ -73,11 +74,27 @@ function LoadingFallback() {
  * Immersive 3D workstation view: scene, overlay, theme selector, and analytics.
  * Listens for Escape to return to monitor from any focused object. Works on all screen sizes.
  */
+/** Same circle color as ThemeSelector so ESC hint matches the theme dot. */
+const previewColors: Record<string, string> = {
+  [SYSTEM_THEME_ID]: '#71717a',
+  clean: '#ffffff',
+  dark: '#262626',
+  classic: '#4ade80',
+  blue: '#90c9f5',
+  pink: '#f5bcce',
+  purple: '#cbbcf5',
+  uga: '#BA0C2F',
+  grayBlue: '#8a9bb5',
+  gold: '#daa520',
+};
+
 function ImmersiveExperience() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
   const theme = useActiveTheme();
   const activeTheme = useThemeStore((s) => s.activeTheme);
-  const useAccentBg = activeTheme === 'uga'; // Bulldog Red: accent bg on desktop and mobile
+  const resolvedId = useResolvedThemeId();
+  const useAccentBg = activeTheme === 'uga';
+  const hintColor = activeTheme === 'classic' ? theme.text : previewColors[resolvedId] ?? previewColors[activeTheme] ?? theme.accent;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,10 +115,10 @@ function ImmersiveExperience() {
       <Overlay />
       
       <div
-        className="fixed bottom-4 left-4 text-xs font-mono opacity-50 pointer-events-none hidden sm:block"
-        style={{ color: theme.textDim }}
+        className="fixed bottom-4 left-4 text-xs font-mono pointer-events-none hidden sm:block"
+        style={{ color: hintColor, opacity: 0.85 }}
       >
-        ESC to return • Click objects to explore
+        ESC to return · Click objects to explore
       </div>
       
       <ThemeSelector />
@@ -121,6 +138,7 @@ function App() {
   const setPrefersReducedMotion = useWorkstationStore((s) => s.setPrefersReducedMotion);
   const setTheme = useThemeStore((s) => s.setTheme);
   const activeTheme = useThemeStore((s) => s.activeTheme);
+  const portfolioDark = useThemeStore((s) => s.portfolioDark);
 
   const onKonami = useCallback(() => {
     const previous = activeTheme;
@@ -134,17 +152,30 @@ function App() {
     setPrefersReducedMotion(prefersReducedMotion);
   }, [prefersReducedMotion, setPrefersReducedMotion]);
 
+  // Sync Tailwind dark class on <html>. Only remove when leaving portfolio view; avoid cleanup on toggle so we don't flash previous mode.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (viewMode === 'professional' && portfolioDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [viewMode, portfolioDark]);
+
   return (
     <>
       <ModeToggle />
-      {viewMode === 'professional' ? <ProfessionalView /> : <ImmersiveExperience />}
-      {viewMode === 'professional' && (
-        <img
-          src="/headshot.png"
-          alt={profileData.name}
-          className="fixed top-4 left-4 z-30 h-32 w-32 rounded-full object-cover ring-2 ring-[#0a0a0a]/10 shadow-xl md:h-40 md:w-40"
-        />
-      )}
+      {viewMode === 'professional' && <PortfolioDarkToggle />}
+      <div>
+        {viewMode === 'professional' ? <ProfessionalView /> : <ImmersiveExperience />}
+        {viewMode === 'professional' && (
+          <img
+            src="/headshot.png"
+            alt={profileData.name}
+            className="fixed top-4 left-4 z-30 h-32 w-32 rounded-full object-cover ring-2 ring-[#0a0a0a]/10 shadow-xl dark:ring-white/20 md:h-40 md:w-40"
+          />
+        )}
+      </div>
     </>
   );
 }

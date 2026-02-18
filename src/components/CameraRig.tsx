@@ -21,11 +21,11 @@ interface CameraConfig {
 /** World positions for each view; must match Experience.tsx (25 units apart on X). */
 const OBJECT_POSITIONS = {
   monitor: { x: 0, y: 1, z: 0 },
-  car: { x: 25, y: 1.5, z: 0 },
-  dog: { x: 50, y: 1.5, z: 0 },
-  vr: { x: 75, y: 1.5, z: 0 },
-  satellite: { x: 100, y: 1.5, z: 0 },
-  tablet: { x: 125, y: 1.5, z: 0 },
+  'audio-tracking-car': { x: 25, y: 1.5, z: 0 },
+  animaldot: { x: 50, y: 1.5, z: 0 },
+  'kitchen-chaos-vr': { x: 75, y: 1.5, z: 0 },
+  memesat: { x: 100, y: 1.5, z: 0 },
+  'capital-one': { x: 125, y: 1.5, z: 0 },
 };
 
 /** In-component mobile check (viewport width < 768). */
@@ -65,68 +65,68 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
       ),
     },
 
-    car: {
+    'audio-tracking-car': {
       position: new Vector3(
-        OBJECT_POSITIONS.car.x,
+        OBJECT_POSITIONS['audio-tracking-car'].x,
         CAMERA_HEIGHT,
         CAMERA_DISTANCE
       ),
       target: new Vector3(
-        OBJECT_POSITIONS.car.x - TARGET_X_OFFSET,
-        OBJECT_POSITIONS.car.y,
-        OBJECT_POSITIONS.car.z
+        OBJECT_POSITIONS['audio-tracking-car'].x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS['audio-tracking-car'].y,
+        OBJECT_POSITIONS['audio-tracking-car'].z
       ),
     },
 
-    dog: {
+    animaldot: {
       position: new Vector3(
-        OBJECT_POSITIONS.dog.x,
+        OBJECT_POSITIONS.animaldot.x,
         CAMERA_HEIGHT,
         CAMERA_DISTANCE
       ),
       target: new Vector3(
-        OBJECT_POSITIONS.dog.x - TARGET_X_OFFSET,
-        OBJECT_POSITIONS.dog.y,
-        OBJECT_POSITIONS.dog.z
+        OBJECT_POSITIONS.animaldot.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.animaldot.y,
+        OBJECT_POSITIONS.animaldot.z
       ),
     },
 
-    vr: {
+    'kitchen-chaos-vr': {
       position: new Vector3(
-        OBJECT_POSITIONS.vr.x,
+        OBJECT_POSITIONS['kitchen-chaos-vr'].x,
         CAMERA_HEIGHT,
         CAMERA_DISTANCE
       ),
       target: new Vector3(
-        OBJECT_POSITIONS.vr.x - TARGET_X_OFFSET,
-        OBJECT_POSITIONS.vr.y,
-        OBJECT_POSITIONS.vr.z
+        OBJECT_POSITIONS['kitchen-chaos-vr'].x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS['kitchen-chaos-vr'].y,
+        OBJECT_POSITIONS['kitchen-chaos-vr'].z
       ),
     },
 
-    satellite: {
+    memesat: {
       position: new Vector3(
-        OBJECT_POSITIONS.satellite.x,
+        OBJECT_POSITIONS.memesat.x,
         CAMERA_HEIGHT,
         CAMERA_DISTANCE
       ),
       target: new Vector3(
-        OBJECT_POSITIONS.satellite.x - TARGET_X_OFFSET,
-        OBJECT_POSITIONS.satellite.y,
-        OBJECT_POSITIONS.satellite.z
+        OBJECT_POSITIONS.memesat.x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS.memesat.y,
+        OBJECT_POSITIONS.memesat.z
       ),
     },
 
-    tablet: {
+    'capital-one': {
       position: new Vector3(
-        OBJECT_POSITIONS.tablet.x,
+        OBJECT_POSITIONS['capital-one'].x,
         CAMERA_HEIGHT,
         CAMERA_DISTANCE
       ),
       target: new Vector3(
-        OBJECT_POSITIONS.tablet.x - TARGET_X_OFFSET,
-        OBJECT_POSITIONS.tablet.y,
-        OBJECT_POSITIONS.tablet.z
+        OBJECT_POSITIONS['capital-one'].x - TARGET_X_OFFSET,
+        OBJECT_POSITIONS['capital-one'].y,
+        OBJECT_POSITIONS['capital-one'].z
       ),
     },
   };

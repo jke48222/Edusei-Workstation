@@ -256,6 +256,7 @@ export const themePresets: Record<string, ThemePreset> = {
 };
 
 const THEME_STORAGE_KEY = 'edusei-workstation-theme';
+const PORTFOLIO_DARK_KEY = 'edusei-portfolio-dark';
 
 export const SYSTEM_THEME_ID = 'system';
 
@@ -269,6 +270,16 @@ function getStoredTheme(): string {
   return SYSTEM_THEME_ID;
 }
 
+function getStoredPortfolioDark(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const stored = localStorage.getItem(PORTFOLIO_DARK_KEY);
+    if (stored === 'true') return true;
+    if (stored === 'false') return false;
+  } catch (_) {}
+  return false;
+}
+
 /** Resolve system preference: dark -> dark theme, light -> clean (Modern). */
 function resolveSystemThemeId(): 'clean' | 'dark' {
   if (typeof window === 'undefined') return 'clean';
@@ -278,6 +289,8 @@ function resolveSystemThemeId(): 'clean' | 'dark' {
 interface ThemeState {
   activeTheme: string;
   setTheme: (themeId: string) => void;
+  portfolioDark: boolean;
+  setPortfolioDark: (value: boolean) => void;
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
@@ -289,6 +302,13 @@ export const useThemeStore = create<ThemeState>((set) => ({
         localStorage.setItem(THEME_STORAGE_KEY, themeId);
       } catch (_) {}
     }
+  },
+  portfolioDark: getStoredPortfolioDark(),
+  setPortfolioDark: (value: boolean) => {
+    set({ portfolioDark: value });
+    try {
+      localStorage.setItem(PORTFOLIO_DARK_KEY, value ? 'true' : 'false');
+    } catch (_) {}
   },
 }));
 
