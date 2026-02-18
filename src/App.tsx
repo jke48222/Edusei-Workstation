@@ -9,7 +9,6 @@ import { Suspense, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
-import { useIsMobile } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
 import { useActiveTheme, useThemeStore } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
@@ -34,8 +33,7 @@ function ImmersiveExperience() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
   const theme = useActiveTheme();
   const activeTheme = useThemeStore((s) => s.activeTheme);
-  const isMobile = useIsMobile();
-  const useAccentBg = isMobile && activeTheme === 'uga';
+  const useAccentBg = activeTheme === 'uga'; // Bulldog Red: accent bg on desktop and mobile
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
