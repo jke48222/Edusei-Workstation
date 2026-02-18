@@ -22,7 +22,7 @@ export function ModeToggle() {
   }, [setViewMode, isPro]);
 
   return (
-    <div className="fixed top-5 right-5 z-50 pointer-events-auto">
+    <div className="fixed top-3 right-5 z-50 pointer-events-auto">
       <button
         type="button"
         onClick={handleToggle}
@@ -35,18 +35,18 @@ export function ModeToggle() {
             ? {
                 border: '1px solid rgba(10,10,10,0.1)',
                 backgroundColor: 'rgba(255,255,255,0.8)',
-                color: 'rgba(10,10,10,0.6)',
+                color: theme.accent,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
               }
             : {
                 border: `1px solid ${theme.accent}40`,
                 backgroundColor: `${theme.terminalBg}cc`,
-                color: theme.textDim,
+                color: theme.accent,
               }
         }
       >
-        {/* Label */}
-        <span className="hidden sm:inline">
+        {/* Label — accent color set on span so it isn’t overridden */}
+        <span className="hidden sm:inline" style={{ color: theme.accent }}>
           {isPro ? 'Workstation' : 'Portfolio'}
         </span>
 

@@ -126,6 +126,9 @@ interface WorkstationState {
   isAnimating: boolean;
   animationStartTime: number | null;
   transitionDuration: number;
+
+  /** Terminal boot sequence has completed (show only once per session). */
+  terminalBooted: boolean;
 }
 
 interface WorkstationActions {
@@ -134,6 +137,7 @@ interface WorkstationActions {
   returnToMonitor: () => void;
   completeAnimation: () => void;
   canNavigate: () => boolean;
+  setTerminalBooted: (booted: boolean) => void;
 }
 
 // ============================================================================
@@ -153,6 +157,7 @@ const initialWorkstationState: WorkstationState = {
   isAnimating: false,
   animationStartTime: null,
   transitionDuration: 1500,
+  terminalBooted: false,
 };
 
 const initialGalleryState: GalleryState = {
@@ -253,6 +258,8 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
       const state = get();
       return !state.isAnimating && state.sceneMode === 'workstation';
     },
+
+    setTerminalBooted: (booted: boolean) => set({ terminalBooted: booted }),
 
     // ========================================================================
     // Gallery Scene Transitions

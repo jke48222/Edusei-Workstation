@@ -7,7 +7,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useThemeStore, themePresets } from '../store/themeStore';
+import { useThemeStore, themePresets, useActiveTheme } from '../store/themeStore';
 
 /** Order of theme presets in the dropdown. */
 const presetOrder = ['clean', 'classic', 'blue', 'pink', 'purple', 'uga', 'grayBlue'];
@@ -19,11 +19,12 @@ const previewColors: Record<string, string> = {
   pink: '#f5bcce',
   purple: '#cbbcf5',
   uga: '#BA0C2F',
-  grayBlue: '#6b8ab8',
+  grayBlue: '#8a9bb5',
 };
 
 export function ThemeSelector() {
   const { activeTheme, setTheme } = useThemeStore();
+  const theme = useActiveTheme();
   const [expanded, setExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
@@ -35,35 +36,44 @@ export function ThemeSelector() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  const circleColor = activeTheme === 'classic' ? theme.text : previewColors[activeTheme];
+
   return (
     <motion.div
       className={`fixed z-50 ${
         isMobile
-          ? 'top-16 right-5'
-          : 'top-4 left-4'
+          ? 'top-[3.25rem] right-5'
+          : 'top-4 left-6'
       }`}
       initial={{ opacity: 0, x: isMobile ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 1, duration: 0.4 }}
     >
-      {/* Toggle button — same size as ModeToggle on mobile (gap-2.5 px-3 py-2 text-[11px]) */}
+      {/* Toggle button — clean: black bg; uga: white bg + black border; other: transparent */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2.5 rounded-full border border-white/10 bg-black/30 px-3 py-2 text-[11px] font-mono backdrop-blur-md transition-all hover:bg-black/40"
+        className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-mono transition-all ${
+          activeTheme === 'clean'
+            ? 'border-[#0a0a0a]/20 bg-black hover:bg-black/90'
+            : activeTheme === 'uga'
+              ? 'border-black bg-white hover:bg-white/90'
+              : 'border-transparent bg-transparent hover:bg-transparent'
+        }`}
         title="Change theme"
       >
         <span
-          className="h-4 w-4 rounded-full border border-white/20"
-          style={{ backgroundColor: previewColors[activeTheme] }}
+          className="h-4 w-4 shrink-0 rounded-full border border-white/20"
+          style={{ backgroundColor: circleColor }}
         />
-        <span className="font-mono text-[10px] text-white/60 hidden sm:inline">
+        <span className="font-mono text-[10px] hidden sm:inline" style={{ color: circleColor }}>
           {themePresets[activeTheme]?.name}
         </span>
         <svg
-          className={`h-3 w-3 text-white/40 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`h-3 w-3 transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          style={{ color: circleColor }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -100,7 +110,7 @@ export function ThemeSelector() {
                   >
                     <span
                       className="h-3.5 w-3.5 shrink-0 rounded-full border border-white/20"
-                      style={{ backgroundColor: previewColors[id] }}
+                      style={{ backgroundColor: id === 'classic' ? preset.text : previewColors[id] }}
                     />
                     <span className={`font-mono text-[11px] ${isActive ? 'text-white' : 'text-white/60'}`}>
                       {preset.name}

@@ -233,6 +233,12 @@ html, body, #root {
   scrollbar-color: var(--scrollbar-color, rgba(100,100,100,0.3)) transparent;
 }
 
+/* Command input placeholder — matches "Loading..." output color (theme.textDim, 0.6 opacity) */
+.terminal-input-wrap .terminal-input::placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity, 0.6);
+}
+
 /* Fixed full-viewport containers for canvas and overlay (z-index layering). */
 .canvas-container {
   position: fixed;

@@ -5,12 +5,13 @@
  * screen, theme-aware layout, and top-level headshot in professional mode.
  */
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
+import { useIsMobile } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
-import { useActiveTheme } from './store/themeStore';
+import { useActiveTheme, useThemeStore } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
 import { ProfessionalView } from './components/professional/ProfessionalView';
 import { ThemeSelector } from './components/ThemeSelector';
@@ -32,7 +33,10 @@ function LoadingFallback() {
 function ImmersiveExperience() {
   const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
   const theme = useActiveTheme();
-  
+  const activeTheme = useThemeStore((s) => s.activeTheme);
+  const isMobile = useIsMobile();
+  const useAccentBg = isMobile && activeTheme === 'uga';
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !isAnimating && currentView !== 'monitor') {
@@ -44,7 +48,7 @@ function ImmersiveExperience() {
   }, [currentView, isAnimating, returnToMonitor]);
   
   return (
-    <div className="w-full h-screen overflow-hidden" style={{ backgroundColor: theme.bg }}>
+    <div className="w-full h-screen overflow-hidden" style={{ backgroundColor: useAccentBg ? theme.accent : theme.bg }}>
       <Suspense fallback={<LoadingFallback />}>
         <Experience />
       </Suspense>
