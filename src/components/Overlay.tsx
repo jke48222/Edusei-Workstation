@@ -35,25 +35,14 @@ function useIsMobile() {
   return isMobile;
 }
 
-/** Framer Motion variants for terminal and list animations. */
-const terminalEnter = {
-  hidden: { opacity: 0, scale: 0.96, y: 12 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-  },
-  exit: { opacity: 0, scale: 0.96, transition: { duration: 0.3 } },
-};
-
+/** Framer Motion variants for list animations. */
 const staggerList = {
-  visible: { transition: { staggerChildren: 0.04 } },
+  visible: { transition: { staggerChildren: 0.015 } },
 };
 
 const fadeSlideUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } },
 };
 
 /** Typewriter boot lines in terminal; calls onComplete when finished. */
@@ -77,9 +66,9 @@ function BootSequence({ onComplete }: { onComplete: () => void }) {
         {bootSequence.slice(0, visibleLines).map((line, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: -8 }}
+            initial={{ opacity: 0, x: -6 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.15 }}
             style={{ color: theme.textDim }}
           >
             {line || '\u00A0'}
@@ -197,6 +186,7 @@ function ProjectCard({
 
   return (
     <motion.button
+      layout={false}
       variants={fadeSlideUp}
       onClick={onClick}
       disabled={disabled}
@@ -352,11 +342,7 @@ function TerminalView() {
   }, [commandOutput]);
 
   return (
-    <motion.div
-      variants={terminalEnter}
-      initial="visible"
-      animate="visible"
-      exit="exit"
+    <div
       className="absolute inset-0 flex items-center justify-center p-3 sm:p-6"
       onClick={() => inputRef.current?.focus()}
     >
@@ -593,7 +579,7 @@ function TerminalView() {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -615,7 +601,7 @@ function ProjectDetailPanel() {
         initial={{ opacity: 0, y: '100%' }}
         animate={{ opacity: 1, y: mobileExpanded ? 0 : 'calc(100% - 56px)' }}
         exit={{ opacity: 0, y: '100%' }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
         className="absolute bottom-0 left-0 right-0 z-10"
         style={{ maxHeight: '85vh' }}
       >
@@ -734,10 +720,10 @@ function ProjectDetailPanel() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 80 }}
+      initial={{ opacity: 0, x: 48 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 80 }}
-      transition={{ duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0, x: 48 }}
+      transition={{ duration: 0.25, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
       className="absolute right-0 top-0 h-full flex items-center justify-center p-8 w-full md:w-[48%]"
     >
       <div
@@ -760,9 +746,9 @@ function ProjectDetailPanel() {
         </motion.button>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ duration: 0.2, delay: 0.1 }}
         >
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -797,9 +783,9 @@ function ProjectDetailPanel() {
 
         <motion.div
           className="mt-6 space-y-3"
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ duration: 0.2, delay: 0.15 }}
         >
           {project.description.map((para, i) => (
             <p key={i} className="font-mono text-[13px] leading-relaxed" style={{ color: theme.textDim }}>
@@ -810,9 +796,9 @@ function ProjectDetailPanel() {
 
         <motion.div
           className="mt-6"
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ duration: 0.2, delay: 0.2 }}
         >
           <p
             className="mb-2 font-mono text-[10px] uppercase tracking-widest"
@@ -821,8 +807,8 @@ function ProjectDetailPanel() {
             Technologies
           </p>
           <div className="flex flex-wrap gap-2">
-            {project.techStack.map((tech, i) => (
-              <motion.span
+            {project.techStack.map((tech) => (
+              <span
                 key={tech}
                 className="rounded px-2.5 py-1 font-mono text-[11px]"
                 style={{
@@ -830,12 +816,9 @@ function ProjectDetailPanel() {
                   backgroundColor: `${theme.accent}08`,
                   color: theme.textDim,
                 }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.75 + i * 0.03 }}
               >
                 {tech}
-              </motion.span>
+              </span>
             ))}
           </div>
         </motion.div>
@@ -843,9 +826,9 @@ function ProjectDetailPanel() {
         {project.additionalProjects?.length ? (
           <motion.div
             className="mt-8"
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
+            transition={{ duration: 0.2, delay: 0.25 }}
           >
             <p
               className="mb-3 font-mono text-[10px] uppercase tracking-widest"
@@ -916,7 +899,7 @@ function ProjectDetailPanel() {
           style={{ borderTop: `1px solid ${theme.projectBorder}` }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 }}
+          transition={{ duration: 0.2, delay: 0.3 }}
         >
           <span className="font-mono text-[10px]" style={{ color: theme.textDim, opacity: 0.5 }}>
             ↺ Drag the 3D model to rotate · ESC to return
@@ -949,12 +932,7 @@ function TransitionIndicator() {
           color: theme.textDim,
         }}
       >
-        <motion.span
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-        >
-          ◐
-        </motion.span>
+        <span className="overlay-spinner" aria-hidden>◐</span>
         {currentView === 'monitor' ? 'Returning...' : 'Loading...'}
       </div>
     </motion.div>
