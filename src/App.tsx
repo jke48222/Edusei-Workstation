@@ -5,10 +5,11 @@
  * screen, theme-aware layout, and top-level headshot in professional mode.
  */
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useCallback, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
 import { Overlay } from './components/Overlay';
+import { useKonamiCode } from './hooks/useKonamiCode';
 import { usePrefersReducedMotion } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
 import { useActiveTheme, useThemeStore } from './store/themeStore';
@@ -76,6 +77,16 @@ function App() {
   const viewMode = useViewMode();
   const prefersReducedMotion = usePrefersReducedMotion();
   const setPrefersReducedMotion = useWorkstationStore((s) => s.setPrefersReducedMotion);
+  const setTheme = useThemeStore((s) => s.setTheme);
+  const activeTheme = useThemeStore((s) => s.activeTheme);
+
+  const onKonami = useCallback(() => {
+    const previous = activeTheme;
+    setTheme('gold');
+    setTimeout(() => setTheme(previous), 5000);
+  }, [activeTheme, setTheme]);
+
+  useKonamiCode(onKonami);
 
   useEffect(() => {
     setPrefersReducedMotion(prefersReducedMotion);
