@@ -2,9 +2,9 @@
 
 An immersive 3D portfolio website built with React Three Fiber, featuring a retro CRT terminal interface and cinematic camera transitions.
 
-🌐 **Live Portfolio**: https://www.jalenedusei.com
+**Live Portfolio**: https://www.jalenedusei.com
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -17,7 +17,7 @@ npm run dev
 npm run build
 ```
 
-## 🎮 How to Use
+## How to Use
 
 1. **Terminal View**: The default view shows a working CLI interface on a CRT monitor  
 2. **Navigate Projects**: Click on projects in the terminal list or type commands:
@@ -29,7 +29,7 @@ npm run build
 3. **Explore Objects**: Click on 3D objects on the desk to view project details  
 4. **Return**: Click "Back to Terminal" or press ESC to return to the main view  
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -44,7 +44,7 @@ src/
     └── Overlay.tsx      # Terminal UI and project cards
 ```
 
-## 🎨 Tech Stack
+## Tech Stack
 
 - **Framework**: React + Vite + TypeScript  
 - **3D**: @react-three/fiber, @react-three/drei  
@@ -52,7 +52,7 @@ src/
 - **State**: zustand  
 - **Styling**: Tailwind CSS  
 
-## 🔧 Customization
+## Customization
 
 ### Adding New Projects
 
@@ -89,7 +89,7 @@ const cameraConfigs: Record<ViewState, CameraConfig> = {
 };
 ```
 
-## 📦 3D Model Attributions
+## 3D Model Attributions
 
 This project uses the following 3D models under Creative Commons Attribution licenses:
 
@@ -100,7 +100,7 @@ This project uses the following 3D models under Creative Commons Attribution lic
 
 Additional models (Robot Car, Sleeping Dog, Satellite) are included in `/public/models/`.
 
-## 📱 PWA / Home screen icon
+## PWA / Home screen icon
 
 The “Add to Home Screen” icon uses `icon-192.png` and `icon-512.png`. To generate them from the favicon:
 
@@ -111,12 +111,12 @@ The “Add to Home Screen” icon uses `icon-192.png` and `icon-512.png`. To gen
 
 Redeploy so the new icons are served; then add to home screen again to see your favicon.
 
-## 📄 Adding Your Resume
+## Adding Your Resume
 
 Place your resume PDF in the `public/` folder as `resume.pdf`. Users can then type `resume` in the terminal or the download link will work.
 
 ---
 
 **Jalen Edusei**  
-🌐 https://www.jalenedusei.com  
+https://www.jalenedusei.com  
 Engineering Portfolio and Interactive Workstation
