@@ -22,7 +22,7 @@ export function ModeToggle() {
   }, [setViewMode, isPro]);
 
   return (
-    <div className="fixed top-3 right-5 z-50 pointer-events-auto">
+    <div className="fixed top-3 right-5 z-[110] pointer-events-auto">
       <button
         type="button"
         onClick={handleToggle}
