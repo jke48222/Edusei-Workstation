@@ -230,7 +230,7 @@ export const honors = [
 export const projectsData: ProjectData[] = [
   {
     id: 'car',
-    executable: 'audio car',
+    executable: 'audiocar',
     title: 'Audio Tracking Car',
     tagline: 'Autonomous audio-frequency navigation system',
     period: 'January 2025 – April 2025',
@@ -292,7 +292,7 @@ export const projectsData: ProjectData[] = [
   },
   {
     id: 'vr',
-    executable: 'kitchen chaos',
+    executable: 'kitchenchaos',
     title: 'Kitchen Chaos VR',
     tagline: 'Immersive multiplayer VR experiences on Quest 3',
     period: 'October 2025 – December 2025',
@@ -366,7 +366,7 @@ export const projectsData: ProjectData[] = [
   },
   {
     id: 'tablet',
-    executable: 'capital one',
+    executable: 'capitalone',
     title: 'Capital One Internship',
     tagline: 'Business Analyst - CreditWise 60M+ users',
     period: 'June 2025 – August 2025',
@@ -436,8 +436,8 @@ export const helpText = [
   'Available commands:',
   '  help     - Display this message',
   '  list     - List all projects',
-  '  run [name] - Open a project (e.g. run audio car)',
-  '  theme [name] - Switch theme (e.g. theme light, theme bulldog red)',
+  '  run [name] - Open a project (e.g. run audiocar)',
+  '  theme [name] - Switch theme (e.g. theme light, theme bulldogred)',
   '  about    - About Jalen Edusei',
   '  skills   - View technical skills',
   '  resume   - Download resume',
