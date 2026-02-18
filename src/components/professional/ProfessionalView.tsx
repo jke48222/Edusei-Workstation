@@ -45,8 +45,9 @@ export function ProfessionalView() {
       <Marquee />
       <Stats />
       <AboutBand />
+      <Timeline />
+      <ExperienceSection />
       <ProjectsList />
-      <ExperienceGrid />
       <SkillsCloud />
       <StudyAbroadSection />
       <ContactCTA />
@@ -155,28 +156,12 @@ function AboutBand() {
   );
 }
 
-function ProjectsList() {
-  return (
-    <section id="work" className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-20">
-      <Section>
-        <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">Selected Work</motion.h2>
-        <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60">Projects across VR, embedded systems, and product engineering.</motion.p>
-      </Section>
-      <div className="space-y-4">
-        {projectsData.map((project, i) => (
-          <ProjectRow key={project.id} project={project} index={i} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ProjectRow({ project, index }: { project: (typeof projectsData)[number]; index: number }) {
+function ProjectRow({ project, index, cardId }: { project: (typeof projectsData)[number]; index: number; cardId?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}>
-      <article className="group relative flex flex-col gap-4 overflow-hidden border border-[#0a0a0a]/10 bg-white p-5 transition-all duration-300 hover:border-[#0a0a0a]/30 hover:shadow-lg md:flex-row md:items-start md:gap-8 md:p-6">
+      <article {...(cardId ? { id: cardId } : {})} className="group relative flex flex-col gap-4 overflow-hidden border border-[#0a0a0a]/10 bg-white p-5 transition-all duration-300 hover:border-[#0a0a0a]/30 hover:shadow-lg md:flex-row md:items-start md:gap-8 md:p-6 scroll-mt-24">
         <div className="absolute left-0 top-0 h-full w-1 transition-all duration-300 group-hover:w-1.5 bg-[#0a0a0a]/20" />
         <span className="ml-3 shrink-0 font-mono text-4xl font-bold text-[#0a0a0a]/10 md:ml-4 md:text-5xl">{String(index + 1).padStart(2, '0')}</span>
         <div className="ml-3 flex-1 md:ml-0">
@@ -203,7 +188,102 @@ function ProjectRow({ project, index }: { project: (typeof projectsData)[number]
   );
 }
 
-function ExperienceGrid() {
+/** Selected Work section: project rows (original design). Timeline clicks scroll to card-{project.id}. */
+function ProjectsList() {
+  return (
+    <section id="work" className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-20">
+      <Section>
+        <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">Selected Work</motion.h2>
+        <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60">Projects across VR, embedded systems, and product engineering.</motion.p>
+      </Section>
+      <div className="space-y-4">
+        {projectsData.map((project, i) => (
+          <ProjectRow key={project.id} project={project} index={i} cardId={`card-${project.id}`} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Parse period string to a sort key (YYYY-MM). */
+function periodToSortKey(period: string): string {
+  const months: Record<string, string> = { january: '01', february: '02', march: '03', april: '04', may: '05', june: '06', july: '07', august: '08', september: '09', october: '10', november: '11', december: '12' };
+  const match = period.toLowerCase().match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s*(\d{4})/);
+  if (match) return `${match[2]}-${months[match[1]] ?? '01'}`;
+  const yearMatch = period.match(/\d{4}/);
+  return yearMatch ? `${yearMatch[0]}-01` : '0000-01';
+}
+
+/** Slug for scroll id from company name. */
+function slugify(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+/** Single timeline node: id (scroll target), date (display), title (display), sortKey. */
+type TimelineNode = { id: string; date: string; title: string; sortKey: string };
+
+function getTimelineNodes(): TimelineNode[] {
+  const education: TimelineNode = {
+    id: 'education',
+    date: `May ${profileData.graduationYear}`,
+    title: profileData.degree,
+    sortKey: `${profileData.graduationYear}-05`,
+  };
+  const work: TimelineNode[] = workExperience.map((role) => ({
+    id: slugify(role.company),
+    date: role.period,
+    title: role.title,
+    sortKey: periodToSortKey(role.period),
+  }));
+  const projects: TimelineNode[] = projectsData.map((p) => ({
+    id: p.id,
+    date: p.period,
+    title: p.title,
+    sortKey: periodToSortKey(p.period),
+  }));
+  const all = [education, ...work, ...projects];
+  all.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  return all;
+}
+
+function scrollToCard(id: string) {
+  document.getElementById(`card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** Horizontal timeline: dates + titles only; click scrolls to Experience or Selected Work card. */
+function Timeline() {
+  const nodes = getTimelineNodes();
+  return (
+    <section id="timeline" className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-20">
+      <Section>
+        <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">Timeline</motion.h2>
+        <motion.p variants={fadeUp} className="mb-8 text-[15px] text-[#0a0a0a]/60">Education, experience, and projects. Click a title to jump to its section.</motion.p>
+      </Section>
+      <div className="timeline-scroll overflow-x-auto pb-4 -mx-6 px-6 md:-mx-12 md:px-12">
+        <div className="relative flex items-start gap-8 md:gap-12 min-w-max pt-1">
+          <div className="absolute left-0 right-0 top-[6px] h-px bg-[#0a0a0a]/15 min-w-full" aria-hidden />
+          {nodes.map((node) => (
+            <button
+              key={node.id}
+              type="button"
+              onClick={() => scrollToCard(node.id)}
+              className="group relative z-10 flex shrink-0 flex-col items-center text-center transition-colors hover:text-[#0a0a0a]"
+            >
+              <span className="h-3 w-3 rounded-full border-2 border-[#0a0a0a]/25 bg-[#fafaf8] shrink-0 group-hover:border-[#0a0a0a]/50" aria-hidden />
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[#0a0a0a]/50 whitespace-nowrap">{node.date}</p>
+              <span className="mt-1 max-w-[140px] text-xs font-semibold text-[#0a0a0a]/80 underline-offset-2 group-hover:underline md:max-w-[180px] md:text-sm">
+                {node.title}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Experience section (original design): dark grid with education + work. Timeline clicks scroll to card-education / card-{company}. */
+function ExperienceSection() {
   return (
     <section id="experience" className="bg-[#0a0a0a] py-20 text-white">
       <div className="mx-auto max-w-6xl px-6 md:px-12 lg:px-20">
@@ -211,10 +291,26 @@ function ExperienceGrid() {
           <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">Experience</motion.h2>
           <motion.p variants={fadeUp} className="mb-10 text-[15px] text-white/50">Where I've applied my engineering and product thinking.</motion.p>
         </Section>
+        {/* Education card (timeline scroll target) */}
+        <Section>
+          <motion.article
+            id="card-education"
+            variants={fadeUp}
+            className="mb-4 flex flex-col justify-between border border-white/10 bg-white/5 p-5 transition-colors hover:border-white/20 hover:bg-white/10 scroll-mt-24"
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/40">May {profileData.graduationYear}</p>
+            <h3 className="mt-2 text-lg font-bold">{profileData.degree}</h3>
+            <p className="mt-0.5 text-sm text-white/50">{profileData.university} · {profileData.college} · Athens, GA</p>
+          </motion.article>
+        </Section>
         <div className="grid gap-4 md:grid-cols-2">
           {workExperience.map((role) => (
             <Section key={role.title + role.company}>
-              <motion.article variants={fadeUp} className="flex h-full flex-col justify-between border border-white/10 bg-white/5 p-5 transition-colors hover:border-white/20 hover:bg-white/10">
+              <motion.article
+                id={`card-${slugify(role.company)}`}
+                variants={fadeUp}
+                className="flex h-full flex-col justify-between border border-white/10 bg-white/5 p-5 transition-colors hover:border-white/20 hover:bg-white/10 scroll-mt-24"
+              >
                 <div>
                   <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/40">{role.period}</p>
                   <h3 className="mt-2 text-lg font-bold">{role.title}</h3>

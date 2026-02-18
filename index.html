@@ -11,19 +11,21 @@
     <title>Jalen Edusei | Software Engineer · UGA 2026</title>
     <meta name="description" content="Jalen Edusei — Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software, and product engineering. Portfolio and 3D workstation." />
     <meta name="author" content="Jalen Edusei" />
+    <meta name="robots" content="index, follow" />
 
-    <!-- Open Graph / Facebook, LinkedIn, etc. -->
+    <!-- Open Graph (Facebook, LinkedIn, Discord, etc.) -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Jalen Edusei | Software Engineer · UGA 2026" />
-    <meta property="og:description" content="Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software. Portfolio and 3D workstation." />
-    <!-- Set og:url and og:image base to your production URL (e.g. https://www.jalenedusei.com) -->
     <meta property="og:url" content="https://www.jalenedusei.com" />
+    <meta property="og:title" content="Jalen Edusei | Software Engineer · UGA 2026" />
+    <meta property="og:description" content="Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software, and product engineering. Portfolio and 3D workstation." />
     <meta property="og:image" content="https://www.jalenedusei.com/headshot.png" />
     <meta property="og:image:alt" content="Jalen Edusei headshot" />
+    <meta property="og:site_name" content="Jalen Edusei — Portfolio" />
     <meta property="og:locale" content="en_US" />
 
-    <!-- Twitter -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.jalenedusei.com" />
     <meta name="twitter:title" content="Jalen Edusei | Software Engineer · UGA 2026" />
     <meta name="twitter:description" content="Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software. Portfolio and 3D workstation." />
     <meta name="twitter:image" content="https://www.jalenedusei.com/headshot.png" />
@@ -43,16 +45,107 @@
           "url": "https://www.jalenedusei.com",
           "image": "https://www.jalenedusei.com/headshot.png",
           "email": "mailto:jalen.edusei@gmail.com",
-          "alumniOf": {
-            "@type": "CollegeOrUniversity",
-            "name": "University of Georgia",
-            "description": "College of Engineering, Morehead Honors College"
-          },
+          "alumniOf": { "@id": "https://www.jalenedusei.com/#org-uga" },
+          "hasCredential": { "@id": "https://www.jalenedusei.com/#credential-degree" },
           "sameAs": [
             "https://www.linkedin.com/in/jalenedusei",
             "https://github.com/jke48222"
           ],
           "knowsAbout": ["C++", "Python", "Unity3D", "VR/XR", "Embedded Systems", "React", "Signal Processing"]
+        },
+        {
+          "@type": "CollegeOrUniversity",
+          "@id": "https://www.jalenedusei.com/#org-uga",
+          "name": "University of Georgia",
+          "description": "College of Engineering, Morehead Honors College",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Athens",
+            "addressRegion": "GA"
+          }
+        },
+        {
+          "@type": "EducationalOccupationalCredential",
+          "@id": "https://www.jalenedusei.com/#credential-degree",
+          "name": "Bachelor of Science, Computer Systems Engineering",
+          "credentialCategory": "degree",
+          "dateIssued": "2026-05",
+          "recognizedBy": { "@id": "https://www.jalenedusei.com/#org-uga" }
+        },
+        {
+          "@type": "ItemList",
+          "name": "Work Experience",
+          "author": { "@id": "https://www.jalenedusei.com/#person" },
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "EmployeeRole",
+                "roleName": "Business Analyst Intern",
+                "startDate": "2025-06",
+                "endDate": "2025-08",
+                "memberOf": { "@id": "https://www.jalenedusei.com/#org-capital-one" }
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "item": {
+                "@type": "EmployeeRole",
+                "roleName": "Resident Assistant",
+                "startDate": "2023-08",
+                "endDate": "2025-05",
+                "memberOf": { "@id": "https://www.jalenedusei.com/#org-uga-housing" }
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "item": {
+                "@type": "EmployeeRole",
+                "roleName": "Research Assistant",
+                "startDate": "2022-09",
+                "endDate": "2023-05",
+                "memberOf": { "@id": "https://www.jalenedusei.com/#org-joyner-lab" }
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "item": {
+                "@type": "EmployeeRole",
+                "roleName": "Shift Leader",
+                "startDate": "2022-05",
+                "endDate": "2022-07",
+                "memberOf": { "@id": "https://www.jalenedusei.com/#org-gac-ms" }
+              }
+            }
+          ]
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.jalenedusei.com/#org-capital-one",
+          "name": "Capital One",
+          "address": { "@type": "PostalAddress", "addressLocality": "McLean", "addressRegion": "VA" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.jalenedusei.com/#org-uga-housing",
+          "name": "University of Georgia Housing",
+          "address": { "@type": "PostalAddress", "addressLocality": "Athens", "addressRegion": "GA" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.jalenedusei.com/#org-joyner-lab",
+          "name": "Joyner Research Laboratory",
+          "address": { "@type": "PostalAddress", "addressLocality": "Athens", "addressRegion": "GA" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.jalenedusei.com/#org-gac-ms",
+          "name": "Great American Cookies & Marble Slab Creamery",
+          "address": { "@type": "PostalAddress", "addressLocality": "Dallas", "addressRegion": "GA" }
         },
         {
           "@type": "CreativeWork",
