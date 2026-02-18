@@ -46,6 +46,8 @@ export const profileData = {
   github: 'github.com/jke48222',
   resumeUrl: '/resume.pdf',
   openForWork: true,
+  /** MM-DD for time-based boot message (e.g. '09-28' for September 28). */
+  birthday: '09-28',
 };
 
 /**
@@ -228,7 +230,7 @@ export const honors = [
 export const projectsData: ProjectData[] = [
   {
     id: 'car',
-    executable: 'audio_car.exe',
+    executable: 'audio car',
     title: 'Audio Tracking Car',
     tagline: 'Autonomous audio-frequency navigation system',
     period: 'January 2025 – April 2025',
@@ -263,7 +265,7 @@ export const projectsData: ProjectData[] = [
   },
   {
     id: 'dog',
-    executable: 'animaldot.exe',
+    executable: 'animaldot',
     title: 'AnimalDot',
     tagline: 'Contactless smart sensing bed for animal vitals',
     period: 'August 2025 – Present',
@@ -290,7 +292,7 @@ export const projectsData: ProjectData[] = [
   },
   {
     id: 'vr',
-    executable: 'kitchen_chaos.exe',
+    executable: 'kitchen chaos',
     title: 'Kitchen Chaos VR',
     tagline: 'Immersive multiplayer VR experiences on Quest 3',
     period: 'October 2025 – December 2025',
@@ -329,7 +331,7 @@ export const projectsData: ProjectData[] = [
   },
   {
     id: 'satellite',
-    executable: 'memesat.exe',
+    executable: 'memesat',
     title: 'MEMESat-1 Flight Software',
     tagline: 'CubeSat software for NASA space mission',
     period: 'March 2024 – December 2024',
@@ -364,7 +366,7 @@ export const projectsData: ProjectData[] = [
   },
   {
     id: 'tablet',
-    executable: 'capital_one.exe',
+    executable: 'capital one',
     title: 'Capital One Internship',
     tagline: 'Business Analyst - CreditWise 60M+ users',
     period: 'June 2025 – August 2025',
@@ -382,16 +384,26 @@ export const projectsData: ProjectData[] = [
 ];
 
 /**
- * Terminal boot sequence
+ * Terminal boot sequence. Returns lines with optional birthday message when today matches profileData.birthday (MM-DD).
  */
-export const bootSequence = [
-  'EDUSEI WORKSTATION v2.026',
-  'Initializing system...',
-  'Loading portfolio modules...',
-  'System ready.',
-  '',
-  'Select a project or type a command:',
-];
+export function getBootSequence(): string[] {
+  const lines = [
+    'EDUSEI WORKSTATION v2.026',
+    'Initializing system...',
+    'Loading portfolio modules...',
+    'System ready.',
+    '',
+    'Select a project or type a command:',
+  ];
+  if (typeof window !== 'undefined' && profileData.birthday) {
+    const now = new Date();
+    const mmdd = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    if (mmdd === profileData.birthday) {
+      lines.splice(1, 0, 'Happy birthday, Jalen! 🎉');
+    }
+  }
+  return lines;
+}
 
 /**
  * ASCII art header - using simple ASCII for perfect alignment
@@ -424,9 +436,12 @@ export const helpText = [
   'Available commands:',
   '  help     - Display this message',
   '  list     - List all projects',
+  '  run [name] - Open a project (e.g. run audio car)',
+  '  theme [name] - Switch theme (e.g. theme light, theme bulldog red)',
   '  about    - About Jalen Edusei',
   '  skills   - View technical skills',
-  '  resume   - Download full resume',
+  '  resume   - Download resume',
+  '  cv       - Download CV',
   '  clear    - Clear terminal',
   '',
   'Click any project to view details.',
