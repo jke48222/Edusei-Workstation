@@ -138,8 +138,9 @@ function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
  */
 export function CameraRig() {
   const { camera } = useThree();
-  const { currentView, isAnimating, completeAnimation } = useWorkstationStore();
+  const { currentView, isAnimating, completeAnimation, prefersReducedMotion } = useWorkstationStore();
   const isMobile = useIsMobile();
+  const dampingFactor = prefersReducedMotion ? 25 : 0.4;
 
   const currentPosition = useRef(new Vector3());
   const currentTarget = useRef(new Vector3());
@@ -165,7 +166,6 @@ export function CameraRig() {
 
   useFrame((_, delta) => {
     const clampedDelta = Math.min(delta, 0.1);
-    const dampingFactor = 0.4;
 
     easing.damp3(
       currentPosition.current,

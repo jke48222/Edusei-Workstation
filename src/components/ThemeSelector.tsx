@@ -7,6 +7,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useWorkstationStore } from '../store/store';
 import { useThemeStore, themePresets, useActiveTheme } from '../store/themeStore';
 
 /** Order of theme presets in the dropdown. */
@@ -25,6 +26,7 @@ const previewColors: Record<string, string> = {
 export function ThemeSelector() {
   const { activeTheme, setTheme } = useThemeStore();
   const theme = useActiveTheme();
+  const prefersReducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
   const [expanded, setExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
@@ -37,6 +39,7 @@ export function ThemeSelector() {
   }, []);
 
   const circleColor = activeTheme === 'classic' ? theme.text : previewColors[activeTheme];
+  const motionTransition = prefersReducedMotion ? { delay: 0, duration: 0 } : { delay: 0.2, duration: 0.25 };
 
   return (
     <motion.div
@@ -45,13 +48,18 @@ export function ThemeSelector() {
           ? 'top-[3.25rem] right-5'
           : 'top-4 left-6'
       }`}
-      initial={{ opacity: 0, x: isMobile ? 20 : -20 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, x: isMobile ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.2, duration: 0.25 }}
+      transition={motionTransition}
     >
       {/* Toggle button — clean: black bg; uga: white bg + black border; other: transparent */}
       <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-haspopup="listbox"
+        aria-controls="theme-selector-listbox"
+        aria-label={`Theme: ${themePresets[activeTheme]?.name ?? activeTheme}. ${expanded ? 'Close menu' : 'Open theme menu'}.`}
         className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-mono transition-all ${
           activeTheme === 'clean'
             ? 'border-[#0a0a0a]/20 bg-black hover:bg-black/90'
@@ -83,10 +91,13 @@ export function ThemeSelector() {
       <AnimatePresence>
         {expanded && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            id="theme-selector-listbox"
+            role="listbox"
+            aria-label="Theme options"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
             className={`mt-2 rounded-xl border border-white/10 bg-black/60 p-2 backdrop-blur-xl ${
               isMobile ? 'absolute right-0' : ''
             }`}
@@ -98,6 +109,10 @@ export function ThemeSelector() {
                 return (
                   <button
                     key={id}
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    aria-current={isActive ? 'true' : undefined}
                     onClick={() => {
                       setTheme(id);
                       setExpanded(false);

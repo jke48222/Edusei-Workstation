@@ -15,6 +15,7 @@ import {
   leadership,
   honors,
   studyAbroad,
+  getSayHiMailto,
 } from '../../data';
 import { FloatingDock } from './FloatingDock';
 
@@ -76,7 +77,7 @@ function Hero() {
           <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-end md:gap-12">
             <p className="max-w-lg text-base leading-relaxed text-[#0a0a0a]/60 md:text-lg">Senior at UGA studying computer systems engineering. Open for full-time opportunities starting May 2026.</p>
             <div className="flex gap-3 shrink-0">
-              <a href={`mailto:${profileData.email}`} className="rounded-full bg-[#0a0a0a] px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-105 active:scale-95">Get in touch</a>
+              <a href={getSayHiMailto()} className="rounded-full bg-[#0a0a0a] px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-105 active:scale-95">Say hi</a>
               <a href={profileData.resumeUrl} target="_blank" rel="noopener noreferrer" className="rounded-full border-2 border-[#0a0a0a]/15 px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-all hover:border-[#0a0a0a] hover:bg-[#0a0a0a]/5">Resume ↗</a>
             </div>
           </div>
@@ -311,7 +312,7 @@ function ContactCTA() {
         <motion.p variants={fadeUp} className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-white/40">What's next?</motion.p>
         <motion.h2 variants={fadeUp} className="text-4xl font-bold tracking-tight md:text-6xl">Let's build<br />something together.</motion.h2>
         <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-3">
-          <a href={`mailto:${profileData.email}`} className="rounded-full bg-white px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-transform hover:scale-105">{profileData.email}</a>
+          <a href={getSayHiMailto()} className="rounded-full bg-white px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-transform hover:scale-105">Say hi</a>
           <a href={`https://${profileData.linkedin}`} target="_blank" rel="noopener noreferrer" className="rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10">LinkedIn</a>
           <a href={`https://${profileData.github}`} target="_blank" rel="noopener noreferrer" className="rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10">GitHub</a>
         </motion.div>

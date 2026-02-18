@@ -1,0 +1,19 @@
+{
+  "name": "Jalen Edusei – Portfolio & Workstation",
+  "short_name": "Edusei",
+  "description": "Software Engineer. Portfolio and 3D workstation.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0a0a0a",
+  "background_color": "#050505",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

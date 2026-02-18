@@ -3,9 +3,90 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="canonical" href="https://www.jalenedusei.com" />
+    <meta name="theme-color" content="#0a0a0a" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>The Edusei Workstation</title>
-    
+    <title>Jalen Edusei | Software Engineer · UGA 2026</title>
+    <meta name="description" content="Jalen Edusei — Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software, and product engineering. Portfolio and 3D workstation." />
+    <meta name="author" content="Jalen Edusei" />
+
+    <!-- Open Graph / Facebook, LinkedIn, etc. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Jalen Edusei | Software Engineer · UGA 2026" />
+    <meta property="og:description" content="Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software. Portfolio and 3D workstation." />
+    <!-- Set og:url and og:image base to your production URL (e.g. https://www.jalenedusei.com) -->
+    <meta property="og:url" content="https://www.jalenedusei.com" />
+    <meta property="og:image" content="https://www.jalenedusei.com/headshot.png" />
+    <meta property="og:image:alt" content="Jalen Edusei headshot" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jalen Edusei | Software Engineer · UGA 2026" />
+    <meta name="twitter:description" content="Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software. Portfolio and 3D workstation." />
+    <meta name="twitter:image" content="https://www.jalenedusei.com/headshot.png" />
+    <meta name="twitter:image:alt" content="Jalen Edusei headshot" />
+
+    <!-- JSON-LD structured data for search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://www.jalenedusei.com/#person",
+          "name": "Jalen Edusei",
+          "jobTitle": "Software Engineer",
+          "description": "B.S. Computer Systems Engineering at University of Georgia. Portfolio and 3D workstation. VR, embedded systems, CubeSat flight software, and product engineering.",
+          "url": "https://www.jalenedusei.com",
+          "image": "https://www.jalenedusei.com/headshot.png",
+          "email": "mailto:jalen.edusei@gmail.com",
+          "alumniOf": {
+            "@type": "CollegeOrUniversity",
+            "name": "University of Georgia",
+            "description": "College of Engineering, Morehead Honors College"
+          },
+          "sameAs": [
+            "https://www.linkedin.com/in/jalenedusei",
+            "https://github.com/jke48222"
+          ],
+          "knowsAbout": ["C++", "Python", "Unity3D", "VR/XR", "Embedded Systems", "React", "Signal Processing"]
+        },
+        {
+          "@type": "CreativeWork",
+          "name": "Audio Tracking Car",
+          "description": "Autonomous audio-frequency navigation system. Python-based control on Raspberry Pi 4 with PID motor control and ADC signal processing.",
+          "author": { "@id": "https://www.jalenedusei.com/#person" },
+          "url": "https://github.com/jke48222/Audio-Tracking-Car",
+          "keywords": "Python, Raspberry Pi, PID Control, Embedded Systems"
+        },
+        {
+          "@type": "CreativeWork",
+          "name": "AnimalDot",
+          "description": "Contactless smart sensing bed for animal vitals using geophone-based vibration sensing. Embedded-to-mobile system for real-time visualization.",
+          "author": { "@id": "https://www.jalenedusei.com/#person" },
+          "keywords": "Geophones, Signal Processing, Embedded Systems, Mobile Dev"
+        },
+        {
+          "@type": "CreativeWork",
+          "name": "Kitchen Chaos VR",
+          "description": "Immersive multiplayer VR cooking game for Meta Quest 3. Built in Unity with VelNet networking and physics-driven interactions.",
+          "author": { "@id": "https://www.jalenedusei.com/#person" },
+          "url": "https://github.com/jke48222/VR-Final-Project",
+          "keywords": "Unity3D, C#, Meta Quest 3, VR, OpenXR"
+        },
+        {
+          "@type": "WebSite",
+          "name": "Jalen Edusei – Portfolio & Workstation",
+          "url": "https://www.jalenedusei.com",
+          "author": { "@id": "https://www.jalenedusei.com/#person" },
+          "description": "Software Engineer portfolio and 3D workstation. Projects in VR, embedded systems, and product engineering."
+        }
+      ]
+    }
+    </script>
+
     <!-- IBM Plex Mono for authentic terminal feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
