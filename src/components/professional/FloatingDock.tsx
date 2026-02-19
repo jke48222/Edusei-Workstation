@@ -5,7 +5,7 @@
  */
 
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /** Section ids and labels for scroll-spy and anchor links (order matches page). */
 const sections = [
@@ -19,24 +19,24 @@ const sections = [
 export function FloatingDock() {
   const [active, setActive] = useState('');
   const [visible, setVisible] = useState(false);
+  const rafRef = useRef<number | null>(null);
+  const tickingRef = useRef(false);
 
   useEffect(() => {
     const container = document.querySelector('.pro-scroll');
     if (!container) return;
 
-    const handleScroll = () => {
+    const updateFromScroll = () => {
+      tickingRef.current = false;
       const scrollY = container.scrollTop;
       const scrollHeight = container.scrollHeight;
       const clientHeight = container.clientHeight;
       setVisible(scrollY > 400);
 
-      /* Near bottom of page → contact is active */
       if (scrollHeight - clientHeight - scrollY < 80) {
         setActive('contact');
         return;
       }
-
-      /* Otherwise: last section (in document order) whose top is at or above the threshold */
       let current = '';
       for (const s of sections) {
         const el = document.getElementById(s.id);
@@ -48,9 +48,18 @@ export function FloatingDock() {
       setActive(current);
     };
 
-    handleScroll();
+    const handleScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      rafRef.current = requestAnimationFrame(updateFromScroll);
+    };
+
+    updateFromScroll();
     container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   return (

@@ -1,8 +1,10 @@
 /**
  * @file CameraRig.tsx
- * @description R3F camera controller: smooth transitions between workstation views (monitor,
- * car, dog, vr, satellite, tablet) using maath damp easing. Configs vary by viewport
- * (mobile vs desktop). Exports OBJECT_POSITIONS and CameraConfig for alignment with Experience.
+ * @description React Three Fiber camera controller component providing smooth transitions
+ * between workstation object views (monitor, robot car, sleeping dog, VR headset, satellite,
+ * Capital One logo) using maath damp easing functions. Camera configurations adapt based
+ * on viewport size (mobile vs desktop). Exports OBJECT_POSITIONS and CameraConfig types
+ * for alignment with the Experience component.
  */
 
 import { useRef, useMemo, useState, useEffect } from 'react';
@@ -12,13 +14,13 @@ import * as easing from 'maath/easing';
 import { useWorkstationStore } from '../store/store';
 import type { ViewState } from '../store/store';
 
-/** Camera position and look-at target for a single view. */
+/** Camera configuration interface defining position and look-at target for a single view. */
 interface CameraConfig {
   position: Vector3;
   target: Vector3;
 }
 
-/** World positions for each view; must match Experience.tsx (25 units apart on X). */
+/** World-space coordinate positions for each workstation object view. Must match Experience.tsx object positions (spaced 25 units apart on X-axis). */
 const OBJECT_POSITIONS = {
   monitor: { x: 0, y: 1, z: 0 },
   'audio-tracking-car': { x: 25, y: 1.5, z: 0 },
@@ -28,7 +30,7 @@ const OBJECT_POSITIONS = {
   'capital-one': { x: 125, y: 1.5, z: 0 },
 };
 
-/** In-component mobile check (viewport width < 768). */
+/** Custom hook that detects mobile viewport (width < 768px) for responsive camera configuration. */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   
@@ -45,7 +47,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-/** Builds position/target configs for all views; distance and height vary by isMobile. */
+/** Generates camera position and target configurations for all workstation views. Distance and height parameters adapt based on mobile vs desktop viewport. */
 function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
   const TARGET_X_OFFSET = isMobile ? 0 : -2;
   const CAMERA_DISTANCE = isMobile ? 6.8 : 7;

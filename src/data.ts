@@ -1,14 +1,16 @@
 /**
  * @file data.ts
- * @description Central data module: profile, skills, work experience, leadership,
- * projects, and terminal/help copy. All content consumed by professional view
- * and immersive overlay. Exports typed interfaces and lookup helpers.
+ * @description Centralized data module containing all portfolio content including
+ * profile information, skills, work experience, leadership roles, project details,
+ * and terminal interface copy. Provides typed interfaces and utility functions for
+ * data access across the professional portfolio view and immersive workstation overlay.
  */
 
 import type { ViewState } from './store/store.ts';
 
 /**
- * Project data interface (aligns with ViewState for 3D object mapping).
+ * Project data interface defining the structure for portfolio projects.
+ * Aligns with ViewState type for 3D object mapping in the immersive workstation view.
  */
 export interface ProjectData {
   id: ViewState;
@@ -52,8 +54,8 @@ export const profileData = {
 };
 
 /**
- * Pre-filled "Say hi" mailto URL (subject + body) for portfolio contact.
- * Use for Get in touch, Contact section, and overlay Email link.
+ * Generates a pre-filled mailto URL with subject and body text for portfolio contact.
+ * Used in contact sections, call-to-action buttons, and overlay email links.
  */
 export function getSayHiMailto(): string {
   const subject = encodeURIComponent(`Portfolio – Say hi from ${profileData.name}`);
@@ -64,7 +66,7 @@ export function getSayHiMailto(): string {
 }
 
 /**
- * Skills organized by category
+ * Skills data organized by category: programming languages, software tools, hardware platforms, and core competencies.
  */
 export const skillsData = {
   programming: [
@@ -89,7 +91,7 @@ export const skillsData = {
 };
 
 /**
- * Work Experience
+ * Work experience data array containing professional roles, companies, locations, periods, and key achievements.
  */
 export const workExperience = [
   {

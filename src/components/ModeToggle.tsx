@@ -1,14 +1,15 @@
 /**
  * @file ModeToggle.tsx
- * @description Toggle between professional (portfolio) and immersive (3D workstation) view.
- * Uses active theme for styling in immersive mode; fixed top-right placement.
+ * @description View mode toggle component that switches between professional portfolio
+ * view and immersive 3D workstation view. Uses active theme for styling in immersive mode
+ * and maintains fixed top-right positioning for consistent accessibility.
  */
 
 import { useCallback } from 'react';
 import { useViewMode, useWorkstationStore, type ViewMode } from '../store/store';
 import { useActiveTheme } from '../store/themeStore';
 
-/** Fixed top-right switch: Portfolio (professional) vs 3D Workstation (immersive). */
+/** Mode toggle component with fixed top-right positioning. Switches between Portfolio (professional) and 3D Workstation (immersive) views. */
 export function ModeToggle() {
   const viewMode = useViewMode();
   const setViewMode = useWorkstationStore((state) => state.setViewMode);
@@ -44,12 +45,12 @@ export function ModeToggle() {
               }
         }
       >
-        {/* Label — in pro view inherits button text color; in workstation view uses theme accent */}
+        {/* Label text: inherits button text color in professional view, uses theme accent in workstation view */}
         <span className="hidden sm:inline" style={isPro ? undefined : { color: theme.accent }}>
           {isPro ? 'Workstation' : 'Portfolio'}
         </span>
 
-        {/* iOS-style switch track */}
+        {/* iOS-style switch track with animated thumb */}
         <span
           className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200"
           style={{

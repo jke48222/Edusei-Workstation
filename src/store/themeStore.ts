@@ -1,39 +1,62 @@
 /**
  * @file themeStore.ts
- * @description Theme state and presets for the 3D workstation and overlay. Each preset defines
- * background, terminal, accent, podium, scrollbar, and scene colors. useActiveTheme returns
- * the current preset object for consumers.
+ * @description Theme state management store for the 3D workstation and overlay components.
+ * Defines theme presets with comprehensive color configurations for backgrounds, terminals,
+ * accents, podiums, scrollbars, and scene elements. Provides hooks for accessing the
+ * currently active theme preset throughout the application.
  */
 
 import { useState, useEffect } from 'react';
 import { create } from 'zustand';
 
 /**
- * Theme preset definition — controls all colors in the 3D workstation scene.
+ * Theme preset interface defining all color and material properties for the 3D workstation scene.
  */
 export interface ThemePreset {
+  /** Display name for the theme. */
   name: string;
-  bg: string;           // site/scene background
-  terminalBg: string;   // terminal window background
+  /** Site and scene background color. */
+  bg: string;
+  /** Terminal window background color. */
+  terminalBg: string;
+  /** Terminal window border color. */
   terminalBorder: string;
-  text: string;         // terminal text color
-  textDim: string;      // terminal dim text
-  accent: string;       // accent / glow color
-  particles: string;    // background particles / stars
+  /** Primary terminal text color. */
+  text: string;
+  /** Dimmed terminal text color for secondary content. */
+  textDim: string;
+  /** Accent color used for highlights and glow effects. */
+  accent: string;
+  /** Color for background particles and stars. */
+  particles: string;
+  /** Base color for podium/platform materials. */
   podiumColor: string;
+  /** Metalness value for podium material (0-1). */
   podiumMetalness: number;
+  /** Roughness value for podium material (0-1). */
   podiumRoughness: number;
+  /** Emissive color for podium material. */
   podiumEmissive: string;
+  /** Intensity multiplier for podium emissive glow (0-1). */
   podiumEmissiveIntensity: number;
-  ringColor: string;    // platform ring color
+  /** Color for platform ring geometry. */
+  ringColor: string;
+  /** Scrollbar color for terminal interface. */
   scrollbar: string;
+  /** Border color for project cards. */
   projectBorder: string;
+  /** Background color for project cards. */
   projectBg: string;
+  /** Fog color for scene atmosphere. */
   fogColor: string;
+  /** Floor plane color. */
   floorColor: string;
+  /** Color for spotlight illumination. */
   spotlightColor: string;
-  spotlightIntensity: number;  // multiplier for pedestal spotlight (1 = default)
-  glowColor: string;    // point light glow on objects
+  /** Intensity multiplier for pedestal spotlight (1.0 = default). */
+  spotlightIntensity: number;
+  /** Color for point light glow effects on objects. */
+  glowColor: string;
 }
 
 export const themePresets: Record<string, ThemePreset> = {
