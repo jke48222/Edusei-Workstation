@@ -202,8 +202,19 @@ def main():
         export_draco_mesh_compression_enable=False,
     )
 
+    # Render photos to white folder
+    scene.render.image_settings.file_format = 'PNG'
+    scene.render.image_settings.color_mode = 'RGBA'
+    white_output_dir = os.path.join(project_root, "white")
+    os.makedirs(white_output_dir, exist_ok=True)
+    scene.render.filepath = os.path.join(white_output_dir, "jalen_edusei_####.png")
+    
+    print("Rendering frames to white folder...")
+    bpy.ops.render.render(animation=True, write_still=True)
+    
     print("Done. JALEN EDUSEI glass logo with rotation is ready.")
     print(f"Exported GLB: {out_path}")
+    print(f"Rendered photos: {white_output_dir}")
 
 if __name__ == "__main__":
     main()

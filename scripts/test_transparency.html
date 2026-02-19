@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparency Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #ff0000 25%, #00ff00 25%, #00ff00 50%, #ff0000 50%, #ff0000 75%, #00ff00 75%);
+            background-size: 40px 40px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .video-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        video {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #333;
+            background: white;
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Transparency Test</h1>
+        <p class="info">
+            If the videos have transparent backgrounds, you should see the red/green checkerboard pattern 
+            through the transparent areas. If you see black or white backgrounds instead, transparency is not preserved.
+        </p>
+        
+        <div class="video-container">
+            <h2>Transition 1 (Black → White)</h2>
+            <video controls autoplay loop>
+                <source src="/videos/jalen-edusei-transition-1.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="video-container">
+            <h2>Transition 2 (White → Black)</h2>
+            <video controls autoplay loop>
+                <source src="/videos/jalen-edusei-transition-2.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="video-container">
+            <h2>Original Black Video (for comparison)</h2>
+            <video controls autoplay loop>
+                <source src="/videos/jalen-edusei-black.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="video-container">
+            <h2>Original White Video (for comparison)</h2>
+            <video controls autoplay loop>
+                <source src="/videos/jalen-edusei-white.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+</body>
+</html>
