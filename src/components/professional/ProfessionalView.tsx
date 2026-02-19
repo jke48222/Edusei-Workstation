@@ -53,9 +53,22 @@ class HeroTitleErrorBoundary extends Component<
   }
 }
 
-/** Hero title wrapper component with error boundary and fallback support. */
+/** Hero title wrapper component with error boundary and fallback support.
+ * On mobile devices (iOS/Android), uses plain text instead of video because WebM VP9 alpha transparency
+ * is not supported on iOS Safari or renders incorrectly on Chrome Android. */
 function HeroTitleWithFallback({ dark }: { dark: boolean }) {
   const fallback = <HeroPlainTextFallback />;
+  
+  // Only use text fallback on actual mobile devices (iOS/Android), not narrow desktop windows
+  // Check user agent to detect iOS Safari or Android Chrome specifically
+  const isMobileDevice = typeof window !== 'undefined' && (
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  );
+  
+  if (isMobileDevice) {
+    return fallback;
+  }
+  
   return (
     <HeroTitleErrorBoundary fallback={fallback}>
       <HeroVideoTitle dark={dark} />
