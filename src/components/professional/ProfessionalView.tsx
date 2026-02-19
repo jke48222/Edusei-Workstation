@@ -183,16 +183,76 @@ function Hero({ heroInView = true }: { heroInView?: boolean }) {
 }
 
 /** Array of technology and domain labels displayed in the scrolling marquee. */
-const marqueeItems = ['C / C++', 'Python', 'Verilog', 'Unity3D', 'React Three Fiber', 'Meta Quest 3', 'NASA F Prime', 'Embedded Systems', 'VR / XR', 'Signal Processing', 'Figma', 'Raspberry Pi', 'WebGL', 'Human-Computer Interaction'];
+const marqueeItems = [
+  'Python', 'Unity3D', 'Figma', 'Raspberry Pi 4', 'C++', 'NASA F Prime', 'Blender', 'Signal Processing',
+  'JavaScript', 'Git', '2U CubeSat', 'Human-Computer Interaction', 'MATLAB', 'CAD', 'STM32 Microcontrollers',
+  'WebGL', 'GitHub', 'Verilog', 'VR/MR Development', 'Raspberry Pi Pico 2W', 'Data Analysis', 'HTML',
+  'Autodesk Fusion 360', 'Meta Quest 3', 'Embedded Systems', 'Zephyr', 'Java', 'Graphic Design',
+  'WordPress', 'C', 'Sensors', 'R', 'Xilinx', 'Website Development', 'React Three Fiber', 'C#',
+  'Business Case Development', 'Wix', 'SQL', 'Microsoft Suite', 'Assembly', 'JavaFX', 'Basys2 FPGA Boards'
+];
 
-/** Horizontal scrolling marquee component displaying technology labels. */
+/** Horizontal scrolling marquee component displaying technology labels. Uses JS animation for seamless infinite loop. */
 function Marquee() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const copyWidthRef = useRef(0);
+  const translateRef = useRef(0);
+  const SPEED = 42; // pixels per second
+
+  const renderItems = (copyId: string) =>
+    marqueeItems.map((item, i) => (
+      <span key={`${copyId}-${i}`} className="mx-6 shrink-0 text-sm font-medium uppercase tracking-widest text-white/80">
+        {item}<span className="ml-6 text-white/30">•</span>
+      </span>
+    ));
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const measure = () => {
+      const firstCopy = track.querySelector(':scope > div:first-child') as HTMLElement;
+      if (firstCopy) copyWidthRef.current = firstCopy.offsetWidth;
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+
+    let rafId: number;
+    let lastTime = performance.now();
+
+    const animate = (now: number) => {
+      const delta = (now - lastTime) / 1000;
+      lastTime = now;
+
+      if (copyWidthRef.current > 0) {
+        translateRef.current -= SPEED * delta;
+        if (translateRef.current <= -copyWidthRef.current) {
+          translateRef.current += copyWidthRef.current;
+        }
+      }
+
+      track.style.transform = `translate3d(${translateRef.current}px, 0, 0)`;
+      rafId = requestAnimationFrame(animate);
+    };
+
+    rafId = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+  }, []);
+
   return (
     <div className="relative overflow-hidden border-y border-[#0a0a0a]/10 bg-[#0a0a0a] py-3 dark:border-[#333333] dark:bg-[#171717] transition-colors duration-300 ease-in-out">
-      <div className="flex animate-marquee whitespace-nowrap">
-        {[...marqueeItems, ...marqueeItems].map((item, i) => (
-          <span key={i} className="mx-6 text-sm font-medium uppercase tracking-widest text-white/80">{item}<span className="ml-6 text-white/30">•</span></span>
-        ))}
+      <div ref={trackRef} className="flex whitespace-nowrap will-change-transform">
+        <div className="flex shrink-0 items-center">
+          {renderItems('copy1')}
+        </div>
+        <div className="flex shrink-0 items-center" aria-hidden="true">
+          {renderItems('copy2')}
+        </div>
       </div>
     </div>
   );
