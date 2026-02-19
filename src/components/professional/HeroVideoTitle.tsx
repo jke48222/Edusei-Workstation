@@ -39,6 +39,7 @@ export function HeroVideoTitle({
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const previousDarkRef = useRef<boolean | null>(null);
   const [currentVideoSrc, setCurrentVideoSrc] = useState<string>('');
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   
   // Preload transition videos on mount to eliminate delay when switching themes
   useEffect(() => {
@@ -76,7 +77,10 @@ export function HeroVideoTitle({
     } else if (previousDarkRef.current !== dark) {
       // Theme changed: use transition video (preloaded for instant playback)
       const transitionVideoSrc = dark ? '/videos/jalen-edusei-transition-1.webm' : '/videos/jalen-edusei-transition-2.webm';
+      setIsTransitioning(true);
       setCurrentVideoSrc(transitionVideoSrc);
+      // Reset transition state after a brief delay
+      setTimeout(() => setIsTransitioning(false), 100);
     }
     // If theme hasn't changed, keep current video (don't update state)
     
@@ -204,7 +208,7 @@ export function HeroVideoTitle({
       <video
         ref={videoRef}
         src={currentVideoSrc}
-        className="w-full h-full"
+        className="w-full h-full transition-opacity duration-200 ease-in-out"
         style={{ 
           display: 'block',
           width: '100%',
@@ -215,7 +219,8 @@ export function HeroVideoTitle({
           minHeight: 0,
           objectFit: 'cover',
           objectPosition: 'left center',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          opacity: isTransitioning ? 0.95 : 1
         }}
         playsInline
         muted
