@@ -1,8 +1,9 @@
 /**
  * @file Overlay.tsx
- * @description Terminal-style overlay for the immersive workstation: boot sequence, system
- * status, project grid, command input, and contact links. Theme-driven colors; supports
- * mobile detail panel with minimize/expand. CRT-style and scrollbar styling via theme.
+ * @description Terminal-style overlay component for the immersive workstation view. Displays
+ * boot sequence animation, system status information, interactive project grid, command input
+ * interface, and contact links. Features theme-driven color schemes, mobile-responsive detail
+ * panel with minimize/expand functionality, and CRT-style visual effects with custom scrollbar styling.
  */
 
 import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
@@ -37,7 +38,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-/** Framer Motion variants for list animations (duration/stagger zero when reduced motion). */
+/** Framer Motion animation variants for list items. Duration and stagger are set to zero when reduced motion preference is enabled. */
 function getStaggerList(reducedMotion: boolean) {
   return { visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.015 } } };
 }

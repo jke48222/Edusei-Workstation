@@ -1,8 +1,10 @@
 /**
  * @file store.ts
- * @description Unified Zustand store for workstation views (monitor/car/dog/vr/satellite/tablet),
- * view mode (immersive vs professional), and gallery/VR experience (scene transitions, avatar,
- * camera, video, gaze bridge). Uses subscribeWithSelector for granular subscriptions.
+ * @description Unified Zustand state management store for the entire application. Manages
+ * workstation view states (monitor, robot car, sleeping dog, VR headset, satellite, Capital One),
+ * view mode switching (immersive 3D vs professional portfolio), and gallery/VR experience state
+ * including scene transitions, avatar controls, camera modes, video interactions, and gaze bridge mechanics.
+ * Uses subscribeWithSelector middleware for efficient granular subscriptions.
  */
 
 import { create } from 'zustand';
@@ -14,53 +16,62 @@ import * as THREE from 'three';
 // ============================================================================
 
 /**
- * ViewState enum representing all possible camera positions in the workstation
+ * ViewState type representing all possible camera positions and object views in the workstation scene.
  */
 export type ViewState = 'monitor' | 'audio-tracking-car' | 'animaldot' | 'kitchen-chaos-vr' | 'memesat' | 'capital-one';
 
 /**
- * High-level view mode for the site
- * - 'immersive' keeps the existing 3D workstation + VR gallery
- * - 'professional' mounts a DOM-first, recruiter-friendly view
+ * High-level view mode type for the entire application.
+ * - 'immersive': Renders the 3D workstation scene with VR gallery experience
+ * - 'professional': Renders a DOM-based, recruiter-friendly portfolio view
  */
 export type ViewMode = 'immersive' | 'professional';
 
 /**
- * Scene mode - tracks which major scene the user is in
+ * Scene mode type tracking the current major scene context within the immersive experience.
  */
 export type SceneMode = 'workstation' | 'vr-transition' | 'gallery';
 
 /**
- * Camera mode within the gallery
+ * Gallery camera mode type defining available camera behaviors within the gallery scene.
  */
 export type GalleryCameraMode = 'follow' | 'cinema';
 
 /**
- * Gallery state for the gamified experience
+ * Gallery state interface defining all state properties for the gamified gallery experience.
  */
 interface GalleryState {
-  // Scene state machine
+  /** Current scene mode within the gallery experience state machine. */
   sceneMode: SceneMode;
-  transitionProgress: number; // 0 to 1
+  /** Transition progress value ranging from 0 to 1. */
+  transitionProgress: number;
+  /** Whether a scene transition is currently in progress. */
   isSceneTransitioning: boolean;
 
-  // Avatar state
+  /** Current avatar position in 3D world space. */
   avatarPosition: THREE.Vector3;
-  avatarRotation: number; // Y-axis rotation in radians
+  /** Avatar rotation around Y-axis in radians. */
+  avatarRotation: number;
+  /** Current avatar velocity vector. */
   avatarVelocity: THREE.Vector3;
+  /** Whether the avatar is currently moving. */
   isMoving: boolean;
 
-  // Camera state
+  /** Current camera mode within the gallery scene. */
   galleryCameraMode: GalleryCameraMode;
+  /** Target position for cinematic camera mode. */
   cinematicTarget: THREE.Vector3 | null;
+  /** Look-at target for cinematic camera mode. */
   cinematicLookAt: THREE.Vector3 | null;
 
-  // Video interaction state
+  /** Currently active video identifier, or null if no video is active. */
   activeVideoId: string | null;
+  /** Currently active platform identifier associated with the active video. */
   activePlatformId: string | null;
+  /** Whether the active video is currently playing. */
   videoPlaying: boolean;
 
-  // Input state (for keyboard controls)
+  /** Keyboard input state for movement controls. */
   input: {
     forward: boolean;
     backward: boolean;
@@ -68,46 +79,51 @@ interface GalleryState {
     right: boolean;
   };
 
-  // Headset dissolve effect
+  /** Opacity value for the headset dissolve effect (0 to 1). */
   headsetOpacity: number;
 
-  // Spirit Oasis — Gaze bridge state
+  /** Spirit Oasis gaze bridge state properties. */
+  /** Target island identifier for gaze bridge construction. */
   gazeTargetIsland: string | null;
+  /** Progress of gaze bridge construction (0 to 1). */
   gazeProgress: number;
+  /** Bridge state mapping for each island (none, building, complete, dissolving). */
   bridgeStates: Record<string, 'none' | 'building' | 'complete' | 'dissolving'>;
+  /** Currently active island identifier. */
   activeIslandId: string | null;
 }
 
+/** Gallery actions interface defining all available actions for gallery state management. */
 interface GalleryActions {
-  // Scene transitions
+  /** Scene transition actions. */
   enterGallery: () => void;
   setTransitionProgress: (progress: number) => void;
   completeGalleryTransition: () => void;
   exitGallery: () => void;
 
-  // Avatar controls
+  /** Avatar control actions. */
   setAvatarPosition: (position: THREE.Vector3) => void;
   setAvatarRotation: (rotation: number) => void;
   setAvatarVelocity: (velocity: THREE.Vector3) => void;
   setIsMoving: (moving: boolean) => void;
 
-  // Camera controls
+  /** Camera control actions. */
   setGalleryCameraMode: (mode: GalleryCameraMode) => void;
   enterCinemaMode: (cameraPos: THREE.Vector3, lookAt: THREE.Vector3) => void;
   exitCinemaMode: () => void;
 
-  // Video controls
+  /** Video interaction control actions. */
   setActiveVideo: (videoId: string | null, platformId: string | null) => void;
   setVideoPlaying: (playing: boolean) => void;
 
-  // Input controls
+  /** Keyboard input control actions. */
   setInput: (key: keyof GalleryState['input'], value: boolean) => void;
   resetInput: () => void;
 
-  // Headset effect
+  /** Headset dissolve effect control actions. */
   setHeadsetOpacity: (opacity: number) => void;
 
-  // Spirit Oasis — Gaze bridge actions
+  /** Spirit Oasis gaze bridge control actions. */
   setGazeTarget: (islandId: string | null) => void;
   setGazeProgress: (progress: number) => void;
   setBridgeState: (islandId: string, state: 'none' | 'building' | 'complete' | 'dissolving') => void;
@@ -115,25 +131,30 @@ interface GalleryActions {
 }
 
 // ============================================================================
-// Workstation Store (Original)
+// Workstation Store State and Actions
 // ============================================================================
 
+/** Workstation state interface defining core application state properties. */
 interface WorkstationState {
-  // High-level site mode
+  /** High-level site view mode (immersive or professional). */
   viewMode: ViewMode;
 
+  /** Current workstation view state identifier. */
   currentView: ViewState;
+  /** Whether a camera animation is currently in progress. */
   isAnimating: boolean;
+  /** Timestamp when the current animation started, or null if not animating. */
   animationStartTime: number | null;
+  /** Duration of camera transition animations in milliseconds. */
   transitionDuration: number;
 
-  /** Terminal boot sequence has completed (show only once per session). */
+  /** Whether the terminal boot sequence has completed (shown only once per session). */
   terminalBooted: boolean;
 
-  /** User prefers reduced motion (from prefers-reduced-motion media query). */
+  /** User preference for reduced motion (from prefers-reduced-motion media query). */
   prefersReducedMotion: boolean;
 
-  /** Terminal sound muted (persisted to localStorage). */
+  /** Whether terminal sound effects are muted (persisted to localStorage). */
   soundMuted: boolean;
 }
 

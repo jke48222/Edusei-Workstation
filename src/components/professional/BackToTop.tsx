@@ -4,7 +4,7 @@
  */
 
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const SCROLL_THRESHOLD = 500;
 
@@ -18,18 +18,30 @@ function ChevronUpIcon({ className }: { className?: string }) {
 
 export function BackToTop() {
   const [visible, setVisible] = useState(false);
+  const rafRef = useRef<number | null>(null);
+  const tickingRef = useRef(false);
 
   useEffect(() => {
     const container = document.querySelector('.pro-scroll');
     if (!container) return;
 
-    const handleScroll = () => {
+    const updateFromScroll = () => {
+      tickingRef.current = false;
       setVisible(container.scrollTop > SCROLL_THRESHOLD);
     };
 
-    handleScroll();
+    const handleScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      rafRef.current = requestAnimationFrame(updateFromScroll);
+    };
+
+    updateFromScroll();
     container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   const scrollToTop = () => {
