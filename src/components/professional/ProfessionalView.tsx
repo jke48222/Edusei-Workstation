@@ -8,7 +8,7 @@
 
 import { Analytics } from '@vercel/analytics/react';
 import { motion, useInView } from 'framer-motion';
-import { Component, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { Component, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   profileData,
@@ -192,15 +192,28 @@ const marqueeItems = [
   'Business Case Development', 'Wix', 'SQL', 'Microsoft Suite', 'Assembly', 'JavaFX', 'Basys2 FPGA Boards'
 ];
 
+/** Shuffles an array using Fisher-Yates algorithm. */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 /** Horizontal scrolling marquee component displaying technology labels. Uses JS animation for seamless infinite loop. */
 function Marquee() {
   const trackRef = useRef<HTMLDivElement>(null);
   const copyWidthRef = useRef(0);
   const translateRef = useRef(0);
   const SPEED = 42; // pixels per second
+  
+  // Randomize skills order once on mount
+  const [shuffledItems] = useState(() => shuffleArray(marqueeItems));
 
   const renderItems = (copyId: string) =>
-    marqueeItems.map((item, i) => (
+    shuffledItems.map((item, i) => (
       <span key={`${copyId}-${i}`} className="mx-6 shrink-0 text-sm font-medium uppercase tracking-widest text-white/80">
         {item}<span className="ml-6 text-white/30">•</span>
       </span>
