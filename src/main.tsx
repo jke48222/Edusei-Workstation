@@ -1,7 +1,8 @@
 /**
  * @file main.tsx
- * @description Application entry point. Mounts the root React component inside
- * StrictMode and BrowserRouter, with global styles applied. Registers PWA service worker in production.
+ * @description Application entry point that mounts the root React component within
+ * StrictMode and BrowserRouter. Applies global styles and registers PWA service worker
+ * in production builds for offline functionality.
  */
 
 import { StrictMode } from 'react';

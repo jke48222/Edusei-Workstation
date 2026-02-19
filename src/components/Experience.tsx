@@ -1,8 +1,9 @@
 /**
  * @file Experience.tsx
- * @description Main 3D workstation scene: R3F Canvas, themed platforms/rings, clickable
- * objects (monitor, car, dog, VR, satellite, tablet), camera rig, and optional gallery/transition.
- * Preloads GLTF models and exports OBJECT_POSITIONS for CameraRig alignment.
+ * @description Main 3D workstation scene component built with React Three Fiber. Renders
+ * themed platforms, clickable 3D objects (monitor, robot car, sleeping dog, VR headset,
+ * satellite, Capital One logo), camera rig, and optional gallery transition effects.
+ * Preloads GLTF models and exports OBJECT_POSITIONS constant for camera alignment.
  */
 
 import { useRef, useState, Suspense } from 'react';
@@ -23,7 +24,7 @@ import { getProjectById } from '../data';
 import { CameraRig } from './CameraRig';
 import type { ViewState } from '../store/store';
 
-/** Preload all GLTF models for faster first-view load. */
+/** Preload all GLTF models to improve initial load performance and reduce loading delays. */
 useGLTF.preload('/models/crt_monitor.glb');
 useGLTF.preload('/models/robot_car.glb');
 useGLTF.preload('/models/sleeping_dog.glb');
@@ -32,7 +33,7 @@ useGLTF.preload('/models/satellite.glb');
 useGLTF.preload('/models/capital_one.glb');
 useGLTF.preload('/models/desk_set.glb');
 
-/** World-space positions for each workstation object (aligned with CameraRig). */
+/** World-space coordinate positions for each workstation object, aligned with CameraRig target positions. */
 export const OBJECT_POSITIONS = {
   monitor: { x: 0, y: 1, z: 0 },
   'audio-tracking-car': { x: 25, y: 1.5, z: 0 },
@@ -59,7 +60,7 @@ function FloatingPlatform({ position }: { position: [number, number, number] }) 
   );
 }
 
-/** Themed ring geometry around each platform. */
+/** Themed ring geometry component displayed around each platform base. */
 function PlatformRing({ position }: { position: [number, number, number] }) {
   const theme = useActiveTheme();
   return (
@@ -70,7 +71,7 @@ function PlatformRing({ position }: { position: [number, number, number] }) {
   );
 }
 
-/** Props for a clickable 3D object (view id, position, active state). */
+/** Props interface for clickable 3D object components. */
 interface ClickableObjectProps {
   viewId: ViewState;
   children: React.ReactNode;
@@ -179,7 +180,7 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
 }
 
 /**
- * CRT Monitor - The main terminal display
+ * CRT Monitor component representing the main terminal display object in the workstation scene.
  */
 function CRTMonitor() {
   const { scene } = useGLTF('/models/crt_monitor.glb');
@@ -333,7 +334,8 @@ function ModelFallback() {
 }
 
 /**
- * Workstation scene content — themed
+ * Workstation scene content component. Manages theming, lighting, environment,
+ * and all 3D objects within the workstation scene.
  */
 function WorkstationContent() {
   const theme = useActiveTheme();

@@ -1,12 +1,14 @@
 /**
  * @file ProfessionalView.tsx
- * @description Full-page scrollable portfolio view: hero, marquee, stats, about, projects,
- * experience, skills, study abroad, contact, footer, and FloatingDock. Data from ../../data.
+ * @description Full-page scrollable portfolio view component. Displays hero section with
+ * animated title, marquee, statistics, about section, project timeline, work experience,
+ * skills, study abroad information, contact call-to-action, footer, and floating navigation dock.
+ * All content is sourced from the centralized data module.
  */
 
 import { Analytics } from '@vercel/analytics/react';
 import { motion, useInView } from 'framer-motion';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { Component, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   profileData,
@@ -19,17 +21,49 @@ import {
   getSayHiMailto,
 } from '../../data';
 import { useThemeStore } from '../../store/themeStore';
+import CountUp from '../CountUp';
+import ScrollReveal from '../ScrollReveal';
 import { BackToTop } from './BackToTop';
 import { FloatingDock } from './FloatingDock';
+import Dither from '../hero-backgrounds/Dither';
+import LetterGlitch from '../hero-backgrounds/LetterGlitch';
+import { HeroVideoTitle } from './HeroVideoTitle';
 
-/** Framer Motion variants for section stagger and fade-up. */
+/** Framer Motion animation variants for staggered section reveals and fade-up effects. */
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 
-/** Wrapper that triggers stagger when in view (once, with margin). */
+/** Plain text fallback component displayed when video title fails to load. */
+const HeroPlainTextFallback = () => (
+  <span className="block text-[clamp(3.5rem,14vw,12rem)]">JALEN<br />EDUSEI</span>
+);
+
+/** Error boundary component that displays plain text fallback when video title fails to render. */
+class HeroTitleErrorBoundary extends Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError = () => ({ hasError: true });
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
+/** Hero title wrapper component with error boundary and fallback support. */
+function HeroTitleWithFallback({ dark }: { dark: boolean }) {
+  const fallback = <HeroPlainTextFallback />;
+  return (
+    <HeroTitleErrorBoundary fallback={fallback}>
+      <HeroVideoTitle dark={dark} />
+    </HeroTitleErrorBoundary>
+  );
+}
+
+/** Section wrapper component that triggers staggered animations when scrolled into view. */
 function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
@@ -40,12 +74,16 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
   );
 }
 
-/** Root professional layout: scroll container with all sections and dock. */
+/** Root professional portfolio layout component. Manages scroll container and all section components. */
 export function ProfessionalView() {
   const location = useLocation();
   const portfolioDark = useThemeStore((s) => s.portfolioDark);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const heroInView = useInView(heroRef, { amount: 0, margin: '-50px' });
 
-  // Keep <html> in sync with portfolio dark mode (no cleanup on toggle to avoid flashing previous mode).
+  // Synchronize HTML root element with portfolio dark mode state
+  // Note: No cleanup on toggle to prevent visual flashing when switching themes
   useLayoutEffect(() => {
     const root = document.documentElement;
     if (portfolioDark) root.classList.add('dark');
@@ -66,10 +104,13 @@ export function ProfessionalView() {
 
   return (
     <div
+      ref={scrollContainerRef}
       className={`pro-scroll fixed inset-0 z-40 overflow-y-auto font-sans transition-[background-color,color] duration-300 ease-in-out ${portfolioDark ? 'dark bg-[#0d0d0d] text-[#fafafa]' : 'bg-[#fafaf8] text-[#0a0a0a]'}`}
       data-portfolio-dark={portfolioDark}
     >
-      <Hero />
+      <div ref={heroRef}>
+        <Hero heroInView={heroInView} />
+      </div>
       <Marquee />
       <Stats />
       <AboutBand />
@@ -78,7 +119,7 @@ export function ProfessionalView() {
       <ProjectsList />
       <SkillsCloud />
       <StudyAbroadSection />
-      <ContactCTA />
+      <ContactCTA scrollContainerRef={scrollContainerRef} />
       <Footer />
       <FloatingDock />
       <BackToTop />
@@ -87,13 +128,26 @@ export function ProfessionalView() {
   );
 }
 
-/** Hero section: gradient background, title, open-for-work badge, CTA buttons. */
-function Hero() {
+/** Hero section component featuring animated dither background, video title, open-for-work badge, and call-to-action buttons. */
+function Hero({ heroInView = true }: { heroInView?: boolean }) {
+  const portfolioDark = useThemeStore((s) => s.portfolioDark);
   return (
     <header className="relative min-h-[92vh] overflow-hidden bg-[#fafaf8] dark:bg-[#0d0d0d] transition-colors duration-300 ease-in-out">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.4] dark:hidden" style={{ backgroundImage: 'radial-gradient(circle, #0a0a0a 0.8px, transparent 0.8px)', backgroundSize: '24px 24px' }} />
-      <div aria-hidden className="pointer-events-none absolute inset-0 hidden opacity-30 dark:block" style={{ backgroundImage: 'radial-gradient(circle, #333333 0.8px, transparent 0.8px)', backgroundSize: '24px 24px' }} />
-      <div aria-hidden className="pointer-events-none absolute inset-0 dark:opacity-90" style={{ background: 'radial-gradient(ellipse 80% 60% at 75% 25%, rgba(168,85,247,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 15% 75%, rgba(6,182,212,0.06) 0%, transparent 60%)' }} />
+      <div className="absolute inset-0 z-[1] min-h-[92vh]">
+        <Suspense fallback={null}>
+          <Dither
+            waveColor={[0.4, 0.45, 0.55]}
+            disableAnimation={!heroInView}
+            enableMouseInteraction={heroInView}
+            mouseRadius={0.3}
+            colorNum={4}
+            waveAmplitude={0.3}
+            waveFrequency={3}
+            waveSpeed={0.05}
+          />
+        </Suspense>
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#fafaf8]/75 dark:bg-[#0d0d0d]/75" />
+      </div>
       <div className="relative z-10 flex min-h-[92vh] flex-col justify-end px-6 pb-20 md:px-12 lg:px-20">
         <motion.div initial={{ opacity: 0, y: 48 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
           <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -110,8 +164,10 @@ function Hero() {
               </a>
             )}
           </div>
-          <h1 className="font-display text-[clamp(3.5rem,14vw,12rem)] font-extrabold leading-[0.85] tracking-tighter text-[#0a0a0a] dark:text-[#fafafa]">JALEN<br />EDUSEI</h1>
-          <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-end md:gap-12">
+          <h1 className="font-display font-extrabold leading-[0.85] tracking-tighter text-[#0a0a0a] dark:text-[#fafafa]" aria-hidden>
+            <HeroTitleWithFallback dark={portfolioDark} />
+          </h1>
+          <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-end md:gap-12">
             <p className="max-w-lg text-base leading-relaxed text-[#0a0a0a]/60 md:text-lg dark:text-[#fafafa]/60">Senior at UGA studying computer systems engineering. Open for full-time opportunities starting May 2026.</p>
             <div className="flex flex-wrap gap-3 shrink-0">
               <a href={getSayHiMailto()} className="rounded-full bg-[#0a0a0a] px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-105 active:scale-95 dark:bg-white dark:text-[#0a0a0a] dark:hover:bg-white/90">Say hi</a>
@@ -126,10 +182,10 @@ function Hero() {
   );
 }
 
-/** Repeating strip of tech/domain labels in the marquee. */
+/** Array of technology and domain labels displayed in the scrolling marquee. */
 const marqueeItems = ['C / C++', 'Python', 'Verilog', 'Unity3D', 'React Three Fiber', 'Meta Quest 3', 'NASA F Prime', 'Embedded Systems', 'VR / XR', 'Signal Processing', 'Figma', 'Raspberry Pi', 'WebGL', 'Human-Computer Interaction'];
 
-/** Horizontal scrolling marquee band. */
+/** Horizontal scrolling marquee component displaying technology labels. */
 function Marquee() {
   return (
     <div className="relative overflow-hidden border-y border-[#0a0a0a]/10 bg-[#0a0a0a] py-3 dark:border-[#333333] dark:bg-[#171717] transition-colors duration-300 ease-in-out">
@@ -142,20 +198,27 @@ function Marquee() {
   );
 }
 
-/** Key metrics for the stats strip. */
+/** Statistics data configuration. Each entry defines animated count-up values, labels, and timing parameters (duration and delay in seconds). */
 const stats = [
-  { value: '10+', label: 'Technical Projects' },
-  { value: '60M+', label: 'Users Impacted' },
-  { value: '2026', label: 'Graduating' },
-  { value: '100+', label: 'NSBE Members Led' },
+  { from: 0, to: 10, suffix: '+', label: 'Technical Projects', duration: 1.5, delay: 0 },
+  { from: 0, to: 60, suffix: 'M+', label: 'Users Impacted', duration: 0.7, delay: 0.2 },
+  { from: 2020, to: 2026, suffix: '', label: 'Graduating', duration: 1.9, delay: 0.4 },
+  { from: 0, to: 100, suffix: '+', label: 'NSBE Members Led', duration: 0.5, delay: 0.1 },
 ];
 
 function Stats() {
+  const sectionRef = useRef<HTMLDivElement>(null);
   return (
-    <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-6 py-16 md:grid-cols-4 md:px-12 lg:px-20">
+    <div
+      ref={sectionRef}
+      className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-6 py-16 md:grid-cols-4 md:px-12 lg:px-20"
+    >
       {stats.map((s) => (
         <div key={s.label} className="text-center">
-          <p className="text-4xl font-bold tracking-tight text-[#0a0a0a] dark:text-[#fafafa] md:text-5xl">{s.value}</p>
+          <p className="text-4xl font-bold tracking-tight text-[#0a0a0a] dark:text-[#fafafa] md:text-5xl">
+            <CountUp from={s.from} to={s.to} duration={s.duration} delay={s.delay} className="inline" triggerRef={sectionRef} />
+            {s.suffix}
+          </p>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[#0a0a0a]/50 dark:text-[#fafafa]/50">{s.label}</p>
         </div>
       ))}
@@ -223,7 +286,7 @@ function ProjectRow({ project, index, cardId }: { project: (typeof projectsData)
   );
 }
 
-/** Selected Work section: project rows (original design). Timeline clicks scroll to card-{project.id}. */
+/** Selected Work section component displaying featured projects in a card-based layout. Timeline interactions scroll to corresponding project cards. */
 function ProjectsList() {
   return (
     <section id="work" className="w-full min-w-full bg-[#fafaf8] dark:bg-[#0a0a0a] transition-colors duration-300 ease-in-out">
@@ -247,7 +310,7 @@ function ProjectsList() {
   );
 }
 
-/** Parse period string to a sort key (YYYY-MM). */
+/** Converts a period string (e.g., "January 2024") to a sortable date key in YYYY-MM format. */
 function periodToSortKey(period: string): string {
   const months: Record<string, string> = { january: '01', february: '02', march: '03', april: '04', may: '05', june: '06', july: '07', august: '08', september: '09', october: '10', november: '11', december: '12' };
   const match = period.toLowerCase().match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s*(\d{4})/);
@@ -256,12 +319,12 @@ function periodToSortKey(period: string): string {
   return yearMatch ? `${yearMatch[0]}-01` : '0000-01';
 }
 
-/** Slug for scroll id from company name. */
+/** Converts a string to a URL-friendly slug for use as scroll anchor identifiers. */
 function slugify(s: string): string {
   return s.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
 
-/** Single timeline node: id (scroll target), date (display), title (display), sortKey. */
+/** Timeline node data structure containing identifier, display date, title, and sort key. */
 type TimelineNode = { id: string; date: string; title: string; sortKey: string };
 
 function getTimelineNodes(): TimelineNode[] {
@@ -292,7 +355,7 @@ function scrollToCard(id: string) {
   document.getElementById(`card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/** Horizontal timeline: dates + titles only; click scrolls to Experience or Selected Work card. */
+/** Horizontal timeline component displaying chronological education, work experience, and projects. Clicking a node scrolls to the corresponding detail card. */
 function Timeline() {
   const nodes = getTimelineNodes();
   return (
@@ -376,46 +439,73 @@ function ExperienceSection() {
 
 function SkillsCloud() {
   return (
-    <section id="skills" className="w-full min-w-full bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
-      <div className="w-full px-6 py-20 md:px-12 lg:px-20">
-        <Section>
-          <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight md:text-4xl dark:text-[#fafafa]">Toolkit</motion.h2>
-          <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/60 dark:text-[#fafafa]/60">Languages, frameworks, hardware, and core strengths.</motion.p>
-        </Section>
-        <div className="grid gap-8 md:grid-cols-2">
-          <Section className="space-y-6">
-            <SkillCategory label="Programming" items={skillsData.programming} />
-            <SkillCategory label="Software & Tools" items={skillsData.software} />
+    <section id="skills" className="relative w-full min-w-full overflow-hidden transition-colors duration-300 ease-in-out">
+      {/* Letter Glitch only behind the Toolkit block (title + skill categories) */}
+      <div className="relative w-full">
+        <div className="absolute inset-0 z-0">
+          <Suspense fallback={null}>
+            <LetterGlitch
+              glitchSpeed={65}
+              centerVignette
+              outerVignette={false}
+              smooth
+            />
+          </Suspense>
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#fafaf8]/85 dark:bg-[#111111]/85" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-0 right-0 top-0 h-40 bg-gradient-to-b from-[#fafaf8] via-[#fafaf8]/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#fafaf8] via-[#fafaf8]/80 to-transparent dark:from-[#111111] dark:via-[#111111]/80"
+          />
+        </div>
+        <div className="relative z-10 w-full px-6 py-20 md:px-12 lg:px-20">
+          <Section>
+            <motion.h2 variants={fadeUp} className="mb-2 text-3xl font-bold tracking-tight text-[#0a0a0a] md:text-4xl dark:text-[#fafafa]">Toolkit</motion.h2>
+            <motion.p variants={fadeUp} className="mb-10 text-[15px] text-[#0a0a0a]/85 dark:text-[#fafafa]/60">Languages, frameworks, hardware, and core strengths.</motion.p>
           </Section>
-          <Section className="space-y-6">
-            <SkillCategory label="Hardware" items={skillsData.hardware} />
-            <SkillCategory label="Core Strengths" items={skillsData.core} />
+          <div className="grid gap-8 md:grid-cols-2">
+            <Section className="space-y-6">
+              <SkillCategory label="Programming" items={skillsData.programming} />
+              <SkillCategory label="Software & Tools" items={skillsData.software} />
+            </Section>
+            <Section className="space-y-6">
+              <SkillCategory label="Hardware" items={skillsData.hardware} />
+              <SkillCategory label="Core Strengths" items={skillsData.core} />
+            </Section>
+          </div>
+        </div>
+      </div>
+      {/* Leadership & Community + Honors & Awards on solid background (no glitch) */}
+      <div className="bg-[#fafaf8] dark:bg-[#111111] transition-colors duration-300 ease-in-out">
+        <div className="w-full px-6 pb-20 md:px-12 lg:px-20">
+          <Section className="grid gap-8 border-t border-[#0a0a0a]/10 pt-10 dark:border-[#333333] md:grid-cols-2">
+            <motion.div variants={fadeUp}>
+              <h3 className="mb-4 text-lg font-bold text-[#0a0a0a] dark:text-[#fafafa]">Leadership & Community</h3>
+              <ul className="space-y-2">
+                {leadership.map((item) => (
+                  <li key={`${item.role}-${item.organization}`} className="text-sm text-[#0a0a0a]/88 dark:text-[#fafafa]/70">
+                    <span className="font-medium text-[#0a0a0a] dark:text-[#fafafa]">{item.role}</span> — {item.organization}
+                    <span className="ml-2 font-mono text-[10px] text-[#0a0a0a]/65 dark:text-[#fafafa]/40">{item.period}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <h3 className="mb-4 text-lg font-bold text-[#0a0a0a] dark:text-[#fafafa]">Honors & Awards</h3>
+              <ul className="space-y-2">
+                {honors.map((honor) => (
+                  <li key={honor.title} className="text-sm text-[#0a0a0a]/88 dark:text-[#fafafa]/70">
+                    <span className="font-medium text-[#0a0a0a] dark:text-[#fafafa]">{honor.title}</span> — {honor.org}
+                    <span className="ml-2 font-mono text-[10px] text-[#0a0a0a]/65 dark:text-[#fafafa]/40">{honor.date}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </Section>
         </div>
-        <Section className="mt-16 grid gap-8 border-t border-[#0a0a0a]/10 pt-10 dark:border-[#333333] md:grid-cols-2">
-        <motion.div variants={fadeUp}>
-          <h3 className="mb-4 text-lg font-bold dark:text-[#fafafa]">Leadership & Community</h3>
-          <ul className="space-y-2">
-            {leadership.map((item) => (
-              <li key={`${item.role}-${item.organization}`} className="text-sm text-[#0a0a0a]/70 dark:text-[#fafafa]/70">
-                <span className="font-medium text-[#0a0a0a] dark:text-[#fafafa]">{item.role}</span> — {item.organization}
-                <span className="ml-2 font-mono text-[10px] text-[#0a0a0a]/40 dark:text-[#fafafa]/40">{item.period}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-        <motion.div variants={fadeUp}>
-          <h3 className="mb-4 text-lg font-bold dark:text-[#fafafa]">Honors & Awards</h3>
-          <ul className="space-y-2">
-            {honors.map((honor) => (
-              <li key={honor.title} className="text-sm text-[#0a0a0a]/70 dark:text-[#fafafa]/70">
-                <span className="font-medium text-[#0a0a0a] dark:text-[#fafafa]">{honor.title}</span> — {honor.org}
-                <span className="ml-2 font-mono text-[10px] text-[#0a0a0a]/40 dark:text-[#fafafa]/40">{honor.date}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-      </Section>
       </div>
     </section>
   );
@@ -424,10 +514,10 @@ function SkillsCloud() {
 function SkillCategory({ label, items }: { label: string; items: string[] }) {
   return (
     <motion.div variants={fadeUp}>
-      <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#0a0a0a]/40 dark:text-[#fafafa]/40">{label}</p>
+      <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#0a0a0a]/65 dark:text-[#fafafa]/40">{label}</p>
       <div className="flex flex-wrap gap-2">
         {items.map((item) => (
-          <span key={item} className="rounded-full border border-[#0a0a0a]/10 bg-white px-3 py-1.5 text-xs text-[#0a0a0a]/80 transition-colors hover:border-[#0a0a0a] hover:bg-[#0a0a0a] hover:text-white dark:border-[#333333] dark:bg-[#141414] dark:text-[#fafafa]/80 dark:hover:border-[#404040] dark:hover:bg-white dark:hover:text-[#0a0a0a]">{item}</span>
+          <span key={item} className="rounded-full border border-[#0a0a0a]/10 bg-white px-3 py-1.5 text-xs text-[#0a0a0a]/90 transition-colors hover:border-[#0a0a0a] hover:bg-[#0a0a0a] hover:text-white dark:border-[#333333] dark:bg-[#141414] dark:text-[#fafafa]/80 dark:hover:border-[#404040] dark:hover:bg-white dark:hover:text-[#0a0a0a]">{item}</span>
         ))}
       </div>
     </motion.div>
@@ -452,13 +542,23 @@ function StudyAbroadSection() {
   );
 }
 
-function ContactCTA() {
+function ContactCTA({ scrollContainerRef }: { scrollContainerRef?: React.RefObject<HTMLElement> }) {
   return (
     <section id="contact" className="relative overflow-hidden bg-[#0a0a0a] py-24 text-center text-white dark:bg-[#111111] dark:text-white transition-colors duration-300 ease-in-out">
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(168,85,247,0.12) 0%, transparent 70%)' }} />
       <Section className="relative mx-auto max-w-3xl px-6">
         <motion.p variants={fadeUp} className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-white/40">What's next?</motion.p>
-        <motion.h2 variants={fadeUp} className="text-4xl font-bold tracking-tight md:text-6xl">Let's build<br />something together.</motion.h2>
+        <ScrollReveal
+          scrollContainerRef={scrollContainerRef}
+          baseOpacity={0.15}
+          enableBlur
+          baseRotation={2}
+          blurStrength={3}
+          containerClassName="!my-0"
+          textClassName="text-4xl font-bold tracking-tight text-white md:text-6xl"
+        >
+          Let's build something together.
+        </ScrollReveal>
         <motion.div variants={fadeUp} className="mt-10 flex flex-wrap justify-center gap-3">
           <a href={getSayHiMailto()} className="rounded-full bg-white px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-transform hover:scale-105 dark:bg-white dark:text-[#0a0a0a] dark:hover:bg-white/90">Say hi</a>
           <a href={`sms:+1${profileData.phone.replace(/\D/g, '')}`} className="rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10">Text me</a>
