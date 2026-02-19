@@ -150,7 +150,7 @@ function Hero({ heroInView = true }: { heroInView?: boolean }) {
       </div>
       <div className="relative z-10 flex min-h-[92vh] flex-col justify-end px-6 pb-20 md:px-12 lg:px-20">
         <motion.div initial={{ opacity: 0, y: 48 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
-          <div className="mb-5 flex flex-wrap items-center gap-3">
+          <div className="mb-5 flex flex-wrap items-center gap-3 pt-6">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#0a0a0a]/50 dark:text-[#fafafa]/50">Computer Systems Engineering · University of Georgia</p>
             {profileData.openForWork && (
               <a
