@@ -159,7 +159,7 @@ function Hero({ heroInView = true }: { heroInView?: boolean }) {
             waveSpeed={0.05}
           />
         </Suspense>
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#fafaf8]/75 dark:bg-[#0d0d0d]/75" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#fafaf8]/75 dark:bg-[#0d0d0d]/75 transition-colors duration-300 ease-in-out" />
       </div>
       <div className="relative z-10 flex min-h-[92vh] flex-col justify-end px-6 pb-20 md:px-12 lg:px-20">
         <motion.div initial={{ opacity: 0, y: 48 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
@@ -537,14 +537,14 @@ function SkillsCloud() {
               smooth
             />
           </Suspense>
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#fafaf8]/85 dark:bg-[#111111]/85" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#fafaf8]/85 dark:bg-[#111111]/85 transition-colors duration-300 ease-in-out" />
           <div
             aria-hidden
-            className="pointer-events-none absolute left-0 right-0 top-0 h-40 bg-gradient-to-b from-[#fafaf8] via-[#fafaf8]/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80"
+            className="pointer-events-none absolute left-0 right-0 top-0 h-40 bg-gradient-to-b from-[#fafaf8] via-[#fafaf8]/80 to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a]/80 transition-colors duration-300 ease-in-out"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#fafaf8] via-[#fafaf8]/80 to-transparent dark:from-[#111111] dark:via-[#111111]/80"
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#fafaf8] via-[#fafaf8]/80 to-transparent dark:from-[#111111] dark:via-[#111111]/80 transition-colors duration-300 ease-in-out"
           />
         </div>
         <div className="relative z-10 w-full px-6 py-20 md:px-12 lg:px-20">
