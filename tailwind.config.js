@@ -32,7 +32,7 @@ export default {
         'flicker': 'flicker 0.15s infinite',
         'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
         'typing': 'typing 3.5s steps(40, end)',
-        'marquee': 'marquee 22s linear infinite',
+        'marquee': 'marquee 40s linear infinite',
       },
       keyframes: {
         blink: {
@@ -56,8 +56,8 @@ export default {
           'to': { width: '100%' },
         },
         marquee: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
+          '0%': { transform: 'translate3d(0, 0, 0)' },
+          '100%': { transform: 'translate3d(-50%, 0, 0)' },
         },
       },
       boxShadow: {
