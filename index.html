@@ -181,11 +181,17 @@
     }
     </script>
 
-    <!-- Preload transition videos for instant theme switching -->
-    <!-- HEVC for Safari (iOS/macOS) -->
+    <!-- Preload ALL hero videos for instant loading -->
+    <!-- Base videos (HEVC for Safari) -->
+    <link rel="preload" href="/videos/hevc/jalen-edusei-black.mov" as="video" type="video/quicktime" />
+    <link rel="preload" href="/videos/hevc/jalen-edusei-white.mov" as="video" type="video/quicktime" />
+    <!-- Transition videos (HEVC for Safari) -->
     <link rel="preload" href="/videos/hevc/jalen-edusei-transition-1.mov" as="video" type="video/quicktime" />
     <link rel="preload" href="/videos/hevc/jalen-edusei-transition-2.mov" as="video" type="video/quicktime" />
-    <!-- WebM for Chrome/Firefox/Edge -->
+    <!-- Base videos (WebM for Chrome/Firefox/Edge) -->
+    <link rel="preload" href="/videos/jalen-edusei-black.webm" as="video" type="video/webm" />
+    <link rel="preload" href="/videos/jalen-edusei-white.webm" as="video" type="video/webm" />
+    <!-- Transition videos (WebM for Chrome/Firefox/Edge) -->
     <link rel="preload" href="/videos/jalen-edusei-transition-1.webm" as="video" type="video/webm" />
     <link rel="preload" href="/videos/jalen-edusei-transition-2.webm" as="video" type="video/webm" />
     
