@@ -59,13 +59,21 @@ Vite will show:
 
 ---
 
-## Option 2: ngrok (Tunnel - Works Anywhere)
+## Option 2: ngrok (Tunnel - Works Anywhere) ⭐ **RECOMMENDED FOR SCHOOL NETWORKS**
 
-### Setup ngrok:
+**Perfect for restricted networks like school Wi-Fi!**
 
-1. **Sign up** at https://ngrok.com (free account)
-2. **Download** ngrok for Windows
-3. **Authenticate:**
+### Quick Setup (Using Helper Scripts):
+
+1. **Get your ngrok auth token:**
+   - Sign up/login at: https://dashboard.ngrok.com/get-started/signup
+   - Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken
+
+2. **Configure ngrok:**
+   ```powershell
+   .\scripts\setup_ngrok.ps1 -AuthToken YOUR_AUTH_TOKEN
+   ```
+   Or if you already have ngrok installed:
    ```powershell
    ngrok config add-authtoken YOUR_AUTH_TOKEN
    ```
@@ -77,26 +85,33 @@ Vite will show:
 npm run dev
 ```
 
-**Terminal 2:** Start ngrok tunnel
+**Terminal 2:** Start ngrok tunnel (using helper script)
+```powershell
+.\scripts\start_ngrok.ps1
+```
+
+Or manually:
 ```powershell
 ngrok http 5173
 ```
 
 ngrok will give you a URL like:
 ```
-Forwarding: https://abc123.ngrok.io -> http://localhost:5173
+Forwarding: https://abc123-def456.ngrok-free.app -> http://localhost:5173
 ```
 
 ### Access from iPhone:
 
-1. Open Safari on iPhone/iPad
-2. Navigate to the ngrok URL (e.g., `https://abc123.ngrok.io`)
+1. Open Safari on iPhone/iPad (can be on any network!)
+2. Navigate to the ngrok URL (e.g., `https://abc123-def456.ngrok-free.app`)
 3. Test your videos!
 
 **Benefits:**
-- Works from anywhere (not just same network)
-- HTTPS (required for some features)
-- Can share with others for testing
+- ✅ Works on restricted networks (school Wi-Fi, corporate networks)
+- ✅ Works from anywhere (not just same network)
+- ✅ HTTPS (required for some features)
+- ✅ Can share with others for testing
+- ✅ Free tier available
 
 ---
 
