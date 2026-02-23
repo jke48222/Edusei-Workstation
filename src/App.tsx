@@ -1,10 +1,3 @@
-/**
- * @file App.tsx
- * @description Root application component that conditionally renders either the immersive
- * 3D workstation view or the professional portfolio view based on the current view mode.
- * Manages theme synchronization, view mode toggling, and displays a headshot image in professional mode.
- */
-
 import { Suspense, useCallback, useEffect, useLayoutEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Experience } from './components/Experience';
@@ -20,11 +13,6 @@ import { ProfessionalView } from './components/professional/ProfessionalView';
 import { ThemeSelector } from './components/ThemeSelector';
 import { profileData } from './data';
 
-/**
- * Immersive 3D workstation view: scene, overlay, theme selector, and analytics.
- * Listens for Escape to return to monitor from any focused object. Works on all screen sizes.
- */
-/** Same circle color as ThemeSelector so ESC hint matches the theme dot. */
 const previewColors: Record<string, string> = {
   [SYSTEM_THEME_ID]: '#71717a',
   clean: '#ffffff',
@@ -78,11 +66,6 @@ function ImmersiveExperience() {
   );
 }
 
-/**
- * Root App component that manages view mode switching between professional portfolio
- * and immersive 3D workstation views. Renders the mode toggle, active view component,
- * and optional headshot image overlay in professional mode.
- */
 function App() {
   const viewMode = useViewMode();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -103,8 +86,6 @@ function App() {
     setPrefersReducedMotion(prefersReducedMotion);
   }, [prefersReducedMotion, setPrefersReducedMotion]);
 
-  // Synchronize Tailwind dark mode class on HTML root element
-  // Only removes class when leaving portfolio view to prevent visual flashing during theme toggles
   useLayoutEffect(() => {
     const root = document.documentElement;
     if (viewMode === 'professional' && portfolioDark) {

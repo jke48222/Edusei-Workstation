@@ -1,11 +1,3 @@
-/**
- * @file data.ts
- * @description Centralized data module containing all portfolio content including
- * profile information, skills, work experience, leadership roles, project details,
- * and terminal interface copy. Provides typed interfaces and utility functions for
- * data access across the professional portfolio view and immersive workstation overlay.
- */
-
 import type { ViewState } from './store/store.ts';
 
 /**
@@ -32,9 +24,6 @@ export interface ProjectData {
   }[];
 }
 
-/**
- * Profile information
- */
 export const profileData = {
   name: 'Jalen Edusei',
   title: 'Software Engineer',
@@ -42,6 +31,7 @@ export const profileData = {
   college: 'College of Engineering, Morehead Honors College',
   degree: 'B.S. Computer Systems Engineering',
   graduationYear: 2026,
+  gpa: '3.65',
   email: 'jalen.edusei@gmail.com',
   phone: '770.714.0190',
   linkedin: 'linkedin.com/in/jalenedusei',
@@ -49,14 +39,9 @@ export const profileData = {
   resumeUrl: '/resume.pdf',
   cvUrl: '/cv.pdf',
   openForWork: true,
-  /** MM-DD for time-based boot message (e.g. '09-28' for September 28). */
   birthday: '09-28',
 };
 
-/**
- * Generates a pre-filled mailto URL with subject and body text for portfolio contact.
- * Used in contact sections, call-to-action buttons, and overlay email links.
- */
 export function getSayHiMailto(): string {
   const subject = encodeURIComponent(`Portfolio – Say hi from ${profileData.name}`);
   const body = encodeURIComponent(
@@ -65,9 +50,6 @@ export function getSayHiMailto(): string {
   return `mailto:${profileData.email}?subject=${subject}&body=${body}`;
 }
 
-/**
- * Skills data organized by category: programming languages, software tools, hardware platforms, and core competencies.
- */
 export const skillsData = {
   programming: [
     'Assembly', 'C', 'C#', 'C++', 'HTML', 'Java', 'JavaFX', 
@@ -90,9 +72,6 @@ export const skillsData = {
   ],
 };
 
-/**
- * Work experience data array containing professional roles, companies, locations, periods, and key achievements.
- */
 export const workExperience = [
   {
     title: 'Business Analyst Intern',
@@ -141,9 +120,6 @@ export const workExperience = [
   },
 ];
 
-/**
- * Leadership & Involvement
- */
 export const leadership = [
   {
     role: 'Vice President',
@@ -206,9 +182,6 @@ export const leadership = [
   },
 ];
 
-/**
- * Study Abroad
- */
 export const studyAbroad = {
   title: 'Study Abroad in Germany',
   period: 'May 2023 – June 2023',
@@ -219,17 +192,12 @@ export const studyAbroad = {
   ],
 };
 
-/**
- * Honors & Awards
- */
 export const honors = [
   { title: 'Extraordinary Engineer', org: 'College of Engineering', date: 'February 2024' },
-  { title: 'Presidential Scholar (2x)', org: 'University of Georgia', date: '2022-2023' },
+  { title: 'Presidential Scholar (2x)', org: 'University of Georgia', date: 'December 2022, May 2023' },
+  { title: 'Dire Needs Project Fund: $1500 Project Grant', org: 'University of Georgia', date: 'August 2023 – May 2024' },
 ];
 
-/**
- * Main projects data - each corresponds to a 3D object
- */
 export const projectsData: ProjectData[] = [
   {
     id: 'audio-tracking-car',
@@ -386,9 +354,6 @@ export const projectsData: ProjectData[] = [
   },
 ];
 
-/**
- * Terminal boot sequence. Returns lines with optional birthday message when today matches profileData.birthday (MM-DD).
- */
 export function getBootSequence(): string[] {
   const lines = [
     'EDUSEI WORKSTATION v2.026',
@@ -408,9 +373,6 @@ export function getBootSequence(): string[] {
   return lines;
 }
 
-/**
- * ASCII art header - using simple ASCII for perfect alignment
- */
 export const asciiArt = `
 +------------------------------------------------------------+
 |                                                            |
@@ -425,18 +387,10 @@ export const asciiArt = `
 +------------------------------------------------------------+
 `;
 
-/**
- * Get project by ID (for 3D workstation / ViewState only).
- */
 export const getProjectById = (id: ViewState): ProjectData | undefined => {
   return projectsData.find(project => project.id === id);
 };
 
-/**
- * Work project for /work page: main projects plus flattened additional projects.
- * Used for full resume-style project list and detail pages by slug.
- */
-/** Map related project title (from additionalProjects or display name) to /work slug. */
 export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'AnimalDot': 'animaldot',
   'Kitchen Chaos VR': 'kitchen-chaos-vr',
@@ -465,11 +419,9 @@ export interface WorkProject {
   location: string;
   github?: string;
   additionalProjects?: { title: string; period: string; github?: string; description: string[] }[];
-  /** For standalone projects: links to related /work pages. */
   relatedProjects?: { title: string; slug: string; period: string }[];
 }
 
-/** All projects for /work in resume order: main entries plus each additional as standalone. */
 export function getAllProjectsForWork(): WorkProject[] {
   const list: WorkProject[] = [];
 
@@ -482,7 +434,6 @@ export function getAllProjectsForWork(): WorkProject[] {
   const memesat = main.find(p => p.id === 'memesat')!;
   const capital = main.find(p => p.id === 'capital-one')!;
 
-  // 1. AnimalDot (main)
   list.push({
     id: animaldot.id,
     title: animaldot.title,
@@ -494,7 +445,6 @@ export function getAllProjectsForWork(): WorkProject[] {
     github: animaldot.github,
     additionalProjects: animaldot.additionalProjects,
   });
-  // 2. Kitchen Chaos VR (main)
   list.push({
     id: kitchen.id,
     title: kitchen.title,
@@ -506,7 +456,6 @@ export function getAllProjectsForWork(): WorkProject[] {
     github: kitchen.github,
     additionalProjects: kitchen.additionalProjects,
   });
-  // 3. BreakBuddy (additional under AnimalDot)
   const breakBuddy = animaldot.additionalProjects?.find(a => a.title === 'BreakBuddy');
   if (breakBuddy) {
     list.push({
@@ -521,7 +470,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       relatedProjects: [{ title: 'AnimalDot', slug: 'animaldot', period: animaldot.period }],
     });
   }
-  // 4. Virtual Reality Portfolio 2
   const vr2 = kitchen.additionalProjects?.find(a => a.title === 'VR Portfolio 2');
   if (vr2) {
     list.push({
@@ -539,7 +487,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       ],
     });
   }
-  // 5. Smart Plant Watering Assistant
   const smartPlant = audioCar.additionalProjects?.find(a => a.title === 'Smart Plant Watering Assistant');
   if (smartPlant) {
     list.push({
@@ -554,7 +501,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       relatedProjects: [{ title: 'Audio Tracking Car', slug: 'audio-tracking-car', period: audioCar.period }],
     });
   }
-  // 6. Virtual Reality Portfolio 1
   const vr1 = kitchen.additionalProjects?.find(a => a.title === 'VR Portfolio 1');
   if (vr1) {
     list.push({
@@ -572,7 +518,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       ],
     });
   }
-  // 7. Audio Tracking Car (main)
   list.push({
     id: audioCar.id,
     title: audioCar.title,
@@ -584,7 +529,6 @@ export function getAllProjectsForWork(): WorkProject[] {
     github: audioCar.github,
     additionalProjects: audioCar.additionalProjects,
   });
-  // 8. LED Frequency Filter
   const ledFilter = audioCar.additionalProjects?.find(a => a.title === 'LED Frequency Filter');
   if (ledFilter) {
     list.push({
@@ -602,7 +546,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       ],
     });
   }
-  // 9. MEMESat-1 Flight Software (main)
   list.push({
     id: memesat.id,
     title: 'MEMESat-1 Flight Software',
@@ -614,7 +557,6 @@ export function getAllProjectsForWork(): WorkProject[] {
     github: memesat.github,
     additionalProjects: memesat.additionalProjects,
   });
-  // 10. Creation and Development of Websites
   const websites = memesat.additionalProjects?.find(a => a.title === 'Website Development');
   if (websites) {
     list.push({
@@ -632,7 +574,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       ],
     });
   }
-  // 11. Travel Itinerary Application
   const travelApp = memesat.additionalProjects?.find(a => a.title === 'Travel Itinerary Application');
   if (travelApp) {
     list.push({
@@ -650,7 +591,6 @@ export function getAllProjectsForWork(): WorkProject[] {
       ],
     });
   }
-  // 12. Capital One (main)
   list.push({
     id: capital.id,
     title: capital.title,
@@ -665,14 +605,10 @@ export function getAllProjectsForWork(): WorkProject[] {
   return list;
 }
 
-/** Get a single work project by slug (main or additional). */
 export function getProjectBySlug(slug: string): WorkProject | undefined {
   return getAllProjectsForWork().find(p => p.id === slug);
 }
 
-/**
- * Help text for terminal
- */
 export const helpText = [
   'Available commands:',
   '  help     - Display this message',
