@@ -1,11 +1,3 @@
-/**
- * @file ProfessionalView.tsx
- * @description Full-page scrollable portfolio view component. Displays hero section with
- * animated title, marquee, statistics, about section, project timeline, work experience,
- * skills, study abroad information, contact call-to-action, footer, and floating navigation dock.
- * All content is sourced from the centralized data module.
- */
-
 import { Analytics } from '@vercel/analytics/react';
 import { motion, useInView } from 'framer-motion';
 import { Component, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -29,19 +21,16 @@ import Dither from '../hero-backgrounds/Dither';
 import LetterGlitch from '../hero-backgrounds/LetterGlitch';
 import { HeroVideoTitle } from './HeroVideoTitle';
 
-/** Framer Motion animation variants for staggered section reveals and fade-up effects. */
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 
-/** Plain text fallback component displayed when video title fails to load. */
 const HeroPlainTextFallback = () => (
   <span className="block text-[clamp(3.5rem,14vw,12rem)]">JALEN<br />EDUSEI</span>
 );
 
-/** Error boundary component that displays plain text fallback when video title fails to render. */
 class HeroTitleErrorBoundary extends Component<
   { children: React.ReactNode; fallback: React.ReactNode },
   { hasError: boolean }
@@ -53,9 +42,6 @@ class HeroTitleErrorBoundary extends Component<
   }
 }
 
-/** Hero title wrapper component with error boundary and fallback support.
- * Uses HEVC videos (.mov) for iOS Safari and WebM for other browsers.
- * Falls back to plain text only if video fails to load. */
 function HeroTitleWithFallback({ dark }: { dark: boolean }) {
   const fallback = <HeroPlainTextFallback />;
   
@@ -66,7 +52,6 @@ function HeroTitleWithFallback({ dark }: { dark: boolean }) {
   );
 }
 
-/** Section wrapper component that triggers staggered animations when scrolled into view. */
 function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
@@ -77,7 +62,6 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
   );
 }
 
-/** Root professional portfolio layout component. Manages scroll container and all section components. */
 export function ProfessionalView() {
   const location = useLocation();
   const portfolioDark = useThemeStore((s) => s.portfolioDark);

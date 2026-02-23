@@ -1,17 +1,6 @@
-/**
- * @file gameStore.ts
- * @description Alternate/legacy game store for gallery scene: scene mode (kitchen | transition | gallery),
- * camera (orbit | follow | cinema), avatar state, video state, and keyboard input. May be used
- * by gallery flows that do not use the unified workstation store.
- */
-
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as THREE from 'three';
-
-// ============================================================================
-// Type Definitions
-// ============================================================================
 
 export type SceneMode = 'kitchen' | 'transition' | 'gallery';
 export type CameraMode = 'orbit' | 'follow' | 'cinema';
@@ -94,10 +83,6 @@ interface GameActions {
   reset: () => void;
 }
 
-// ============================================================================
-// Initial State
-// ============================================================================
-
 const initialState: GameState = {
   sceneMode: 'kitchen',
   transitionProgress: 0,
@@ -126,18 +111,10 @@ const initialState: GameState = {
   },
 };
 
-// ============================================================================
-// Store Creation
-// ============================================================================
-
 export const useGameStore = create<GameState & GameActions>()(
   subscribeWithSelector((set, get) => ({
     ...initialState,
 
-    // ========================================================================
-    // Scene Transitions
-    // ========================================================================
-    
     triggerTransition: () => {
       const { sceneMode, isTransitioning } = get();
       if (sceneMode !== 'kitchen' || isTransitioning) return;
@@ -162,7 +139,6 @@ export const useGameStore = create<GameState & GameActions>()(
         cameraMode: 'follow',
         isLoading: false,
         showControls: true,
-        // Reset avatar to gallery spawn point
         avatarPosition: new THREE.Vector3(0, 0, 8),
         avatarRotation: 0,
       });
@@ -174,10 +150,6 @@ export const useGameStore = create<GameState & GameActions>()(
         sceneMode: 'kitchen',
       });
     },
-
-    // ========================================================================
-    // Camera Controls
-    // ========================================================================
 
     setCameraMode: (mode: CameraMode) => {
       set({ cameraMode: mode });
@@ -199,10 +171,6 @@ export const useGameStore = create<GameState & GameActions>()(
       });
     },
 
-    // ========================================================================
-    // Avatar Controls
-    // ========================================================================
-
     setAvatarPosition: (position: THREE.Vector3) => {
       set({ avatarPosition: position.clone() });
     },
@@ -215,14 +183,8 @@ export const useGameStore = create<GameState & GameActions>()(
       set({ isMoving: moving });
     },
 
-    // ========================================================================
-    // Video Controls
-    // ========================================================================
-
     setActiveVideo: (videoId: string | null, platformId: string | null) => {
       const { activeVideoId } = get();
-      
-      // Only update if actually changing
       if (activeVideoId === videoId) return;
 
       set({
@@ -235,10 +197,6 @@ export const useGameStore = create<GameState & GameActions>()(
     setVideoPlaying: (playing: boolean) => {
       set({ videoPlaying: playing });
     },
-
-    // ========================================================================
-    // Input Controls
-    // ========================================================================
 
     setInput: (key: keyof GameState['input'], value: boolean) => {
       set((state) => ({
@@ -257,10 +215,6 @@ export const useGameStore = create<GameState & GameActions>()(
       });
     },
 
-    // ========================================================================
-    // UI Controls
-    // ========================================================================
-
     setShowControls: (show: boolean) => {
       set({ showControls: show });
     },
@@ -269,19 +223,11 @@ export const useGameStore = create<GameState & GameActions>()(
       set({ isLoading: loading });
     },
 
-    // ========================================================================
-    // Utility
-    // ========================================================================
-
     reset: () => {
       set(initialState);
     },
   }))
 );
-
-// ============================================================================
-// Selectors (for optimized re-renders)
-// ============================================================================
 
 export const selectSceneMode = (state: GameState) => state.sceneMode;
 export const selectCameraMode = (state: GameState) => state.cameraMode;
@@ -290,11 +236,6 @@ export const selectActiveVideo = (state: GameState) => state.activeVideoId;
 export const selectIsTransitioning = (state: GameState) => state.isTransitioning;
 export const selectInput = (state: GameState) => state.input;
 
-// ============================================================================
-// Subscriptions for side effects
-// ============================================================================
-
-// Example: Log state changes in development
 if (import.meta.env.DEV) {
   useGameStore.subscribe(
     (state) => state.sceneMode,

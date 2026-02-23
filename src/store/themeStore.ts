@@ -1,11 +1,3 @@
-/**
- * @file themeStore.ts
- * @description Theme state management store for the 3D workstation and overlay components.
- * Defines theme presets with comprehensive color configurations for backgrounds, terminals,
- * accents, podiums, scrollbars, and scene elements. Provides hooks for accessing the
- * currently active theme preset throughout the application.
- */
-
 import { useState, useEffect } from 'react';
 import { create } from 'zustand';
 
