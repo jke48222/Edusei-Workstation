@@ -1,11 +1,3 @@
-/**
- * @file Overlay.tsx
- * @description Terminal-style overlay component for the immersive workstation view. Displays
- * boot sequence animation, system status information, interactive project grid, command input
- * interface, and contact links. Features theme-driven color schemes, mobile-responsive detail
- * panel with minimize/expand functionality, and CRT-style visual effects with custom scrollbar styling.
- */
-
 import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkstationStore } from '../store/store';
@@ -22,7 +14,6 @@ import {
 import type { ViewState } from '../store/store';
 import { resumeAudioContext, playKeystroke, playBootComplete } from '../utils/terminalSound';
 
-/** Local responsive hook: true when viewport width < 768px. */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') return window.innerWidth < 768;
@@ -38,7 +29,6 @@ function useIsMobile() {
   return isMobile;
 }
 
-/** Framer Motion animation variants for list items. Duration and stagger are set to zero when reduced motion preference is enabled. */
 function getStaggerList(reducedMotion: boolean) {
   return { visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.015 } } };
 }
@@ -49,7 +39,6 @@ function getFadeSlideUp(reducedMotion: boolean) {
   };
 }
 
-/** Typewriter boot lines in terminal; calls onComplete when finished. */
 function BootSequence({ lines, onComplete, reducedMotion }: { lines: string[]; onComplete: () => void; reducedMotion?: boolean }) {
   const theme = useActiveTheme();
   const [visibleLines, setVisibleLines] = useState(0);
