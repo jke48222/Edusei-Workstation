@@ -268,10 +268,11 @@ const stats = [
 
 function Stats() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const portfolioDark = useThemeStore((s) => s.portfolioDark);
   return (
     <div
       ref={sectionRef}
-      className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-6 py-16 md:grid-cols-4 md:px-12 lg:px-20"
+      className={`mx-auto grid max-w-6xl grid-cols-2 gap-6 px-6 py-16 md:grid-cols-4 md:px-12 lg:px-20 transition-[background-color,color] duration-300 ease-in-out ${portfolioDark ? 'bg-[#0d0d0d]' : 'bg-[#fafaf8]'}`}
     >
       {stats.map((s) => (
         <div key={s.label} className="text-center">
