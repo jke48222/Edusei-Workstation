@@ -181,9 +181,10 @@
     }
     </script>
 
-    <!-- Preload only the initial hero video (default light theme = black text) -->
+    <!-- Preload initial hero video — browser picks the first type it supports -->
     <link rel="preload" href="/videos/jalen-edusei-black.webm" as="video" type="video/webm" fetchpriority="high" />
     <link rel="preload" href="/videos/hevc/jalen-edusei-black.mov" as="video" type="video/mp4" />
+    <link rel="preload" href="/videos/h264/jalen-edusei-black.mp4" as="video" type="video/mp4" />
     
     <!-- IBM Plex Mono for authentic terminal feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
