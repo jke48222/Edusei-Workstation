@@ -1,7 +1,42 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git checkout:*)",
+      "Bash(ffmpeg -version)",
+      "Bash(ls:*)",
+      "Bash(ffprobe -v quiet -show_entries stream=width,height,duration,nb_frames,codec_name -of csv=p=0 jalen-edusei-black.webm)",
+      "Bash(ffprobe -v quiet -show_entries format=duration -of csv=p=0 jalen-edusei-black.webm)",
+      "Bash(ffprobe -v quiet -show_entries format=duration -of csv=p=0 jalen-edusei-white.webm)",
+      "Bash(ffmpeg -y -sseof -0.1 -i jalen-edusei-black.webm -frames:v 1 -c:v libwebp -quality 90 -lossless 0 posters/jalen-edusei-black.webp)",
+      "Bash(ffmpeg -y -sseof -0.1 -i jalen-edusei-white.webm -frames:v 1 -c:v libwebp -quality 90 -lossless 0 posters/jalen-edusei-white.webp)",
+      "Bash(file posters/*.webp)",
+      "Bash(ffmpeg -y -sseof -0.1 -i ../jalen-edusei-black.webm -frames:v 1 -pix_fmt yuva420p -c:v libwebp -lossless 1 jalen-edusei-black.webp)",
+      "Bash(ffmpeg -y -sseof -0.1 -i ../jalen-edusei-white.webm -frames:v 1 -pix_fmt yuva420p -c:v libwebp -lossless 1 jalen-edusei-white.webp)",
+      "Bash(ffprobe -v quiet -show_entries stream=pix_fmt -of csv=p=0 posters/jalen-edusei-black.webp)",
+      "Bash(ffprobe -v quiet -show_entries stream=pix_fmt -of csv=p=0 posters/jalen-edusei-white.webp)",
+      "Bash(ffmpeg -y -ss 5.0 -i jalen-edusei-black.webm -frames:v 1 -pix_fmt yuva420p -c:v png test_black_5.0.png)",
+      "Bash(ffmpeg -y -ss 4.0 -i jalen-edusei-black.webm -frames:v 1 -pix_fmt yuva420p -c:v png test_black_4.0.png)",
+      "Bash(ffmpeg -y -ss 3.0 -i jalen-edusei-black.webm -frames:v 1 -pix_fmt yuva420p -c:v png test_black_3.0.png)",
+      "Bash(ffprobe -v quiet -show_entries stream=pix_fmt,width,height -of csv=p=0 test_black_5.0.png)",
+      "Bash(ffprobe -v quiet -show_entries stream=pix_fmt,width,height -of csv=p=0 test_black_3.0.png)",
+      "Bash(ffmpeg -y -ss 2.0 -i jalen-edusei-black.webm -frames:v 1 -pix_fmt rgba -c:v png test_black_2.0.png)",
+      "Bash(ffmpeg -y -ss 1.0 -i jalen-edusei-black.webm -frames:v 1 -pix_fmt rgba -c:v png test_black_1.0.png)",
+      "Bash(ffmpeg -y -i jalen-edusei-black.webm -frames:v 1 -pix_fmt rgba -c:v png test_black_0.png)",
+      "Bash(ffprobe:*)",
+      "Bash(ffmpeg -y -ss 2.5 -i jalen-edusei-black.webm -frames:v 1 test_frame.png)",
+      "Bash(ffmpeg -y -ss 2.5 -i jalen-edusei-white.webm -frames:v 1 test_frame_white.png)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\(len\\(data['streams']\\), 'streams'\\); [print\\(f'  Stream {i}: {s.get\\(\\\\\"codec_name\\\\\",\\\\\"?\\\\\"\\)} {s.get\\(\\\\\"pix_fmt\\\\\",\\\\\"?\\\\\"\\)} {s.get\\(\\\\\"width\\\\\",\\\\\"?\\\\\"\\)}x{s.get\\(\\\\\"height\\\\\",\\\\\"?\\\\\"\\)}'\\) for i,s in enumerate\\(data['streams']\\)]\")",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\(len\\(data['streams']\\), 'streams'\\); [print\\(f'  Stream {i}: {s.get\\(\\\\\"codec_name\\\\\",\\\\\"?\\\\\"\\)} {s.get\\(\\\\\"pix_fmt\\\\\",\\\\\"?\\\\\"\\)} {s.get\\(\\\\\"width\\\\\",\\\\\"?\\\\\"\\)}x{s.get\\(\\\\\"height\\\\\",\\\\\"?\\\\\"\\)} tags={s.get\\(\\\\\"tags\\\\\",{}\\)}'\\) for i,s in enumerate\\(data['streams']\\)]\")",
+      "Bash(python3:*)",
+      "Bash(ffmpeg -y -i jalen-edusei-black.webm -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -movflags +faststart h264/jalen-edusei-black.mp4)",
+      "Bash(ffmpeg -y -i jalen-edusei-white.webm -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -movflags +faststart h264/jalen-edusei-white.mp4)",
+      "Bash(ffmpeg -y -i jalen-edusei-transition-1.webm -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -movflags +faststart h264/jalen-edusei-transition-1.mp4)",
+      "Bash(ffmpeg -y -i jalen-edusei-transition-2.webm -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -movflags +faststart h264/jalen-edusei-transition-2.mp4)",
+      "Bash(ffmpeg -y -ss 2.5 -i h264/jalen-edusei-white.mp4 -frames:v 1 test_h264_white.png)",
+      "Bash(ffmpeg -y -ss 2.5 -i h264/jalen-edusei-black.mp4 -frames:v 1 test_h264_black.png)",
+      "Bash(ffmpeg -y -i jalen-edusei-white.webm -vf \"negate\" -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -movflags +faststart h264/jalen-edusei-black.mp4)",
+      "Bash(ffmpeg:*)"
     ]
   }
 }
