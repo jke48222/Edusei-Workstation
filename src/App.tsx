@@ -7,11 +7,8 @@ import { usePrefersReducedMotion } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
 import { useActiveTheme, useThemeStore, useResolvedThemeId, SYSTEM_THEME_ID } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
-import { PortfolioDarkToggle } from './components/PortfolioDarkToggle';
-import { PortfolioSearch } from './components/PortfolioSearch';
 import { ProfessionalView } from './components/professional/ProfessionalView';
 import { ThemeSelector } from './components/ThemeSelector';
-import { profileData } from './data';
 
 const previewColors: Record<string, string> = {
   [SYSTEM_THEME_ID]: '#71717a',
@@ -97,22 +94,9 @@ function App() {
 
   return (
     <>
-      <ModeToggle />
-      {viewMode === 'professional' && (
-        <>
-          <PortfolioSearch />
-          <PortfolioDarkToggle />
-        </>
-      )}
+      {viewMode === 'immersive' && <ModeToggle />}
       <div>
         {viewMode === 'professional' ? <ProfessionalView /> : <ImmersiveExperience />}
-        {viewMode === 'professional' && (
-          <img
-            src="/headshot.png"
-            alt={profileData.name}
-            className="fixed top-4 left-4 z-30 h-32 w-32 rounded-full object-cover ring-2 ring-[#0a0a0a]/10 shadow-xl dark:ring-white/20 md:h-40 md:w-40"
-          />
-        )}
       </div>
     </>
   );
