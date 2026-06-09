@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { projectsData } from '../data';
+import { featuredProjects } from '../data';
 
 type SearchItem = { id: string; label: string; subtitle?: string };
 
@@ -14,11 +14,12 @@ const SECTIONS: SearchItem[] = [
   { id: 'experience', label: 'Experience' },
   { id: 'work', label: 'Selected Work' },
   { id: 'skills', label: 'Toolkit' },
+  { id: 'certifications', label: 'Certifications' },
   { id: 'contact', label: 'Contact' },
 ];
 
 function getProjectItems(): SearchItem[] {
-  return projectsData.map((p) => ({
+  return featuredProjects.map((p) => ({
     id: `card-${p.id}`,
     label: p.title,
     subtitle: p.tagline,
@@ -36,7 +37,7 @@ function SearchIcon({ className }: { className?: string }) {
   );
 }
 
-export function PortfolioSearch() {
+export function PortfolioSearch({ inline = false }: { inline?: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,12 +54,10 @@ export function PortfolioSearch() {
   const scrollTo = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      const scrollContainer = document.querySelector('.pro-scroll');
-      if (scrollContainer) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // Target lives on the home page (e.g. searching from a sub-page): go there + anchor.
+      window.location.href = `/#${id}`;
     }
     setOpen(false);
     setQuery('');
@@ -93,7 +92,11 @@ export function PortfolioSearch() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Search portfolio"
-        className="fixed top-3 left-3 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg backdrop-blur-xl transition-all hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 dark:border-white/20 dark:bg-[#262626] dark:text-white/90 dark:hover:border-white/40 dark:hover:bg-[#333] sm:left-auto sm:right-[10.8rem]"
+        className={
+          inline
+            ? 'flex h-9 w-9 items-center justify-center rounded-full border border-[var(--pf-line)] bg-[var(--pf-bg-elev)] text-[var(--pf-ink-soft)] transition-all hover:border-[var(--pf-accent)] hover:text-[var(--pf-ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pf-accent)]/40'
+            : 'fixed top-3 left-3 z-[110] flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a]/20 bg-white text-[#0a0a0a]/80 shadow-lg backdrop-blur-xl transition-all hover:border-[#0a0a0a]/40 hover:bg-[#f0f0f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a]/30 dark:border-white/20 dark:bg-[#262626] dark:text-white/90 dark:hover:border-white/40 dark:hover:bg-[#333] sm:left-auto sm:right-[10.8rem]'
+        }
       >
         <SearchIcon className="h-4 w-4" />
       </button>

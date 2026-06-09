@@ -36,7 +36,12 @@
       "Bash(ffmpeg -y -ss 2.5 -i h264/jalen-edusei-white.mp4 -frames:v 1 test_h264_white.png)",
       "Bash(ffmpeg -y -ss 2.5 -i h264/jalen-edusei-black.mp4 -frames:v 1 test_h264_black.png)",
       "Bash(ffmpeg -y -i jalen-edusei-white.webm -vf \"negate\" -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -movflags +faststart h264/jalen-edusei-black.mp4)",
-      "Bash(ffmpeg:*)"
+      "Bash(ffmpeg:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npm install *)",
+      "Bash(pkill -f \"vite\")",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
