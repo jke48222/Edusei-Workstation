@@ -131,7 +131,7 @@ export const islandData: IslandData[] = [
     id: 'vr-xr',
     title: 'VR / XR Experiences',
     subtitle: 'Quest 3 Development',
-    description: 'Built immersive VR games and XR environments for Meta Quest 3 in Unity — from multiplayer cooking chaos to spatial audio museums.',
+    description: 'Built immersive VR games and XR environments for Meta Quest 3 in Unity, from multiplayer cooking chaos to spatial audio museums.',
     accentColor: '#a855f7',
     propModel: '/models/quest3.glb',
     techStack: ['Unity3D', 'C#', 'Meta Quest 3', 'OpenXR', 'VelNet'],
@@ -164,8 +164,8 @@ export const islandData: IslandData[] = [
       screenRotation: [0, 0, 0],
     },
     subProjects: [
-      { title: 'VR Portfolio 2 — XR Environments', period: 'Oct–Nov 2025' },
-      { title: 'VR Portfolio 1 — VR Design Principles', period: 'Aug–Oct 2025' },
+      { title: 'VR Portfolio 2: XR Environments', period: 'Oct–Nov 2025' },
+      { title: 'VR Portfolio 1: VR Design Principles', period: 'Aug–Oct 2025' },
     ],
   },
   {
@@ -198,8 +198,8 @@ export const islandData: IslandData[] = [
       Math.sin(-Math.PI / 2) * (ISLAND_DISTANCE - 4.5),
     ],
     subProjects: [
-      { title: 'Website Development — WordPress & JS', period: 'Sep 2022–May 2024' },
-      { title: 'Travel Itinerary App — JavaFX + APIs', period: 'Dec 2023' },
+      { title: 'Website Development: WordPress & JS', period: 'Sep 2022–May 2024' },
+      { title: 'Travel Itinerary App: JavaFX + APIs', period: 'Dec 2023' },
     ],
   },
   {
@@ -267,7 +267,7 @@ export const islandData: IslandData[] = [
       Math.sin(Math.PI / 6) * (ISLAND_DISTANCE - 4.5),
     ],
     subProjects: [
-      { title: 'BreakBuddy — Stress Management App', period: 'Aug–Dec 2025' },
+      { title: 'BreakBuddy: Stress Management App', period: 'Aug–Dec 2025' },
     ],
   },
   {
