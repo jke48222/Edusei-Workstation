@@ -2,7 +2,7 @@
  * Simple service worker: caches same-origin GET requests so the site works
  * offline for static content after the first visit.
  */
-const CACHE_NAME = 'edusei-workstation-v2';
+const CACHE_NAME = 'edusei-workstation-v3';
 
 const SHELL_URLS = ['/', '/index.html', '/manifest.json', '/favicon.svg', '/icon-192.png', '/icon-512.png'];
 
