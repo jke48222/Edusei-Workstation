@@ -25,6 +25,10 @@ export interface ReticleCursorProps {
  * theme accent. It "locks" (brackets close in, center fills) when hovering an
  * interactive DOM control or a clickable 3D object — the latter detected by
  * reading the inline `body.style.cursor` the 3D scene sets to `pointer`.
+ *
+ * Position and rotation are written straight to the DOM in the rAF loop (no
+ * per-frame React state), so movement never triggers a re-render — only the
+ * rare lock/visibility transitions do.
  */
 export default function ReticleCursor({
   color = '#33FF00',
@@ -33,13 +37,15 @@ export default function ReticleCursor({
   zIndex = 9999,
   reducedMotion = false,
 }: ReticleCursorProps) {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
   const [visible, setVisible] = useState(false);
   const [locked, setLocked] = useState(false);
   const [overText, setOverText] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const gRef = useRef<SVGGElement>(null);
   const targetRef = useRef({ x: -100, y: -100 });
   const currentRef = useRef({ x: -100, y: -100 });
   const rotRef = useRef(0);
+  const lockedRef = useRef(false);
   const rafRef = useRef<number>();
 
   useEffect(() => {
@@ -51,7 +57,9 @@ export default function ReticleCursor({
       const domInteractive = !!el?.closest?.(INTERACTIVE);
       // The 3D scene signals a clickable object by setting body cursor to 'pointer'.
       const sceneInteractive = document.body.style.cursor === 'pointer';
-      setLocked(domInteractive || sceneInteractive);
+      const next = domInteractive || sceneInteractive;
+      lockedRef.current = next;
+      setLocked(next);
     };
     const onLeave = () => setVisible(false);
     document.addEventListener('mousemove', onMove);
@@ -76,7 +84,10 @@ export default function ReticleCursor({
       const s = reducedMotion ? 1 : smooth;
       currentRef.current = { x: c.x + (t.x - c.x) * s, y: c.y + (t.y - c.y) * s };
       if (!reducedMotion) rotRef.current = (rotRef.current + 0.35) % 360;
-      setPos({ ...currentRef.current });
+      const node = rootRef.current;
+      if (node) node.style.transform = `translate(${currentRef.current.x}px, ${currentRef.current.y}px)`;
+      const g = gRef.current;
+      if (g) g.style.transform = `rotate(${lockedRef.current ? rotRef.current * 0.4 : rotRef.current}deg)`;
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -92,8 +103,13 @@ export default function ReticleCursor({
 
   return (
     <div
+      ref={rootRef}
       className="pointer-events-none fixed left-0 top-0"
-      style={{ zIndex, transform: `translate(${pos.x}px, ${pos.y}px)`, willChange: 'transform' }}
+      style={{
+        zIndex,
+        transform: `translate(${currentRef.current.x}px, ${currentRef.current.y}px)`,
+        willChange: 'transform',
+      }}
       aria-hidden
     >
       <svg
@@ -109,6 +125,7 @@ export default function ReticleCursor({
       >
         {/* Rotating corner brackets — the "scanning" frame. */}
         <g
+          ref={gRef}
           stroke={color}
           strokeWidth={1.6}
           fill="none"
