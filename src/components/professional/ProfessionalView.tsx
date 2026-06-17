@@ -249,7 +249,7 @@ function Marquee() {
   }, []);
 
   return (
-    <div className="pf-band-dark relative overflow-hidden border-y border-[var(--pf-line)] py-3.5">
+    <div className="pf-band-soft relative overflow-hidden border-y border-[var(--pf-line)] py-3.5">
       <div ref={trackRef} className="flex whitespace-nowrap will-change-transform">
         <div className="flex shrink-0 items-center">{renderItems('a')}</div>
         <div className="flex shrink-0 items-center" aria-hidden>{renderItems('b')}</div>
@@ -511,7 +511,7 @@ export function ExperienceSection() {
       <div className="pf-grain pointer-events-none absolute inset-0" aria-hidden />
       <div className="relative mx-auto max-w-7xl px-6 py-24 md:px-12 lg:px-20">
         <div className="mb-10">
-          <div className="mb-3 inline-flex items-center gap-2 text-[var(--pf-accent-bright)]">
+          <div className="mb-3 inline-flex items-center gap-2 text-[var(--pf-accent-deep)] dark:text-[var(--pf-accent-bright)]">
             <CircuitMotif className="h-4 w-4" />
             <span className="font-mono text-[11px] uppercase tracking-[0.32em]">Experience</span>
           </div>
@@ -523,16 +523,16 @@ export function ExperienceSection() {
             <Reveal key={role.title + role.company} delay={(i % 2) * 0.08}>
               <article
                 id={`card-${slugify(role.company)}`}
-                className="flex h-full flex-col rounded-[var(--pf-radius-lg)] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-[var(--pf-accent)]/40 hover:bg-white/[0.07]"
+                className="pf-exp-card flex h-full flex-col rounded-[var(--pf-radius-lg)] p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1"
                 style={{ scrollMarginTop: '6rem' }}
               >
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--pf-accent-bright)]">{role.period}</p>
-                <h3 className="mt-2 font-display text-xl font-bold text-white">{role.title}</h3>
-                <p className="mt-0.5 text-sm text-white/55">{role.company} · {role.location}</p>
-                <ul className="mt-4 space-y-2.5 text-[13px] leading-relaxed text-white/65">
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--pf-accent-deep)] dark:text-[var(--pf-accent-bright)]">{role.period}</p>
+                <h3 className="mt-2 font-display text-xl font-bold text-[var(--pf-ink)]">{role.title}</h3>
+                <p className="mt-0.5 text-sm text-[var(--pf-ink-soft)]">{role.company} · {role.location}</p>
+                <ul className="mt-4 space-y-2.5 text-[13px] leading-relaxed text-[var(--pf-ink-soft)]">
                   {role.highlights.slice(0, 3).map((h) => (
                     <li key={h} className="flex gap-2.5">
-                      <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--pf-accent-bright)]" />
+                      <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--pf-accent-deep)] dark:text-[var(--pf-accent-bright)]" />
                       <span>{h}</span>
                     </li>
                   ))}

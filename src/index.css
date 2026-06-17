@@ -13,6 +13,13 @@
  * Scoped under .pf (portfolio) so the 3D workstation + terminal stay untouched.
  * ============================================================================= */
 :root {
+  /* Declare that this page manages its own light/dark theming. This opts the
+     page out of the browser's "Auto Dark Mode" (Chrome force-dark), which would
+     otherwise heuristically darken solid section backgrounds while leaving
+     gradient/image surfaces (e.g. the hero mesh) light — producing a broken,
+     half-light/half-dark render that looks like the modes are "mixed up". */
+  color-scheme: light dark;
+
   /* Signature accent — cobalt→cyan "current", with amber as the warm tertiary.
      Intentionally not green, pink, or purple. */
   --pf-accent: #2563eb;          /* cobalt blue 600 */
@@ -39,6 +46,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --pf-bg: #0a0b0d;
   --pf-bg-elev: #131417;
   --pf-ink: #f5f6f7;
@@ -179,24 +187,27 @@
       radial-gradient(26rem 26rem at 95% 100%, color-mix(in srgb, var(--pf-accent-2) 24%, transparent), transparent 58%);
   }
 
-  /* Dark contrast band — intentionally dark in BOTH themes so dark mode never
-     flips it to a light panel (which read as "mixed-up" modes with white text). */
-  .pf-band-dark {
-    background-color: #0a0a0a;
-    color: #f5f6f7;
+  /* Soft section band — a clean elevated surface that follows the theme:
+     light in light mode, dark in dark mode. Text uses the theme ink so it stays
+     legible in both. Used by the skills marquee and the experience section. */
+  .pf-band-soft {
+    background-color: var(--pf-bg-elev);
+    color: var(--pf-ink);
   }
-  .dark .pf-band-dark {
-    background-color: #0e1116;
+  .pf-experience-band {
+    background-color: var(--pf-bg-elev);
+    color: var(--pf-ink);
   }
 
-  /* Experience band: a softer, slightly lighter charcoal than the default dark
-     band in light mode; stays the same elevated dark in dark mode. */
-  .pf-experience-band {
-    background-color: #1a1a1d;
-    color: #f5f6f7;
+  /* Experience cards — theme-adaptive surface (dark tint in light mode, light
+     tint in dark mode) so they read correctly on the elevated band in both. */
+  .pf-exp-card {
+    border: 1px solid var(--pf-line);
+    background-color: color-mix(in srgb, var(--pf-ink) 4%, transparent);
   }
-  .dark .pf-experience-band {
-    background-color: #0e1116;
+  .pf-exp-card:hover {
+    border-color: color-mix(in srgb, var(--pf-accent) 45%, var(--pf-line));
+    background-color: color-mix(in srgb, var(--pf-ink) 8%, transparent);
   }
 
   /* Film grain overlay (sustainable: pure CSS/SVG, no asset) */
