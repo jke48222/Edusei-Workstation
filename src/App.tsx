@@ -8,7 +8,7 @@ import { Overlay } from './components/Overlay';
 import { useKonamiCode } from './hooks/useKonamiCode';
 import { usePrefersReducedMotion } from './hooks/useIsMobile';
 import { useWorkstationStore, useViewMode } from './store/store';
-import { useActiveTheme, useThemeStore, useResolvedThemeId, SYSTEM_THEME_ID } from './store/themeStore';
+import { useActiveTheme, useThemeStore, useResolvedThemeId, SYSTEM_THEME_ID, setDarkClass } from './store/themeStore';
 import { ModeToggle } from './components/ModeToggle';
 import { ProfessionalView } from './components/professional/ProfessionalView';
 import { ThemeSelector } from './components/ThemeSelector';
@@ -87,12 +87,7 @@ function App() {
   }, [prefersReducedMotion, setPrefersReducedMotion]);
 
   useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (viewMode === 'professional' && portfolioDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    setDarkClass(viewMode === 'professional' && portfolioDark);
   }, [viewMode, portfolioDark]);
 
   return (

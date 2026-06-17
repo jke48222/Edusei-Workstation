@@ -13,11 +13,18 @@
  * Scoped under .pf (portfolio) so the 3D workstation + terminal stay untouched.
  * ============================================================================= */
 :root {
-  /* Declare that this page manages its own light/dark theming. This opts the
-     page out of the browser's "Auto Dark Mode" (Chrome force-dark), which would
-     otherwise heuristically darken solid section backgrounds while leaving
-     gradient/image surfaces (e.g. the hero mesh) light — producing a broken,
-     half-light/half-dark render that looks like the modes are "mixed up". */
+  /* Declare that this page manages its own light/dark theming. The value must
+     include `dark` for the browser to treat the page as dark-aware — that is
+     what disables Chrome's "Auto Dark Mode" (force-dark), which otherwise
+     lightness-inverts our near-white surfaces while leaving saturated colors and
+     image cards alone, producing the broken half-light/half-dark "mixed up"
+     render. (.dark below narrows this to `dark` once the dark theme is active.)
+
+     Some aggressive WebView/flag-forced force-dark engines ignore color-scheme
+     entirely. For those we ALSO default the portfolio theme to the OS preference
+     (see getStoredPortfolioDark in themeStore.ts): a dark-preferring visitor
+     then gets our real dark theme — which force-dark leaves untouched because it
+     is already dark — instead of a mangled light one. */
   color-scheme: light dark;
 
   /* Signature accent — cobalt→cyan "current", with amber as the warm tertiary.
@@ -55,6 +62,19 @@
   --pf-line: rgba(255, 255, 255, 0.10);
   --pf-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.75);
   --pf-shadow-accent: 0 26px 80px -30px rgba(37, 99, 235, 0.5);
+}
+
+/* Atomic theme switch. While the root carries `.theme-switching` (added for a
+   single frame around a light/dark flip — see setDarkClass in themeStore.ts),
+   ALL color transitions are killed so every surface snaps to the new theme in
+   the same paint. Without this, large surfaces (e.g. .pro-scroll's background)
+   transition their resolved color over ~300ms while smaller elements snap
+   instantly, leaving a half-light/half-dark render mid-toggle — which Chromium
+   can occasionally leave permanently stuck when toggled rapidly. */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
 }
 
 @layer components {

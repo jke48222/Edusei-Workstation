@@ -273,6 +273,43 @@ export const themePresets: Record<string, ThemePreset> = {
 const THEME_STORAGE_KEY = 'edusei-workstation-theme';
 const PORTFOLIO_DARK_KEY = 'edusei-portfolio-dark';
 
+let themeSwitchToken = 0;
+
+/**
+ * Atomically toggle the portfolio's `.dark` class on <html>.
+ *
+ * The flip is wrapped in a one-frame `.theme-switching` window that disables all
+ * color transitions (see index.css), so every themed surface snaps to the new
+ * theme in the same paint instead of transitioning at different rates. That
+ * eliminates the transient — and occasionally permanently stuck — half-light/
+ * half-dark render seen when the light/dark toggle is hit rapidly.
+ *
+ * Idempotent: a call that matches the current state is a no-op, so the several
+ * effects that keep the root in sync don't each trigger a redundant flip.
+ */
+export function setDarkClass(on: boolean): void {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  if (root.classList.contains('dark') === on) return;
+
+  root.classList.add('theme-switching');
+  root.classList.toggle('dark', on);
+  // Force a synchronous reflow so the new colors commit with transitions off.
+  void root.offsetWidth;
+
+  const token = ++themeSwitchToken;
+  const reenable = () => {
+    // Only the most recent switch clears the flag, so a flip that lands while a
+    // previous one is still settling doesn't re-enable transitions early.
+    if (token === themeSwitchToken) root.classList.remove('theme-switching');
+  };
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(() => requestAnimationFrame(reenable));
+  } else {
+    reenable();
+  }
+}
+
 export const SYSTEM_THEME_ID = 'system';
 
 function getStoredTheme(): string {
@@ -292,7 +329,15 @@ function getStoredPortfolioDark(): boolean {
     if (stored === 'true') return true;
     if (stored === 'false') return false;
   } catch (_) {}
-  return false;
+  // No explicit choice yet — follow the OS/browser preference. This keeps the
+  // portfolio's theme aligned with the environment so a dark-preferring browser
+  // gets our real dark theme instead of a light one that its force-dark engine
+  // would mangle. The pre-paint boot script in index.html mirrors this logic.
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  } catch (_) {
+    return false;
+  }
 }
 
 /** Resolve system preference: dark -> dark theme, light -> clean (Modern). */

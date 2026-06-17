@@ -13,7 +13,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Moon, SunMedium, Boxes } from 'lucide-react';
 import { profileData } from '../../data';
-import { useThemeStore } from '../../store/themeStore';
+import { useThemeStore, setDarkClass } from '../../store/themeStore';
 import { useWorkstationStore } from '../../store/store';
 import { PortfolioSearch } from '../PortfolioSearch';
 import { Footer } from './ProfessionalView';
@@ -107,9 +107,7 @@ export function SectionPage({
 
   // Keep the document root in sync with the portfolio's dark-mode preference.
   useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (portfolioDark) root.classList.add('dark');
-    else root.classList.remove('dark');
+    setDarkClass(portfolioDark);
   }, [portfolioDark]);
 
   useEffect(() => {

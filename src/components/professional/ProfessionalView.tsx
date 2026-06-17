@@ -26,7 +26,7 @@ import {
   studyAbroad,
   getSayHiMailto,
 } from '../../data';
-import { useThemeStore } from '../../store/themeStore';
+import { useThemeStore, setDarkClass } from '../../store/themeStore';
 import CountUp from '../CountUp';
 import { BackToTop } from './BackToTop';
 import { FloatingDock } from './FloatingDock';
@@ -73,9 +73,7 @@ export function ProfessionalView() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (portfolioDark) root.classList.add('dark');
-    else root.classList.remove('dark');
+    setDarkClass(portfolioDark);
   }, [portfolioDark]);
 
   useEffect(() => {
@@ -342,12 +340,14 @@ export function AboutBand() {
 
           <Reveal delay={0.1}>
             <div className="overflow-hidden rounded-[var(--pf-radius-lg)] border border-[var(--pf-line)] bg-[var(--pf-bg-elev)] shadow-[var(--pf-shadow)]">
-              {/* headshot — clean, cropped to the face */}
+              {/* headshot — transparent cutout, square crop from the top.
+                  aspect-square keeps a constant 1:1 box, so the crop never
+                  changes on resize — the image only scales with the page. */}
               <img
                 src="/headshot.png"
                 alt={profileData.name}
-                className="h-72 w-full object-cover"
-                style={{ objectPosition: '50% 18%' }}
+                className="aspect-square w-full object-cover object-top"
+                style={{ objectPosition: '50% 12%' }}
               />
               <dl className="divide-y divide-[var(--pf-line)]">
                 {facts.map((f) => (
