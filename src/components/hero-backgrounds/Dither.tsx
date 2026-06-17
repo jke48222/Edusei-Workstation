@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unknown-property */
 import { useRef, useEffect, forwardRef } from 'react';
 import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
 import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
@@ -146,13 +145,13 @@ class RetroEffectImpl extends Effect {
     this.uniforms.get('colorNum')!.value = value;
   }
   get colorNum(): number {
-    return this.uniforms.get('colorNum')!.value;
+    return this.uniforms.get('colorNum')!.value as number;
   }
   set pixelSize(value: number) {
     this.uniforms.get('pixelSize')!.value = value;
   }
   get pixelSize(): number {
-    return this.uniforms.get('pixelSize')!.value;
+    return this.uniforms.get('pixelSize')!.value as number;
   }
 }
 
@@ -161,7 +160,9 @@ const RetroEffect = forwardRef<
   { colorNum: number; pixelSize: number }
 >((props, ref) => {
   const { colorNum, pixelSize } = props;
-  const WrappedRetroEffect = wrapEffect(RetroEffectImpl);
+  // wrapEffect's generated type drops the impl's props/ref, so widen it here.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const WrappedRetroEffect = wrapEffect(RetroEffectImpl) as any;
   return <WrappedRetroEffect ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
 });
 

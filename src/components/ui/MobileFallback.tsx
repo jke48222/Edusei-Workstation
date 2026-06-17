@@ -192,7 +192,7 @@ interface VideoModalProps {
 
 function VideoModal({ video, onClose }: VideoModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [, setIsPlaying] = useState(false);
   const [error, setError] = useState(false);
   
   // Auto-play when modal opens

@@ -16,6 +16,7 @@ import { Footer } from '../professional/ProfessionalView';
 import { ProjectTile } from '../professional/ui/ProjectTile';
 import { ProjectMedia, resolveMedia } from '../professional/ui/ProjectMedia';
 import { CATEGORY_ICON, CATEGORY_LABEL, MagneticButton } from '../professional/ui/Kit';
+import { ZoomableImage } from '../professional/ui/ZoomableImage';
 
 const SITE_URL = 'https://www.jalenedusei.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/headshot.png`;
@@ -229,11 +230,10 @@ export function ProjectDetailPage() {
                   transition={{ duration: 0.4, delay: (i % 3) * 0.06 }}
                   className="overflow-hidden rounded-xl border border-[var(--pf-line)] bg-[var(--pf-bg-elev)] shadow-[var(--pf-shadow-sm)]"
                 >
-                  <img
+                  <ZoomableImage
                     src={g.src}
                     alt={g.alt}
-                    loading="lazy"
-                    className="aspect-video w-full object-cover transition-transform duration-500 hover:scale-105"
+                    className="aspect-video w-full object-cover transition-transform duration-500 group-hover/zoom:scale-105"
                   />
                 </motion.div>
               ))}

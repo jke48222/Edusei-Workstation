@@ -213,7 +213,7 @@ function Marquee() {
 
   const renderItems = (copyId: string) =>
     shuffledItems.map((item, i) => (
-      <span key={`${copyId}-${i}`} className="mx-5 inline-flex shrink-0 items-center text-sm font-semibold uppercase tracking-[0.18em] text-[var(--pf-bg)]">
+      <span key={`${copyId}-${i}`} className="mx-5 inline-flex shrink-0 items-center text-sm font-semibold uppercase tracking-[0.18em]">
         {item}
         <span className="ml-5 text-[var(--pf-accent-bright)]">✦</span>
       </span>
@@ -249,7 +249,7 @@ function Marquee() {
   }, []);
 
   return (
-    <div className="relative overflow-hidden border-y border-[var(--pf-line)] py-3.5" style={{ background: 'var(--pf-ink)' }}>
+    <div className="pf-band-dark relative overflow-hidden border-y border-[var(--pf-line)] py-3.5">
       <div ref={trackRef} className="flex whitespace-nowrap will-change-transform">
         <div className="flex shrink-0 items-center">{renderItems('a')}</div>
         <div className="flex shrink-0 items-center" aria-hidden>{renderItems('b')}</div>
@@ -281,8 +281,8 @@ export function Stats() {
           >
             <s.icon className="mx-auto mb-3 h-5 w-5 text-[var(--pf-accent-deep)] transition-transform duration-500 group-hover:scale-125 dark:text-[var(--pf-accent-bright)]" />
             <p
-              className="whitespace-nowrap font-display font-extrabold leading-none tracking-tight text-[var(--pf-ink)]"
-              style={{ fontSize: 'clamp(1.5rem, 22cqw, 3.25rem)' }}
+              className="whitespace-nowrap font-sans font-bold leading-none tracking-tight text-[var(--pf-ink)]"
+              style={{ fontSize: 'clamp(1.5rem, 20cqw, 3rem)' }}
             >
               <CountUp from={s.from} to={s.to} duration={s.duration} delay={s.delay} className="inline" triggerRef={sectionRef} />
               {s.suffix}
@@ -507,9 +507,9 @@ export function Timeline() {
 
 export function ExperienceSection() {
   return (
-    <section id="experience" className="relative w-full overflow-hidden" style={{ background: 'var(--pf-ink)' }}>
+    <section id="experience" className="pf-experience-band relative w-full overflow-hidden">
       <div className="pf-grain pointer-events-none absolute inset-0" aria-hidden />
-      <div className="relative mx-auto max-w-7xl px-6 py-24 md:px-12 lg:px-20" style={{ color: 'var(--pf-bg)' }}>
+      <div className="relative mx-auto max-w-7xl px-6 py-24 md:px-12 lg:px-20">
         <div className="mb-10">
           <div className="mb-3 inline-flex items-center gap-2 text-[var(--pf-accent-bright)]">
             <CircuitMotif className="h-4 w-4" />

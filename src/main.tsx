@@ -5,10 +5,15 @@
  * in production builds for offline functionality.
  */
 
-import { StrictMode } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import DotRingCursor from './components/DotRingCursor';
+import ReticleCursor from './components/ReticleCursor';
+import { useViewMode } from './store/store';
+import { useActiveTheme, useThemeStore } from './store/themeStore';
+import { usePrefersReducedMotion } from './hooks/useIsMobile';
 import { NotFound } from './components/NotFound';
 import { WorkPage } from './components/work/WorkPage';
 import { ProjectDetailPage } from './components/work/ProjectDetailPage';
@@ -38,6 +43,47 @@ function isEmbedded(): boolean {
   }
 }
 
+/**
+ * Picks the right custom cursor for the active "site": the reticle for the
+ * immersive Workstation (only live at `/`), the dot+ring everywhere else on the
+ * professional portfolio. Renders nothing on touch / coarse-pointer devices.
+ */
+function SiteCursor() {
+  const viewMode = useViewMode();
+  const location = useLocation();
+  const theme = useActiveTheme();
+  const portfolioDark = useThemeStore((s) => s.portfolioDark);
+  const reducedMotion = usePrefersReducedMotion();
+  const [finePointer, setFinePointer] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: fine)');
+    const update = () => setFinePointer(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  if (!finePointer) return null;
+
+  // The Workstation only renders at `/`; every other route is the portfolio.
+  const isWorkstation = viewMode === 'immersive' && location.pathname === '/';
+
+  if (isWorkstation) {
+    return <ReticleCursor color={theme.accent} reducedMotion={reducedMotion} />;
+  }
+
+  return (
+    <DotRingCursor
+      dark={portfolioDark}
+      ringColor="color-mix(in srgb, var(--pf-ink) 55%, transparent)"
+      dotColor="var(--pf-accent)"
+      hoverColor="var(--pf-accent)"
+      smooth={reducedMotion ? 1 : 0.18}
+    />
+  );
+}
+
 const root = createRoot(document.getElementById('root') as HTMLElement);
 
 if (isEmbedded()) {
@@ -52,6 +98,7 @@ if (isEmbedded()) {
     <StrictMode>
       <ErrorBoundary>
         <BrowserRouter>
+          <SiteCursor />
           <Routes>
             <Route path="/" element={<App />} />
             <Route path="/work" element={<WorkPage />} />

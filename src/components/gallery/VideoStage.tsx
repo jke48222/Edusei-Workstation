@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Html, useVideoTexture, Sparkles } from '@react-three/drei';
+import { Html, Sparkles } from '@react-three/drei';
 import { useWorkstationStore } from '../../store/store';
 import { GALLERY_CONFIG, GalleryVideo } from '../../constants/galleryData';
 
@@ -58,7 +58,7 @@ interface TriggerPlatformProps {
   videoId: string;
 }
 
-function TriggerPlatform({ position, isActive, videoId }: TriggerPlatformProps) {
+function TriggerPlatform({ position, isActive }: TriggerPlatformProps) {
   const ringRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const outerRef = useRef<THREE.Mesh>(null);
@@ -299,8 +299,8 @@ interface VideoSurfaceProps {
   isActive: boolean;
 }
 
-function VideoSurface({ videoUrl, thumbnailUrl, width, height, isActive }: VideoSurfaceProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+function VideoSurface({ videoUrl, width, height, isActive }: VideoSurfaceProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
