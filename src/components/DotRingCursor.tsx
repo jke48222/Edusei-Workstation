@@ -32,6 +32,10 @@ export interface DotRingCursorProps {
  * The dot tracks the pointer 1:1; the ring eases behind it. The ring grows and
  * the dot fades when hovering links/buttons, and the whole cursor hides over
  * text fields so the native caret can show through.
+ *
+ * Position is written straight to the DOM in the rAF loop (no per-frame React
+ * state) so the cursor never triggers a re-render while moving — only the rare
+ * hover/visibility transitions re-render.
  */
 export default function DotRingCursor({
   ringSize = 30,
@@ -44,10 +48,10 @@ export default function DotRingCursor({
   zIndex = 9999,
   dark = false,
 }: DotRingCursorProps) {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [overText, setOverText] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>();
   const targetRef = useRef({ x: -100, y: -100 });
   const currentRef = useRef({ x: -100, y: -100 });
@@ -60,6 +64,7 @@ export default function DotRingCursor({
     targetRef.current = { x: e.clientX, y: e.clientY };
     if (!visible) setVisible(true);
     const el = e.target as HTMLElement | null;
+    // React bails on unchanged primitives, so these only re-render on transitions.
     setOverText(!!el?.closest?.(TEXT_FIELD));
     setHovering(!!el?.closest?.(INTERACTIVE));
   }, [visible]);
@@ -94,7 +99,8 @@ export default function DotRingCursor({
       } else {
         currentRef.current = { x: c.x + dx, y: c.y + dy };
       }
-      setPos({ ...currentRef.current });
+      const node = rootRef.current;
+      if (node) node.style.transform = `translate(${currentRef.current.x}px, ${currentRef.current.y}px)`;
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -111,10 +117,12 @@ export default function DotRingCursor({
 
   return (
     <div
+      ref={rootRef}
       className="pointer-events-none fixed left-0 top-0"
       style={{
         zIndex,
-        transform: `translate(${pos.x}px, ${pos.y}px)`,
+        // Seed from the live position so the first paint isn't at the origin.
+        transform: `translate(${currentRef.current.x}px, ${currentRef.current.y}px)`,
         willChange: 'transform',
       }}
       aria-hidden

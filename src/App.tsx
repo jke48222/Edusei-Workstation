@@ -1,6 +1,9 @@
-import { Suspense, useCallback, useEffect, useLayoutEffect } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import { Experience } from './components/Experience';
+
+// Lazy-loaded: keeps three.js / R3F out of the initial bundle for the default
+// professional view; only fetched when the user enters the 3D workstation.
+const Experience = lazy(() => import('./components/Experience').then((m) => ({ default: m.Experience })));
 import { Overlay } from './components/Overlay';
 import { useKonamiCode } from './hooks/useKonamiCode';
 import { usePrefersReducedMotion } from './hooks/useIsMobile';
