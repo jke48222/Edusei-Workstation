@@ -173,10 +173,30 @@
       radial-gradient(26rem 26rem at 95% 100%, color-mix(in srgb, var(--pf-accent-2) 38%, transparent), transparent 55%);
   }
   .dark .pf-tile-atmo {
-    background-color: #eef0f2;
+    background-color: #0e1116;
     background-image:
-      radial-gradient(30rem 30rem at 20% 0%, color-mix(in srgb, var(--pf-accent) 30%, transparent), transparent 55%),
-      radial-gradient(26rem 26rem at 95% 100%, color-mix(in srgb, var(--pf-accent-2) 26%, transparent), transparent 55%);
+      radial-gradient(30rem 30rem at 20% 0%, color-mix(in srgb, var(--pf-accent) 26%, transparent), transparent 58%),
+      radial-gradient(26rem 26rem at 95% 100%, color-mix(in srgb, var(--pf-accent-2) 24%, transparent), transparent 58%);
+  }
+
+  /* Dark contrast band — intentionally dark in BOTH themes so dark mode never
+     flips it to a light panel (which read as "mixed-up" modes with white text). */
+  .pf-band-dark {
+    background-color: #0a0a0a;
+    color: #f5f6f7;
+  }
+  .dark .pf-band-dark {
+    background-color: #0e1116;
+  }
+
+  /* Experience band: a softer, slightly lighter charcoal than the default dark
+     band in light mode; stays the same elevated dark in dark mode. */
+  .pf-experience-band {
+    background-color: #1a1a1d;
+    color: #f5f6f7;
+  }
+  .dark .pf-experience-band {
+    background-color: #0e1116;
   }
 
   /* Film grain overlay (sustainable: pure CSS/SVG, no asset) */
@@ -609,4 +629,23 @@ html, body, #root {
   .overlay-spinner {
     animation: none;
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Custom cursors                                                              */
+/* When a JS-driven cursor is active (fine-pointer devices only), hide the     */
+/* native pointer everywhere so it doesn't compete with the rendered cursor.   */
+/* The !important beats the inline body.style.cursor the 3D scene sets on hover.*/
+/* -------------------------------------------------------------------------- */
+html.cursor-hidden,
+html.cursor-hidden * {
+  cursor: none !important;
+}
+
+/* Keep the native caret for text entry — the JS cursor hides itself over these. */
+html.cursor-hidden input,
+html.cursor-hidden textarea,
+html.cursor-hidden select,
+html.cursor-hidden [contenteditable="true"] {
+  cursor: auto !important;
 }

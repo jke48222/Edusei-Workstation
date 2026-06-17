@@ -1,8 +1,8 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import * as easing from 'maath/easing';
-import { useWorkstationStore, useSceneMode, useTransitionProgress } from '../../store/store';
+import { useWorkstationStore, useSceneMode } from '../../store/store';
 
 /**
  * @file TransitionPortal.tsx
@@ -63,11 +63,10 @@ interface TransitionPortalProps {
  * 
  * Uses maath/easing for smooth, heavy camera movements
  */
-export function TransitionPortal({ headsetRef }: TransitionPortalProps) {
+export function TransitionPortal(_props: TransitionPortalProps) {
   const { camera } = useThree();
   const sceneMode = useSceneMode();
-  const transitionProgress = useTransitionProgress();
-  
+
   const setTransitionProgress = useWorkstationStore((state) => state.setTransitionProgress);
   const completeGalleryTransition = useWorkstationStore((state) => state.completeGalleryTransition);
   

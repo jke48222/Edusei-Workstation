@@ -1,0 +1,167 @@
+% ============================================================
+% One-Page Resume - Jalen Edusei
+% Target: 2026 New Grad Software / Embedded / Full-Stack Engineering
+% ============================================================
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.55in}
+\addtolength{\evensidemargin}{-0.55in}
+\addtolength{\textwidth}{1.1in}
+\addtolength{\topmargin}{-0.65in}
+\addtolength{\textheight}{1.15in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% ============================================================
+\begin{document}
+
+% ---------- HEADING ----------
+\begin{center}
+    {\Huge \scshape Jalen Edusei} \\ \vspace{2pt}
+    \small 770.714.0190 $|$ \href{mailto:jalen.edusei@gmail.com}{\underline{jalen.edusei@gmail.com}} $|$
+    \href{https://www.jalenedusei.com}{\underline{jalenedusei.com}} $|$
+    \href{https://www.linkedin.com/in/jalenedusei}{\underline{linkedin.com/in/jalenedusei}} $|$
+    \href{https://github.com/jke48222}{\underline{github.com/jke48222}}
+\end{center}
+
+% ---------- EDUCATION ----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University of Georgia, Morehead Honors College}{Athens, GA}
+      {B.S. Computer Systems Engineering \quad $|$ \quad GPA: 3.61}{Aug. 2022 -- May 2026}
+    \resumeItemListStart
+      \resumeItem{\textbf{Relevant Coursework:} Data Structures, Systems Programming, Software Development, Discrete Mathematics, Advanced Digital Design, Embedded Systems I \& II, Design of Digital Systems, Sensors \& Transducers, Linear Systems, Human-Computer Interaction.}
+    \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+% ---------- EXPERIENCE ----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Business Analyst Intern}{June 2025 -- Aug. 2025}
+      {Capital One}{McLean, VA}
+      \resumeItemListStart
+        \resumeItem{Built a data-driven business case for a Notifications Preferences Center on the CreditWise team, projected to streamline communication management for 60M+ users.}
+        \resumeItem{Leveraged SQL, Python, and Excel to analyze email-campaign KPIs and engineer a valuation framework quantifying engagement and retention impact, informing product roadmap decisions.}
+        \resumeItem{Partnered with cross-functional product, design, and engineering teams to present recommendations to senior leadership and align on future messaging strategy.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Flight Software Developer --- MEMESat-1 CubeSat}{Mar. 2024 -- Dec. 2024}
+      {UGA Small Satellite Research Laboratory}{Athens, GA}
+      \resumeItemListStart
+        \resumeItem{Developed and debugged embedded flight software in C/C++ for the MEMESat-1 CubeSat on STM32 microcontrollers, bringing up and troubleshooting UART communication between onboard subsystems.}
+        \resumeItem{Authored unit and integration tests that hardened the flight system against edge cases and failure conditions, and reviewed teammate code to improve quality across the codebase.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+% ---------- PROJECTS ----------
+\section{Projects}
+    \resumeSubHeadingListStart
+
+      \resumeProjectHeading
+          {\textbf{Live Election Platform} $|$ \emph{Next.js, TypeScript, Supabase, PostgreSQL, WebSocket}}{Mar. 2026 -- Apr. 2026}
+          \resumeItemListStart
+            \resumeItem{Shipped a presenter-paced realtime voting system for 60--80 concurrent users across 14 roles, using a finite-state election machine and Supabase WebSocket broadcast for sub-100ms ballot delivery.}
+            \resumeItem{Engineered a defense-in-depth anti-fraud stack with composite SHA-256 browser fingerprinting, a database \texttt{UNIQUE} constraint, and Postgres Row-Level Security to prevent duplicate voting and tampering.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{AnimalDot Smart Bed} $|$ \emph{C++, ESP32, BLE/WiFi/MQTT, DSP, React Native}}{Aug. 2025 -- May 2026}
+          \resumeItemListStart
+            \resumeItem{Engineered ESP32 firmware in C++ for a contactless vital-signs bed, orchestrating geophone, temperature, and load-cell sensors through a modular sensor manager with NVS-persisted calibration.}
+            \resumeItem{Built a real-time DSP pipeline (band-pass filtering, peak detection, smoothing) and concurrent BLE/WiFi/MQTT stacks streaming telemetry to a React Native app, Node.js backend, and Next.js dashboard.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{PrimeForge FPGA Prime Detector} $|$ \emph{Verilog, Xilinx FPGA, VGA, DDR2, SPI}}{Jan. 2026 -- May 2026}
+          \resumeItemListStart
+            \resumeItem{Architected a Verilog prime-detection system unifying dual compute cores (Sieve + trial division), a 640x480 VGA pipeline, SD-card SPI interface, and DDR2 arbiter, verified with module-level testbenches.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{Immersive 3D Portfolio} $|$ \emph{React Three Fiber, TypeScript, Zustand, Tailwind CSS}}{Jan. 2026 -- Present}
+          \resumeItemListStart
+            \resumeItem{Built a 3D ``workstation'' portfolio with a custom theme engine and terminal-inspired navigation, optimized to a consistent 60 FPS PWA across browsers and deployed end-to-end on Vercel.}
+          \resumeItemListEnd
+
+    \resumeSubHeadingListEnd
+
+% ---------- TECHNICAL SKILLS ----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: C, C++, C\#, Python, TypeScript, JavaScript, Java, SQL, Verilog, Assembly, MATLAB} \\ \vspace{2pt}
+     \textbf{Frameworks \& Tools}{: React, Next.js, Node.js, React Native, React Three Fiber, Tailwind CSS, Supabase, PostgreSQL, Unity, Git, Figma, Vercel} \\ \vspace{2pt}
+     \textbf{Embedded \& Hardware}{: STM32, ESP32, Raspberry Pi, FPGA (Xilinx), BLE/NimBLE, MQTT, UART/SPI, RTOS concepts, signal processing, NASA F´ (F Prime)} \\ \vspace{2pt}
+     \textbf{AI}{: Anthropic Claude API, LLM application development, tool use, structured (JSON) outputs, prompt engineering}
+    }}
+ \end{itemize}
+
+% ---------- LEADERSHIP ----------
+\section{Leadership \& Honors}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     Vice President, UGA Engineering Student Society (100+ members) $|$ Tau Beta Pi Honor Society $|$ Resident Assistant $|$ \textit{Extraordinary Engineer} \& 2x Presidential Scholar awards.
+    }}
+ \end{itemize}
+
+\end{document}

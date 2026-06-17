@@ -1,0 +1,432 @@
+% ============================================================
+% Curriculum Vitae - Jalen Edusei
+% ============================================================
+\documentclass[letterpaper,10pt]{article}
+\usepackage[empty]{fullpage}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{12pt}
+\addtolength{\oddsidemargin}{-0.40in}
+\addtolength{\evensidemargin}{-0.40in}
+\addtolength{\textwidth}{0.80in}
+\addtolength{\topmargin}{-0.50in}
+\addtolength{\textheight}{1.05in}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\raggedright
+\setlength{\emergencystretch}{2em}
+\setlist[itemize]{
+  leftmargin=3em,
+  itemsep=2pt,
+  topsep=2pt,
+  parsep=0pt,
+  partopsep=0pt
+}
+\newcommand{\SectionGapBefore}{13pt}
+\newcommand{\SectionGapAfter}{4pt}
+\newcommand{\EntryGapAfter}{2pt}
+\newcommand{\IfEmpty}[3]{\if\relax\detokenize{#1}\relax #2 \else #3 \fi}
+\newcommand{\sectiontitle}[1]{%
+  \vspace{\SectionGapBefore}%
+  {\textbf{\large #1}}\par
+  \vspace{-6pt}%
+  \rule{\textwidth}{0.4pt}\par
+  \vspace{\SectionGapAfter}%
+}
+\newcommand{\projectheading}[4]{%
+  \begin{tabularx}{\textwidth}{@{}X r@{}}
+    \textbf{#1} & #2 \\
+    \textit{#3} & #4 \\
+  \end{tabularx}\par
+  \vspace{\EntryGapAfter}%
+}
+\newcommand{\experienceheading}[4]{%
+  \begin{tabularx}{\textwidth}{@{}X r@{}}%
+    \textbf{#1}%
+    \IfEmpty{#2}{}{, \textit{#2\IfEmpty{#3}{}{,}}}%
+    \IfEmpty{#3}{}{#3}%
+    & #4 \\%
+  \end{tabularx}\par
+  \vspace{\EntryGapAfter}%
+}
+\newcommand{\awardrow}[2]{%
+  \begin{tabularx}{\textwidth}{@{}X r@{}}
+    \textbf{#1} & #2 \\
+  \end{tabularx}\par
+  \vspace{1pt}%
+}
+\makeatletter
+\newcommand{\OutlineNoop}[1]{}
+\renewcommand{\section}{\@ifstar\OutlineNoop\OutlineNoop}
+\renewcommand{\subsection}{\@ifstar\OutlineNoop\OutlineNoop}
+\renewcommand{\subsubsection}{\@ifstar\OutlineNoop\OutlineNoop}
+\renewcommand{\paragraph}{\@ifstar\OutlineNoop\OutlineNoop}
+\renewcommand{\subparagraph}{\@ifstar\OutlineNoop\OutlineNoop}
+\makeatother
+
+\begin{document}
+
+\begin{center}
+{\LARGE \textbf{Jalen Edusei}}\par
+\vspace{4pt}
+\href{mailto:jalen.edusei@gmail.com}{jalen.edusei@gmail.com} \;|\;
+770.714.0190 \;|\;
+\href{https://www.jalenedusei.com}{jalenedusei.com} \;|\;
+\href{https://www.linkedin.com/in/jalenedusei}{linkedin.com/in/jalenedusei} \;|\;
+\href{https://github.com/jke48222}{github.com/jke48222}
+\end{center}
+
+% ============================================================
+% EDUCATION
+% ============================================================
+\section*{EDUCATION}
+\sectiontitle{EDUCATION}
+\begin{tabularx}{\textwidth}{@{}X r@{}}
+\textbf{University of Georgia}, Morehead Honors College, Athens, GA & May 2026 \\
+\textit{Bachelor of Science, Computer Systems Engineering} & GPA: 3.61 \\
+\end{tabularx}
+\vspace{3pt}
+
+\textbf{Relevant Coursework:} Data Structures, Systems Programming, Software Development, Discrete Mathematics, Advanced Digital Design, Design of Digital Systems, Embedded Systems I \& II, Sensors \& Transducers, Linear Systems, Human-Computer Interaction, Microfabrication, Probability \& Statistics for Engineering.
+
+% ============================================================
+% RESEARCH EXPERIENCE
+% ============================================================
+\section*{RESEARCH EXPERIENCE}
+\sectiontitle{RESEARCH EXPERIENCE}
+\subsection*{Joyner Research Laboratory}
+\experienceheading{Joyner Research Laboratory}{Research Assistant}{Athens, GA}{September 2022 -- May 2023}
+\begin{itemize}
+\item Conducted 50+ experiments including ELISAs and DNA/RNA extractions supporting malaria bioinformatics projects.
+\item Analyzed and documented data contributing to 2 peer-reviewed manuscripts.
+\item Designed and launched a new laboratory website, increasing research visibility and engagement by over 500 monthly visitors.
+\end{itemize}
+\subsection*{Small Satellite Research Laboratory}
+\experienceheading{Small Satellite Research Laboratory}{Flight Software Developer (MEMESat-1)}{Athens, GA}{March 2024 -- December 2024}
+\begin{itemize}
+\item Developed and debugged embedded flight software in C/C++ for the MEMESat-1 CubeSat on STM32 microcontrollers, bringing up and troubleshooting UART communication between onboard subsystems.
+\item Authored unit and integration tests to verify software behavior and harden the flight system against edge cases and failure conditions.
+\item Reviewed teammates' code and documentation, providing feedback that improved consistency, readability, and overall quality across the flight software codebase.
+\end{itemize}
+\subsection*{Capstone Design (AnimalDot)}
+\experienceheading{University of Georgia}{Capstone Researcher (AnimalDot)}{Athens, GA}{August 2025 -- May 2026}
+\begin{itemize}
+\item Designed a contactless smart sensing bed to monitor animal heart rate and respiration using geophone-based vibration sensing, prioritizing minimal animal disturbance and continuous passive data collection.
+\item Developed a modular sensing and processing pipeline integrating geophones, load cells, and temperature sensors with analog signal conditioning, filtering, and feature extraction to separate physiological signals from environmental noise.
+\item Architected an embedded-to-mobile system that transmits processed data to a companion mobile application for real-time visualization, trend tracking, and caregiver-facing health insights.
+\end{itemize}
+
+% ============================================================
+% TEACHING & MENTORING EXPERIENCE
+% ============================================================
+\section*{TEACHING AND MENTORING EXPERIENCE}
+\sectiontitle{TEACHING \& MENTORING EXPERIENCE}
+\subsection*{Office of Engagement, Leadership, and Service}
+\experienceheading{Office of Engagement, Leadership, and Service}{ELS Peer Leader}{Athens, GA}{January 2024 -- May 2024}
+\begin{itemize}
+\item Selected for leadership coaching program supporting first- and second-year student engagement in UGA involvement pathways.
+\item Conducted 1:1 mentorship sessions, connecting students to leadership opportunities, clubs, and resources across campus.
+\item Facilitated interactive workshops that improved student understanding of values-based leadership and self-discovery.
+\end{itemize}
+\subsection*{UGA STEM Academic Success Program}
+\experienceheading{UGA STEM Academic Success Program}{Student Advisor}{Athens, GA}{August 2023 -- May 2025}
+\begin{itemize}
+\item Planned and executed 8+ workshops each semester supporting academic success for 30+ STEM students.
+\item Assisted in strategic programming and mentoring initiatives contributing to increased retention and engagement.
+\item Developed and maintained the organization's digital and social media strategy, increasing online engagement by 50\%.
+\end{itemize}
+\subsection*{University of Georgia Housing}
+\experienceheading{University of Georgia Housing}{Resident Assistant}{Athens, GA}{August 2023 -- May 2025}
+\begin{itemize}
+\item Cultivated a supportive community for 45 residents by organizing 10+ educational and social events each semester, boosting resident engagement by 30\%.
+\item Mediated and resolved 30+ conflicts and safety concerns, maintaining a secure environment.
+\item Partnered with housing staff to implement programming focused on academic success and mental health awareness.
+\end{itemize}
+
+% ============================================================
+% TECHNICAL & ENGINEERING PROJECTS
+% ============================================================
+\section*{TECHNICAL AND ENGINEERING PROJECTS}
+\sectiontitle{TECHNICAL \& ENGINEERING PROJECTS}
+\subsection*{Personal Portfolio Website}
+\projectheading
+{Personal Portfolio Website}{Athens, GA}
+{Design Engineering \& Full Stack Development}{January 2026 -- present}
+\begin{itemize}
+\item Architected an immersive 3D workstation experience using React Three Fiber and Framer Motion, implementing high-fidelity spatial transitions and intentional motion patterns between 2D and 3D states.
+\item Engineered a robust component architecture and custom theme engine with Tailwind CSS and Zustand, ensuring synchronized state management across complex 3D overlays and traditional web interfaces.
+\item Optimized 3D asset delivery and interaction performance for a Progressive Web App (PWA) environment, maintaining a consistent 60 FPS experience and mobile-first responsiveness across all major browsers.
+\item Designed a terminal-inspired navigation system and modular asset pipeline, establishing end-to-end technical ownership from Figma-based prototyping to production-ready deployment on Vercel.
+\end{itemize}
+\subsection*{Musical Artist Website and Storefront}
+\projectheading
+{Musical Artist Website and Storefront}{Athens, GA}
+{Freelance Full Stack Development}{May 2026 -- present}
+\begin{itemize}
+\item Built a production music-artist site and e-commerce storefront in Next.js 16 (App Router) and React 19 / TypeScript, integrating the Shopify Storefront API as a headless commerce backend with cart state persisted in an httpOnly cookie and all cart mutations routed through a hardened server-side API boundary.
+\item Modeled all editorial content (releases, tracks, shows, videos, press, and lookbooks) in Sanity CMS with an embedded Studio, and wired on-demand Incremental Static Regeneration via HMAC-signed Sanity webhooks to revalidate only the paths affected by each content change.
+\item Implemented a Klaviyo-backed email capture flow with Zod schema validation and Upstash Redis per-IP rate limiting (429 with \texttt{Retry-After}), organizing the marketing and store experiences into separate route groups under a shared Tailwind CSS v4 design system.
+\item Instrumented the platform with Sentry error monitoring and Vercel Analytics and Speed Insights, delivering a mobile-first responsive build deployed end-to-end on Vercel.
+\end{itemize}
+\subsection*{ATLAS Job Search Platform}
+\projectheading
+{ATLAS Job Search Platform}{Athens, GA}
+{AI Application Development \& Full Stack Engineering}{April 2026}
+\begin{itemize}
+\item Built a full-stack React job-search operating system featuring a Kanban-style pipeline visualization and full CRUD application tracking, centralizing every stage of the search from outreach to offer in a single dashboard.
+\item Integrated the Anthropic Claude API to power a suite of AI tools including resume tailoring, cover letter generation, company research, cold outreach drafting, interview preparation, mock interviews, and offer comparison.
+\item Engineered an analytics layer with interactive charts surfacing application velocity, response rates, and pipeline health, enabling data-informed decisions across the search.
+\end{itemize}
+\subsection*{Übersicht Desktop Widget Suite}
+\projectheading
+{Übersicht Desktop Widget Suite}{Athens, GA}
+{Frontend Engineering \& Creative Coding}{May 2026}
+\begin{itemize}
+\item Built a suite of 12 macOS desktop widgets for Übersicht in React/JSX, unifying them under a single self-contained design system of color tokens, typography, a frosted-glass card shell, drag/resize handles, and last-known-good caching for consistent look and offline resilience.
+\item Engineered graphics-heavy widgets including a full-screen WebGL fragment-shader live wallpaper, an auto-rotating 3D PBR model viewer with daily rotation and offline fallback, and a dot-matrix globe rendering great-circle arcs and pins over visited cities.
+\item Integrated external data sources through shell-backed commands, surfacing Apple Music now-playing and most-played albums, NASA's Astronomy Picture of the Day with inline video, and Claude API-generated daily prompts.
+\item Packaged each widget as an independent GitHub repository with automated shell install scripts and distributable bundles, owning the project end-to-end from design system to documentation and release.
+\end{itemize}
+\subsection*{PDMS Microfluidic Mixer}
+\projectheading
+{PDMS Microfluidic Mixer}{Athens, GA}
+{for Microfabrication}{January 2026 -- May 2026}
+\begin{itemize}
+\item Designed and fabricated passive microfluidic mixing devices in PDMS to overcome diffusion-limited mixing in laminar, low-Reynolds-number flow, comparing Y-junction, sharp-bend, and smooth-bend serpentine channel geometries to maximize fluid interface generation and in-channel residence time.
+\item Produced photoresist molds via photolithography (1000 RPM spin coating, 95\,$^{\circ}$C soft bake, mask-aligner UV exposure, post-exposure bake, and development) and cast PDMS devices using trichlorosilane surface modification, plasma bonding to glass, and thermal curing.
+\item Characterized fabricated devices on a Chemyx syringe pump across input flow rates from 0.001 to 0.1 mL/min, capturing microscope imagery at junctions and bends to evaluate mixing performance and diagnose dust-defect and channel-leakage failure modes.
+\item Collaborated on a four-person team to document results and propose future work, including quantitative mixing metrics, varied channel heights, and fluids of differing viscosities and Reynolds numbers.
+\end{itemize}
+\subsection*{PrimeForge FPGA Prime Number Detector}
+\projectheading
+{PrimeForge FPGA Prime Number Detector}{Athens, GA}
+{for Advanced Digital Systems, CSEE 4280}{January 2026 -- May 2026}
+\begin{itemize}
+\item Architected a Verilog-based prime number detection system on a Xilinx FPGA, unifying a VGA output controller, SD card interface, DDR2 memory arbiter, and parallel compute engines under a single top-level module.
+\item Implemented dual prime-finding cores: a Sieve of Eratosthenes engine and a trial-division engine, with a configurable 64-bit upper bound, enabling runtime selection between throughput-optimized and resource-efficient computation paths.
+\item Designed a 640x480 @ 60Hz VGA pipeline with a sprite engine, 8x16 font ROM text renderer, and DDR2-backed frame buffering to display the last 20 primes, runtime, and accuracy against a reference set loaded from SD card over SPI.
+\item Built a multi-input user interface combining PMOD joystick, keypad, debounced buttons, and an FSM-driven menu, and verified the design with module-level testbenches for the sieve engine, trial divider, DDR2 arbiter, SD SPI controller, sprite engine, and VGA timing.
+\end{itemize}
+\subsection*{PARMCO Bluetooth Motor Control System}
+\projectheading
+{PARMCO Bluetooth Motor Control System}{Athens, GA}
+{for Embedded Systems II, ECSE 4235}{January 2026 -- May 2026}
+\begin{itemize}
+\item Built a BLE GATT server in C on a Raspberry Pi 4 that advertises a custom service, parses UTF-8 motor control commands, and streams RPM telemetry notifications to a SwiftUI iOS client over Core Bluetooth.
+\item Integrated ARMv8 assembly GPIO primitives (via direct register mapping) with the pigpio DMA-based hardware PWM library to drive an L293D motor driver, supporting forward/reverse direction, variable speed, and start/stop commands from the phone.
+\item Implemented closed-loop control modes (Maintain and Match) that sample an IR tachometer, compute actual RPM, and adjust PWM duty cycle in real time to track an RPM setpoint or a reference tach input.
+\item Packaged the server as a systemd service for boot auto-start and designed the SwiftUI client with manual and automatic control modes, delivering a demo-ready phone-to-motor system with bidirectional BLE communication.
+\end{itemize}
+\subsection*{AnimalDot Smart Bed}
+\projectheading
+{AnimalDot Smart Bed}{Athens, GA}
+{for Capstone Design}{August 2025 -- May 2026}
+\begin{itemize}
+\item Engineered ESP32 firmware in C++ for a contactless animal vital-signs monitoring bed, orchestrating a geophone (heart rate / respiration), DHT22 temperature sensor, and FX29 load cells through a modular sensor manager with NVS-persisted calibration.
+\item Implemented a real-time DSP pipeline (band-pass filtering, peak-count detection, and exponential smoothing) to extract cardiac and respiratory signals from raw geophone vibration data while suppressing environmental noise.
+\item Architected concurrent BLE, WiFi, and MQTT connectivity stacks, including NimBLE GATT services with the standard 0x180D Heart Rate profile, STA auto-connect with captive-portal AP fallback, and BedDot-compatible binary MQTT payloads for cloud telemetry.
+\item Delivered an end-to-end embedded-to-mobile system with a React Native companion app, Node.js backend, and Next.js caregiver dashboard, providing live vital sign visualization, trend tracking, and remote configuration of the bed.
+\end{itemize}
+\subsection*{Live Election Platform}
+\projectheading
+{Live Election Platform}{Athens, GA}
+{for a campus engineering student organization}{March 2026 -- April 2026}
+\begin{itemize}
+\item Designed and shipped a presenter-paced live election system in Next.js 14 (App Router) and Tailwind CSS, supporting 60--80 concurrent voters across 14 parliamentary roles and 39 candidates with a finite-state election machine (Waiting $\rightarrow$ Voting $\rightarrow$ Locked $\rightarrow$ Results) and runoff/floor-nomination support.
+\item Architected the realtime layer on Supabase Postgres with WebSocket Broadcast for sub-100ms ballot delivery, server-synced countdowns via absolute UTC \texttt{poll\_expires\_at} timestamps, and 0--400ms randomized vote jitter to mitigate stampeding-herd load at submission.
+\item Engineered a defense-in-depth anti-fraud stack combining composite SHA-256 browser fingerprinting (Canvas + AudioContext + system entropy), a database-level \texttt{UNIQUE(role\_id, device\_hash)} constraint with silent SQLSTATE 23505 handling, and Row-Level Security policies to prevent duplicate voting and result tampering.
+\item Built an admin dashboard with progressive disclosure (pre-poll checklist, live telemetry, results with tie detection) and a WCAG AA voter UI featuring 48dp touch targets, \texttt{role="timer"} live regions, Web Worker heartbeats, and REST fail-safe reconnection on \texttt{visibilitychange}.
+\end{itemize}
+\subsection*{Kitchen Chaos VR}
+\projectheading
+{Kitchen Chaos VR}{Athens, GA}
+{for Virtual Reality, CSCI 6830}{October 2025 -- December 2025}
+\begin{itemize}
+\item Built an Overcooked-style multiplayer VR cooking game for Meta Quest 3 in Unity, implementing physics-driven interactions, locomotion, and object handling across a modular C\# gameplay architecture.
+\item Integrated VelNet networking to synchronize player avatars, spawning, and round state across clients, enabling reliable session flow from bootstrap to gameplay with deterministic event handling and scene management.
+\item Developed a recipe and scoring pipeline using ScriptableObjects, trigger-based ingredient tracking, and interpretable score breakdowns, then integrated an AI dish judge via REST API calls with strict JSON outputs and text-to-speech narration.
+\end{itemize}
+\subsection*{BreakBuddy}
+\projectheading
+{BreakBuddy}{Athens, GA}
+{for Human-Computer Interaction, CSCI 4800}{August 2025 -- December 2025}
+\begin{itemize}
+\item Designed BreakBuddy, a guilt-free stress management application for educators that converts 2 to 5 minute pauses into guided micro-break sessions with social accountability and low cognitive load.
+\item Conducted user research through semi-structured interviews, affinity mapping, POV and HMW framing, and assumption mapping, then validated concepts via experience prototyping and iterative heuristic evaluation.
+\item Built and tested paper and high-fidelity prototypes featuring a robust activity timer, defensive design error states, and a Reports dashboard with streak tracking and data visualization.
+\end{itemize}
+\subsection*{Virtual Reality Portfolio 2}
+\projectheading
+{Virtual Reality Portfolio 2}{Athens, GA}
+{for Virtual Reality, CSCI 6830}{October 2025 -- November 2025}
+\begin{itemize}
+\item Developed two advanced XR experiences for the Meta Quest 3, including a VR Mini Museum and an MR Room, featuring spatial audio storytelling, physics-based interactions, and hand-tracked UI.
+\item Implemented mixed reality features such as depth-based occlusion, passthrough visualization, spatial anchors, distance grabbing, and real-time object spawning across a modular system of more than 20 C\# scripts.
+\item Built an AI-driven NPC assistant using Wit.ai for natural language understanding, speech synthesis, and lip-synchronized responses that enable voice-controlled panels.
+\end{itemize}
+\subsection*{Smart Plant Watering Assistant}
+\projectheading
+{Smart Plant Watering Assistant}{Athens, GA}
+{for Sensors and Transducers, ELEE 4230}{August 2025 -- November 2025}
+\begin{itemize}
+\item Built an automated plant monitoring system using a Raspberry Pi Pico 2W connected to a soil moisture sensor, thermistor, and LDR to analyze environmental conditions in real time.
+\item Integrated analog signal conditioning, operational amplifier stages, and Kalman filtering to stabilize noisy sensor data and enhance measurement precision.
+\item Implemented control logic for a transistor-driven water pump with predictive thresholding to maintain optimal soil moisture, demonstrating reliable closed-loop system performance.
+\end{itemize}
+\subsection*{Virtual Reality Portfolio 1}
+\projectheading
+{Virtual Reality Portfolio 1}{Athens, GA}
+{for Virtual Reality, CSCI 6830}{August 2025 -- October 2025}
+\begin{itemize}
+\item Constructed a four-part Unity portfolio demonstrating key VR design principles including transformation, physics-based motion, immersion, and user interaction with spatial environments.
+\item Authored over 15 C\# scripts integrating real-time lighting, spatial audio, collision detection, and smooth locomotion, translating theoretical VR concepts into practical, interactive learning modules.
+\end{itemize}
+\subsection*{Audio Tracking Car}
+\projectheading
+{Audio Tracking Car}{Athens, GA}
+{for ECSE Design Methodology, ECSE 2920}{January 2025 -- April 2025}
+\begin{itemize}
+\item Engineered a Python-based control system on Raspberry Pi 4 that autonomously navigated towards specific audio frequencies, improving tracking precision by 20\%.
+\item Developed a PID motor control algorithm utilizing optical encoder feedback and ADC signal processing, enhancing motor response time by 15\%.
+\end{itemize}
+\subsection*{LED Frequency Filter}
+\projectheading
+{LED Frequency Filter}{Athens, GA}
+{for Linear Systems, ELEE 6210}{August 2024 -- December 2024}
+\begin{itemize}
+\item Designed a frequency filter circuit to classify signals into predefined bands and visualize them via LEDs, achieving 98\% signal classification accuracy.
+\item Iterated hardware design through oscilloscope analysis and voltage optimization to minimize signal attenuation and distortion.
+\end{itemize}
+\subsection*{Creation and Development of Websites}
+\projectheading
+{Creation and Development of Websites}{Athens, GA}
+{for a campus engineering student organization}{September 2022 -- May 2024}
+\begin{itemize}
+\item Spearheaded interactive WordPress and JavaScript website development, enhancing digital presence and increasing site traffic by 500+ monthly visitors.
+\item Coordinated with 10+ stakeholders to define requirements and apply UX principles, ensuring multi-device compatibility and seamless user experience.
+\end{itemize}
+\subsection*{Travel Itinerary Application}
+\projectheading
+{Travel Itinerary Application}{Athens, GA}
+{for Software Development, CSCI 1302}{December 2023}
+\begin{itemize}
+\item Created JavaFX-based GUI application integrating Google Places and other RESTful APIs for dynamic data loading on hotels, attractions, and restaurants.
+\item Engineered efficient background threading to enable smooth UI responsiveness during data retrieval, increasing user satisfaction.
+\end{itemize}
+
+% ============================================================
+% PROFESSIONAL EXPERIENCE
+% ============================================================
+\section*{PROFESSIONAL EXPERIENCE}
+\sectiontitle{PROFESSIONAL EXPERIENCE}
+\subsection*{Capital One}
+\experienceheading{Capital One}{Business Analyst Intern}{McLean, VA}{June 2025 -- August 2025}
+\begin{itemize}
+\item Spearheaded development of a business case for a Notifications Preferences Center for CreditWise, projected to streamline customer communication management for 60M+ users.
+\item Analyzed performance of CreditWise email campaigns, creating a valuation framework to quantify engagement and retention impact and propose a new email domain.
+\item Partnered with cross-functional teams to present actionable recommendations to senior leadership, driving alignment on future messaging strategy.
+\item Leveraged SQL, Python, Excel, and data visualization tools to evaluate KPIs, delivering insights that informed product roadmap decisions.
+\end{itemize}
+\subsection*{Great American Cookies \& Marble Slab Creamery}
+\experienceheading{Great American Cookies \& Marble Slab Creamery}{Shift Leader}{Dallas, GA}{May 2022 -- July 2022}
+\begin{itemize}
+\item Managed daily operations and supervised a team of 5 employees, increasing shift efficiency by 20\%.
+\item Processed 100+ customer orders daily with exemplary service, achieving top customer satisfaction ratings.
+\item Trained new staff, improving onboarding time by 40\%.
+\end{itemize}
+
+% ============================================================
+% HONORS AND AWARDS
+% ============================================================
+\section*{HONORS AND AWARDS}
+\sectiontitle{HONORS \& AWARDS}
+\subsection*{Extraordinary Engineer}
+\awardrow{Extraordinary Engineer}{February 2024}
+\begin{itemize}
+\item Recognized by the College of Engineering for leadership, academic excellence, and service to the engineering community.
+\end{itemize}
+\subsection*{Presidential Scholar}
+\awardrow{Presidential Scholar (2x)}{December 2022, May 2023}
+\begin{itemize}
+\item Awarded for maintaining a 4.0 GPA during consecutive semesters of full-time coursework.
+\end{itemize}
+\subsection*{Dire Needs Project Fund}
+\awardrow{Dire Needs Project Fund: \$1500 Project Grant}{August 2023 -- May 2024}
+\begin{itemize}
+\item Selected through a competitive process to receive funding for a student-led project addressing a pressing engineering challenge.
+\end{itemize}
+
+% ============================================================
+% CERTIFICATIONS
+% ============================================================
+\section*{CERTIFICATIONS}
+\sectiontitle{CERTIFICATIONS}
+\subsection*{Emerging Engineering Leadership Development Program}
+\awardrow{Emerging Engineering Leadership Development (EELD) Program}{May 2026}
+\begin{itemize}
+\item UGA College of Engineering Capstone Design program, developed in partnership with the J.W. Fanning Institute for Leadership Development, covering conflict resolution, stakeholder engagement, and cross-generational collaboration.
+\end{itemize}
+\subsection*{CITI Program}
+\awardrow{CITI Program: SBE Foundations, Human Subjects Research}{September 2025}
+\begin{itemize}
+\item Foundational training in the ethical and regulatory standards for human subjects research at the University of Georgia (Record ID 72070654; valid through September 2030).
+\end{itemize}
+
+% ============================================================
+% LEADERSHIP & UNIVERSITY SERVICE
+% ============================================================
+\section*{LEADERSHIP AND UNIVERSITY SERVICE}
+\sectiontitle{LEADERSHIP \& UNIVERSITY SERVICE}
+\subsection*{Tau Beta Pi Honor Society}
+\experienceheading{Tau Beta Pi Honor Society}{Member}{}{October 2024 -- present}
+\begin{itemize}
+\item Selected for academic distinction, leadership, and commitment to ethical engineering practice.
+\item Participate in professional development forums and community service events promoting excellence in STEM education.
+\end{itemize}
+\subsection*{Theta Tau Fraternity, Iota Epsilon Chapter}
+\experienceheading{Theta Tau Fraternity, Iota Epsilon Chapter}{Brother}{}{January 2024 -- present}
+\begin{itemize}
+\item Co-organize technical workshops, speaker panels, and community outreach efforts enhancing professional growth for 120+ members.
+\item Foster fraternity values of brotherhood, service, and lifelong learning through active participation in chapter initiatives.
+\end{itemize}
+\subsection*{UGA Engineering Student Society}
+\experienceheading{UGA Engineering Student Society}{Vice President}{}{May 2025 -- May 2026}
+\begin{itemize}
+\item Lead a 100+ member chapter in strategic planning, aligning operations with national initiatives and regional directives.
+\item Coordinate logistics for national and regional conventions, managing travel, accommodations, and registration for 50+ members.
+\item Design and implement a centralized digital resource hub, providing internship pipelines, alumni contacts, and project archives to boost member success.
+\end{itemize}
+\experienceheading{UGA Engineering Student Society}{Senator}{}{May 2024 -- May 2025}
+\begin{itemize}
+\item Represented chapter at regional and national levels, voting on legislation and advocating for student-centered initiatives.
+\item Led conference interest meetings, managing all travel logistics and budget allocations in coordination with the Treasurer.
+\end{itemize}
+\experienceheading{UGA Engineering Student Society}{Telecommunications \& Vice Public Relations Chair}{}{May 2023 -- May 2024}
+\begin{itemize}
+\item Increased chapter social media engagement by 40\% through data-driven content strategies and visual design.
+\item Designed and launched a new chapter website to streamline communication, centralize resources, and showcase events.
+\end{itemize}
+
+% ============================================================
+% TECHNICAL SKILLS
+% ============================================================
+\section*{TECHNICAL SKILLS}
+\sectiontitle{TECHNICAL SKILLS}
+\textbf{Programming:} Assembly, C, C\#, C++, HTML, Java, JavaFX, JavaScript, MATLAB, Python, R, SQL, TypeScript, Verilog\par
+\vspace{2pt}
+\textbf{Software:} Autodesk Fusion 360, Blender, CAD, Figma, Git, GitHub, Graphic Design, Klaviyo, Microsoft Suite, NASA F Prime, Next.js, Node.js, PlatformIO, React Native, Sanity CMS, Shopify Storefront API, Supabase, Tailwind CSS, Unity3D, Vercel, Virtual \& Mixed Reality Development, Website Development, Wix, WordPress, Xilinx, Zephyr\par
+\vspace{2pt}
+\textbf{AI \& Machine Learning:} Anthropic Claude API, LLM Application Development, AI Agents \& Tool Use, Prompt Engineering, REST-based AI Integration, Structured (JSON) Outputs, Wit.ai Natural Language Understanding, Speech Synthesis \& Text-to-Speech\par
+\vspace{2pt}
+\textbf{Hardware and Embedded Systems:} 2U CubeSat, Basys2 FPGA Boards, BLE / NimBLE, Cleanroom Microfabrication, ESP32, Geophones \& Load Cells, Microfluidics, MQTT, PDMS Soft Lithography, Photolithography, Raspberry Pi Pico 2W, Raspberry Pi 4, Sensors, Signal Processing, STM32 Microcontrollers\par
+\vspace{2pt}
+\textbf{Core Competencies:} Business Case Development, Collaboration, Data Analysis, Critical Thinking, Human-Computer Interaction, Problem Solving, Product Strategy, Project Management, Real-Time Systems, Strategic Leadership, Technical Communication
+
+\end{document}

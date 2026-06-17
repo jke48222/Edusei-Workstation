@@ -1,6 +1,11 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+
+/** Elements that should grow the ring (clickable affordances). */
+const INTERACTIVE = 'a, button, [role="button"], summary, label[for], [data-cursor="hover"]';
+/** Elements that should yield to the native text caret (cursor hides itself). */
+const TEXT_FIELD = 'input, textarea, select, [contenteditable="true"], [data-cursor="text"]';
 
 export interface DotRingCursorProps {
   /** Outer ring size (px). */
@@ -13,6 +18,8 @@ export interface DotRingCursorProps {
   ringColor?: string;
   /** Dot fill color. */
   dotColor?: string;
+  /** Color the ring/dot take when hovering an interactive element. */
+  hoverColor?: string;
   /** Smooth follow speed (0–1, higher = snappier). */
   smooth?: number;
   zIndex?: number;
@@ -20,33 +27,44 @@ export interface DotRingCursorProps {
   dark?: boolean;
 }
 
+/**
+ * A minimal "dot + trailing ring" cursor for the professional portfolio.
+ * The dot tracks the pointer 1:1; the ring eases behind it. The ring grows and
+ * the dot fades when hovering links/buttons, and the whole cursor hides over
+ * text fields so the native caret can show through.
+ */
 export default function DotRingCursor({
-  ringSize = 32,
-  dotSize = 6,
+  ringSize = 30,
+  dotSize = 5,
   ringStroke = 1.5,
   ringColor,
   dotColor,
+  hoverColor,
   smooth = 0.18,
-  zIndex = 150,
+  zIndex = 9999,
   dark = false,
 }: DotRingCursorProps) {
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [visible, setVisible] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const [overText, setOverText] = useState(false);
   const rafRef = useRef<number>();
   const targetRef = useRef({ x: -100, y: -100 });
   const currentRef = useRef({ x: -100, y: -100 });
 
   const ring = ringColor ?? (dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)');
   const dot = dotColor ?? (dark ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.9)');
+  const accent = hoverColor ?? ring;
 
   const handleMove = useCallback((e: MouseEvent) => {
     targetRef.current = { x: e.clientX, y: e.clientY };
     if (!visible) setVisible(true);
+    const el = e.target as HTMLElement | null;
+    setOverText(!!el?.closest?.(TEXT_FIELD));
+    setHovering(!!el?.closest?.(INTERACTIVE));
   }, [visible]);
 
-  const handleLeave = useCallback(() => {
-    setVisible(false);
-  }, []);
+  const handleLeave = useCallback(() => setVisible(false), []);
 
   useEffect(() => {
     document.addEventListener('mousemove', handleMove);
@@ -54,17 +72,16 @@ export default function DotRingCursor({
     return () => {
       document.removeEventListener('mousemove', handleMove);
       document.removeEventListener('mouseleave', handleLeave);
-      document.body.style.cursor = '';
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [handleMove, handleLeave]);
 
+  // Hide the native cursor only while ours is on-screen and not over a text field.
   useEffect(() => {
-    document.body.style.cursor = visible ? 'none' : '';
-    return () => {
-      document.body.style.cursor = '';
-    };
-  }, [visible]);
+    const root = document.documentElement;
+    if (visible && !overText) root.classList.add('cursor-hidden');
+    else root.classList.remove('cursor-hidden');
+    return () => root.classList.remove('cursor-hidden');
+  }, [visible, overText]);
 
   useEffect(() => {
     const tick = () => {
@@ -86,7 +103,11 @@ export default function DotRingCursor({
     };
   }, [smooth]);
 
-  if (!visible) return null;
+  // Over text fields we defer entirely to the native caret.
+  if (!visible || overText) return null;
+
+  const ringScale = hovering ? 1.6 : 1;
+  const ringCol = hovering ? accent : ring;
 
   return (
     <div
@@ -104,9 +125,11 @@ export default function DotRingCursor({
           height: ringSize,
           marginLeft: -ringSize / 2,
           marginTop: -ringSize / 2,
-          border: `${ringStroke}px solid ${ring}`,
+          border: `${ringStroke}px solid ${ringCol}`,
           borderRadius: '50%',
-          transition: 'border-color 0.2s ease',
+          transform: `scale(${ringScale})`,
+          backgroundColor: hovering ? 'color-mix(in srgb, ' + accent + ' 12%, transparent)' : 'transparent',
+          transition: 'transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease',
         }}
       />
       <div
@@ -120,7 +143,8 @@ export default function DotRingCursor({
           marginTop: -dotSize / 2,
           borderRadius: '50%',
           backgroundColor: dot,
-          transition: 'background-color 0.2s ease',
+          opacity: hovering ? 0 : 1,
+          transition: 'opacity 0.2s ease, background-color 0.2s ease',
         }}
       />
     </div>
