@@ -130,7 +130,7 @@ export const workExperience = [
 export const leadership = [
   {
     role: 'Vice President',
-    organization: 'UGA Engineering Student Society',
+    organization: 'National Society of Black Engineers (NSBE)',
     period: 'May 2025 – May 2026',
     highlights: [
       'Led a 100+ member chapter in strategic planning, aligning operations with national initiatives.',
@@ -168,7 +168,7 @@ export const leadership = [
   },
   {
     role: 'Senator',
-    organization: 'UGA Engineering Student Society',
+    organization: 'National Society of Black Engineers (NSBE)',
     period: 'May 2024 – May 2025',
     highlights: [
       'Represented chapter at regional and national levels, voting on legislation and advocating for student-centered initiatives.',
@@ -187,7 +187,7 @@ export const leadership = [
   },
   {
     role: 'Telecom & Vice PR Chair',
-    organization: 'UGA Engineering Student Society',
+    organization: 'National Society of Black Engineers (NSBE)',
     period: 'May 2023 – May 2024',
     highlights: [
       'Increased chapter social media engagement by 40% through data-driven content strategies and visual design.',
