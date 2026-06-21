@@ -24,7 +24,7 @@ export default function Hero() {
       <div id="hero-zone" className="sticky top-0 h-screen overflow-hidden">
         <div className="relative mx-auto h-full max-w-container px-5 md:px-8">
           {/* ── Left: headline + additive supporting lines (ink, over the bright video) ── */}
-          <div className="absolute bottom-[15%] left-5 right-5 md:left-8 md:max-w-[62%]">
+          <div className="absolute bottom-[15%] left-5 right-5 md:left-8 md:max-w-[46%] lg:max-w-[42%]">
             <EyebrowPill className="mb-5">{hero.eyebrow}</EyebrowPill>
             <h1 className="over-bright font-display text-[34px] leading-[1.02] sm:text-[48px] md:text-[64px]">
               {hero.headline.lead} <span className="italic-accent">{hero.headline.accent}</span>
