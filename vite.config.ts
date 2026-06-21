@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0', // Listen on all network interfaces (allows mobile device access)
-    port: 5173,
+    port: Number(process.env.PORT) || 5173, // honor harness-assigned port (autoPort), fall back to 5173
     strictPort: false,
     // Allow ngrok tunnels and other development hosts
     allowedHosts: [

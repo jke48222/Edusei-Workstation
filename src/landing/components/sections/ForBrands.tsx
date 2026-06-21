@@ -8,7 +8,7 @@ export default function ForBrands() {
       <div className="mx-auto max-w-container px-5 md:px-8">
         <Reveal>
           <div className="glass-strong rounded-3xl p-8 md:p-12">
-            <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto] md:items-start">
               <div>
                 <div className="mb-6 flex flex-wrap items-center gap-3">
                   <EyebrowPill>{s.eyebrow}</EyebrowPill>

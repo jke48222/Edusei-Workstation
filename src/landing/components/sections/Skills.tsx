@@ -39,7 +39,7 @@ export default function Skills() {
           <Eyebrow className="over-video-dim shrink-0">{s.count}</Eyebrow>
         </Reveal>
 
-        <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
           {CATEGORIES.map((cat, i) => (
             <Reveal key={cat.title} delay={(i % 3) * 80} className={cat.title === "Software & Tools" ? "xl:col-span-2" : ""}>
               <div className="glass-strong h-full rounded-2xl p-6 md:p-7">

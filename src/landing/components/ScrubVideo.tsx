@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Fixed, full-viewport background video scrubbed by page scroll.
@@ -13,6 +13,14 @@ import { useEffect, useRef } from "react";
  */
 export default function ScrubVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Phones/tablets get a lighter 720p encode — same all-intra frames, ~7.5MB vs ~18MB —
+  // so the decoder can keep up with rapid scrub seeks instead of stuttering.
+  const [src] = useState(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
+      ? "/media/hero-mobile.mp4"
+      : "/media/hero.mp4"
+  );
 
   useEffect(() => {
     const video = videoRef.current;
@@ -93,7 +101,7 @@ export default function ScrubVideo() {
       <video
         ref={videoRef}
         className="h-full w-full object-cover [transform:translateZ(0)] [will-change:transform]"
-        src="/media/hero.mp4"
+        src={src}
         poster="/media/hero-poster.jpg"
         muted
         playsInline

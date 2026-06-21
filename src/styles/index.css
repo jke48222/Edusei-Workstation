@@ -697,6 +697,15 @@ html.cursor-hidden [contenteditable="true"] {
    behind it. The scrub + scroll-progress logic reads this element's scrollTop. */
 #landing-scroll {
   scroll-behavior: smooth;
+  /* Hide the scrollbar so it doesn't consume ~10px on the right, which would
+     otherwise push content left and make the side padding look uneven. Content
+     then uses the full viewport width with symmetric padding. Scrolling still
+     works via wheel/touch/keys, and the hero has its own scroll cue. */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+#landing-scroll::-webkit-scrollbar {
+  display: none; /* WebKit/Blink */
 }
 @media (prefers-reduced-motion: reduce) {
   #landing-scroll {

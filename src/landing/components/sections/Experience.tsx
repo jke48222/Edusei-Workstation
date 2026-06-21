@@ -15,7 +15,7 @@ export default function Experience() {
           </h2>
         </Reveal>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {workExperience.map((role, i) => (
             <Reveal key={role.title + role.company} delay={(i % 2) * 90}>
               <article className="glass-strong flex h-full flex-col rounded-2xl p-7 md:p-8">
