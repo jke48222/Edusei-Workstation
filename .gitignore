@@ -8,3 +8,7 @@ dist
 *.log
 test_*.png
 screen-recording-script.md
+
+# Personal working files (not site assets)
+/Jalen_Edusei_Salesforce_AI_Builder.tex
+/headshot-original.png
