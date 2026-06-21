@@ -47,7 +47,7 @@ export default function About() {
           </h2>
         </Reveal>
 
-        <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1.05fr_0.95fr]">
           {/* Bio + info */}
           <Reveal>
             <div className="glass-strong h-full rounded-2xl p-7 md:p-9">
