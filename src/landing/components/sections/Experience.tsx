@@ -2,6 +2,24 @@ import { site } from "../../content/site";
 import { workExperience } from "../../../data";
 import { EyebrowPill, Reveal, ArrowRight } from "../ui";
 
+/** Company monogram badges (real logos aren't available for most of these). */
+const MONOGRAM: Record<string, string> = {
+  "Capital One": "C1",
+  "University of Georgia Housing": "UGA",
+  "Joyner Research Laboratory": "JR",
+  "Great American Cookies & Marble Slab Creamery": "GA",
+};
+
+function monogram(company: string): string {
+  if (MONOGRAM[company]) return MONOGRAM[company];
+  return company
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
+
 export default function Experience() {
   const { experience: s } = site;
   return (
@@ -18,9 +36,16 @@ export default function Experience() {
           {workExperience.map((role, i) => (
             <Reveal key={role.title + role.company} delay={(i % 2) * 90}>
               <article className="glass-strong flex h-full flex-col rounded-2xl p-7 md:p-8">
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute">{role.period}</p>
-                <h3 className="mt-2 font-display text-[22px] tracking-[-0.03em] text-ink">{role.title}</h3>
-                <p className="mt-0.5 text-[14px] text-ink-dim">{role.company} · {role.location}</p>
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink font-display text-[13px] font-semibold tracking-tight text-white">
+                    {monogram(role.company)}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-display text-[20px] leading-tight tracking-[-0.03em] text-ink">{role.title}</h3>
+                    <p className="truncate text-[13px] text-ink-dim">{role.company}</p>
+                  </div>
+                </div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-mute">{role.period} · {role.location}</p>
                 <ul className="mt-4 space-y-2.5">
                   {role.highlights.slice(0, 3).map((h) => (
                     <li key={h} className="flex gap-2.5 text-[13px] leading-[1.55] text-ink-dim">

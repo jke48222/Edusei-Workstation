@@ -926,7 +926,8 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
 
   // Live, embeddable sites
   'live-election-platform': { kind: 'site', url: 'https://nsbe-election.vercel.app/', embed: true },
-  'personal-portfolio': { kind: 'site', url: 'https://www.jalenedusei.com/', embed: true },
+  // Self-framing (this site) would render the embedded splash, so use a real clip of the portfolio's hero.
+  'personal-portfolio': { kind: 'video', src: '/videos/h264/jalen-edusei-black.mp4', poster: '/media/hero-poster.jpg', alt: 'Jalen Edusei portfolio hero' },
   'musical-artist-site': { kind: 'site', url: 'https://www.akilahmali.com/', embed: true },
   'parmco-ble-motor': { kind: 'site', url: 'https://jke48222.github.io/parmco/', embed: true },
   'website-development': { kind: 'site', url: 'https://nsbe.uga.edu/', embed: true },
