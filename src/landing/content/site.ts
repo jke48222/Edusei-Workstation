@@ -45,7 +45,7 @@ export const site = {
       "From CubeSat flight software to multiplayer VR, I build the whole system.",
       "Computer Systems Engineer · B.S., University of Georgia, Class of 2026.",
     ],
-    tagline: "HARDWARE-DEEP · PRODUCT-MINDED",
+    tagline: "EMBEDDED · VR · FULL-STACK · DATA",
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
     recentProjectIds: ["animaldot", "parmco-ble-motor", "primeforge-fpga", "atlas-job-search"],
