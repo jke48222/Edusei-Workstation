@@ -8,10 +8,7 @@ import { BtnPrimary } from '../../landing/components/ui';
  */
 export function WorkHeader({ active }: { active?: 'work' }) {
   return (
-    <header
-      className="sticky top-0 z-30 border-b border-[var(--line)] backdrop-blur-md"
-      style={{ background: 'color-mix(in srgb, var(--bg) 82%, transparent)' }}
-    >
+    <header className="sticky top-0 z-30">
       <div className="mx-auto flex max-w-container items-center justify-between gap-4 px-5 py-3.5 md:px-8">
         <Link to="/" className="inline-flex items-center gap-2 font-display text-[17px] tracking-[-0.04em] text-ink">
           <ArrowLeft className="h-4 w-4 text-ink-mute" />

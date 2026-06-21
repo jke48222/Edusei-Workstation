@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { site } from "../content/site";
 import { BtnPrimary } from "./ui";
@@ -6,23 +6,9 @@ import LandingSearch from "./LandingSearch";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [solid, setSolid] = useState(false);
-
-  useEffect(() => {
-    const scroller = document.getElementById("landing-scroll");
-    const onScroll = () => setSolid((scroller ? scroller.scrollTop : window.scrollY) > 80);
-    onScroll();
-    const target: Window | HTMLElement = scroller ?? window;
-    target.addEventListener("scroll", onScroll, { passive: true } as AddEventListenerOptions);
-    return () => target.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        solid ? "border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-md" : ""
-      }`}
-    >
+    <header className="fixed inset-x-0 top-0 z-50">
       <div className="mx-auto flex max-w-container items-center justify-between px-5 py-3.5 md:px-8">
         {/* Left: search + wordmark */}
         <div className="flex items-center gap-2.5 text-ink">
