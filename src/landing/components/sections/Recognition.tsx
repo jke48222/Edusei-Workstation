@@ -42,7 +42,7 @@ export default function Recognition() {
           </h2>
         </Reveal>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_1.25fr]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.25fr]">
           {/* Honors */}
           <Reveal>
             <h3 className="over-video mb-5 inline-flex items-center gap-2 font-display text-[18px] tracking-[-0.03em] text-white">
@@ -65,7 +65,7 @@ export default function Recognition() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ink"><Users className="h-4 w-4" /></span>
               Leadership & Service
             </h3>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {orgs.map((org) => (
                 <div key={org.organization} className="glass-strong flex flex-col rounded-2xl p-5">
                   <div className="flex items-start gap-3">

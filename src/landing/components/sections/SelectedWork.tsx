@@ -182,7 +182,7 @@ export default function SelectedWork() {
           </Link>
         </Reveal>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((p, i) => (
             <WorkCard key={p.id} project={p} featured={i === 0} />
           ))}

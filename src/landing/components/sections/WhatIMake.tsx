@@ -7,7 +7,7 @@ export default function WhatIMake() {
   return (
     <section id="topics" className="relative z-10">
       <div className="mx-auto max-w-container px-5 py-20 md:px-8 md:py-28">
-        <div className="grid items-end gap-8 md:grid-cols-[1.4fr_1fr]">
+        <div className="grid grid-cols-1 items-end gap-8 md:grid-cols-[1.4fr_1fr]">
           <Reveal>
             <EyebrowPill className="mb-6">{s.eyebrow}</EyebrowPill>
             <h2 className="over-bright font-display text-[40px] leading-[0.98] md:text-[64px]">

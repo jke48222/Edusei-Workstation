@@ -15,17 +15,12 @@ export default function StartHere() {
             <p className="text-[14px] leading-[1.6] text-ink md:text-[16px]">{s.body}</p>
           </div>
 
-          <div className="mx-auto mt-10 flex max-w-[460px] items-center gap-2 rounded-full bg-white p-1.5 pl-2">
+          <div className="mt-10 flex justify-center">
             <a href={site.socials.email}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ink px-5 py-3 font-display text-[13px] text-white">
+              className="group inline-flex items-center gap-3 whitespace-nowrap rounded-full bg-white px-6 py-3.5 font-display text-[14px] text-ink transition-transform duration-300 hover:-translate-y-0.5">
               {s.subscribeCta}
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-ink"><ArrowRight className="h-3.5 w-3.5" /></span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:translate-x-0.5"><ArrowRight className="h-3.5 w-3.5" /></span>
             </a>
-            <input
-              type="email"
-              placeholder={s.emailPlaceholder}
-              className="min-w-0 flex-1 bg-transparent px-3 text-[14px] text-ink outline-none placeholder:text-ink-mute"
-            />
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">

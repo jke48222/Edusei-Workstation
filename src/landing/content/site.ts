@@ -193,7 +193,6 @@ export const site = {
     body:
       "I'm open to software, technology, business, and data roles across all domains, and always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
     subscribeCta: "Say hi!",
-    emailPlaceholder: "you@company.com",
   },
 
   footer: {
