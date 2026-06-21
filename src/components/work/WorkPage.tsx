@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getAllProjectsForWork, type ProjectCategory } from '../../data';
 import { ProjectTile } from './ui/ProjectTile';
@@ -16,9 +17,21 @@ import Footer from '../../landing/components/sections/Footer';
 
 const ALL = 'all' as const;
 
+const CATEGORY_SET: ProjectCategory[] = ['web', 'ai', 'embedded', 'hardware', 'vr', 'research'];
+
 export function WorkPage() {
   const projects = useMemo(() => getAllProjectsForWork(), []);
-  const [filter, setFilter] = useState<ProjectCategory | typeof ALL>(ALL);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCat = searchParams.get('cat');
+  const [filter, setFilter] = useState<ProjectCategory | typeof ALL>(
+    initialCat && (CATEGORY_SET as string[]).includes(initialCat) ? (initialCat as ProjectCategory) : ALL
+  );
+
+  // Reflect the active filter in the URL (?cat=) so a filtered view is shareable.
+  const selectFilter = (next: ProjectCategory | typeof ALL) => {
+    setFilter(next);
+    setSearchParams(next === ALL ? {} : { cat: next }, { replace: true });
+  };
 
   // These pages are always light bone — clear any inherited portfolio dark class.
   useLayoutEffect(() => {
@@ -51,12 +64,12 @@ export function WorkPage() {
         />
 
         <div className="mb-10 flex flex-wrap gap-2">
-          <FilterChip active={filter === ALL} onClick={() => setFilter(ALL)} label="All" icon={LayoutGrid} count={projects.length} />
+          <FilterChip active={filter === ALL} onClick={() => selectFilter(ALL)} label="All" icon={LayoutGrid} count={projects.length} />
           {categories.map((c) => (
             <FilterChip
               key={c}
               active={filter === c}
-              onClick={() => setFilter(c)}
+              onClick={() => selectFilter(c)}
               label={CATEGORY_LABEL[c]}
               icon={CATEGORY_ICON[c]}
               count={projects.filter((p) => p.category === c).length}

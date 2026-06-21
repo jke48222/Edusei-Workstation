@@ -44,8 +44,8 @@ export default function Recognition() {
         <div className="grid gap-8 lg:grid-cols-[1fr_1.25fr]">
           {/* Honors */}
           <Reveal>
-            <h3 className="mb-5 inline-flex items-center gap-2 font-display text-[18px] tracking-[-0.03em] text-ink">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white"><Award className="h-4 w-4" /></span>
+            <h3 className="over-video mb-5 inline-flex items-center gap-2 font-display text-[18px] tracking-[-0.03em] text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ink"><Award className="h-4 w-4" /></span>
               Honors & Awards
             </h3>
             <div className="space-y-3">
@@ -60,8 +60,8 @@ export default function Recognition() {
 
           {/* Leadership */}
           <Reveal delay={120}>
-            <h3 className="mb-5 inline-flex items-center gap-2 font-display text-[18px] tracking-[-0.03em] text-ink">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white"><Users className="h-4 w-4" /></span>
+            <h3 className="over-video mb-5 inline-flex items-center gap-2 font-display text-[18px] tracking-[-0.03em] text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ink"><Users className="h-4 w-4" /></span>
               Leadership & Service
             </h3>
             <div className="grid gap-3 sm:grid-cols-2">

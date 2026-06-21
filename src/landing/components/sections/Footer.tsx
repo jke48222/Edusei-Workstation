@@ -15,8 +15,8 @@ const ICON_LINKS: IconLink[] = [
 ];
 
 function IconButton({ item }: { item: IconLink }) {
-  const cls = "flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-bg-elev text-ink-dim transition-all hover:-translate-y-0.5 hover:border-ink hover:text-ink";
-  const inner = <item.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />;
+  const cls = "flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-bg-elev text-ink-dim transition-all hover:-translate-y-0.5 hover:border-ink hover:text-ink";
+  const inner = <item.icon className="h-[17px] w-[17px]" strokeWidth={1.8} />;
   return item.internal ? (
     <Link to={item.href} aria-label={item.label} title={item.label} className={cls}>{inner}</Link>
   ) : (
@@ -28,14 +28,9 @@ export default function Footer() {
   return (
     <footer className="relative z-10 overflow-hidden bg-bg pt-16 text-ink">
       <div className="mx-auto max-w-container px-5 md:px-8">
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <p className="max-w-[32ch] text-[14px] leading-[1.5] text-ink-dim">
-            {site.degree}. Open to software, technology, business, and data roles.
-          </p>
-          <div className="flex flex-wrap gap-2.5">
-            {ICON_LINKS.map((l) => <IconButton key={l.label} item={l} />)}
-          </div>
-        </div>
+        <p className="max-w-[40ch] text-[14px] leading-[1.5] text-ink-dim">
+          {site.degree}. Open to software, technology, business, and data roles.
+        </p>
 
         {/* oversized wordmark */}
         <div className="pointer-events-none select-none pt-10">
@@ -44,9 +39,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-start justify-between gap-3 border-t border-[var(--line)] py-7 md:flex-row md:items-center">
+        {/* bottom bar: copyright (left); location + icon links (bottom-right) */}
+        <div className="flex flex-col items-start gap-5 border-t border-[var(--line)] py-7 md:flex-row md:items-center md:justify-between">
           <span className="text-[12px] text-ink-mute">{site.footer.copyright}</span>
-          <span className="font-mono text-[11px] tracking-[0.06em] text-ink-mute">Athens, GA · {site.email}</span>
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <span className="font-mono text-[11px] tracking-[0.06em] text-ink-mute">Atlanta, GA · {site.email}</span>
+            <div className="flex flex-wrap gap-2.5">
+              {ICON_LINKS.map((l) => <IconButton key={l.label} item={l} />)}
+            </div>
+          </div>
         </div>
       </div>
     </footer>
