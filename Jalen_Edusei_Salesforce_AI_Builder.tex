@@ -1,0 +1,144 @@
+% ============================================================
+% Curriculum Vitae - Jalen Edusei
+% Tailored for Salesforce - AI Builder, Emerging Talent (JR341276)
+% ============================================================
+\documentclass[letterpaper,10pt]{article}
+\usepackage[empty]{fullpage}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+
+% --- Optimized Margins for One-Page Fit ---
+\addtolength{\oddsidemargin}{-0.55in}
+\addtolength{\evensidemargin}{-0.55in}
+\addtolength{\textwidth}{1.10in}
+\addtolength{\topmargin}{-0.65in}
+\addtolength{\textheight}{1.30in}
+
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\raggedright
+
+% --- Compact Lists ---
+\setlist[itemize]{
+  leftmargin=2em,
+  itemsep=1.5pt,
+  topsep=2pt,
+  parsep=0pt,
+  partopsep=0pt
+}
+
+% --- Custom Commands ---
+\newcommand{\sectiontitle}[1]{%
+  \vspace{6pt}%
+  {\textbf{\large #1}}\par
+  \vspace{-6pt}%
+  \rule{\textwidth}{0.4pt}\par
+  \vspace{3pt}%
+}
+
+\newcommand{\experienceheading}[4]{%
+  \begin{tabularx}{\textwidth}{@{}X r@{}}%
+    \textbf{#1} $|$ \textit{#2} & #4 \\%
+  \end{tabularx}\par
+  \vspace{1.5pt}%
+}
+
+\newcommand{\projectheading}[3]{%
+  \begin{tabularx}{\textwidth}{@{}X r@{}}
+    \textbf{#1} $|$ \textit{#2} & #3 \\
+  \end{tabularx}\par
+  \vspace{1.5pt}%
+}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{Jalen Edusei}}\par
+    \vspace{4pt}
+    \href{mailto:jalen.edusei@gmail.com}{jalen.edusei@gmail.com} \;|\;
+    770.714.0190 \;|\;
+    \href{https://www.jalenedusei.com}{www.jalenedusei.com} \;|\;
+    \href{https://github.com/jke48222}{github.com/jke48222}
+\end{center}
+
+% ============================================================
+% EDUCATION
+% ============================================================
+\sectiontitle{EDUCATION}
+\begin{tabularx}{\textwidth}{@{}X r@{}}
+\textbf{University of Georgia}, Morehead Honors College, Athens, GA & May 2026 \\
+\textit{Bachelor of Science, Computer Systems Engineering} & GPA: 3.61 \\
+\end{tabularx}\par
+\vspace{2pt}
+\textbf{Relevant Coursework:} Data Structures \& Algorithms, Software Engineering, Database Systems, Operating Systems, Human-Computer Interaction
+
+% ============================================================
+% TECHNICAL SKILLS
+% ============================================================
+\sectiontitle{TECHNICAL SKILLS}
+\textbf{AI \& Agents:} Anthropic Claude API, LLM Application Development, AI Agents \& Tool Use, Prompt Engineering, Structured (JSON) Outputs, REST-based AI Integration, Wit.ai NLU, Speech Synthesis / TTS\par
+\vspace{1pt}
+\textbf{Languages:} TypeScript, JavaScript, Python, C\#, C++, SQL, Java, C\par
+\vspace{1pt}
+\textbf{Web \& Real-Time:} React, Next.js, Node.js, React Three Fiber, Tailwind CSS, Supabase (PostgreSQL), WebSocket / Realtime, REST APIs\par
+\vspace{1pt}
+\textbf{Tools \& Core:} Git, GitHub, Vercel, Unity3D, OOP, Code Review, Engineering Rigor, Cross-Functional Collaboration
+
+% ============================================================
+% PROFESSIONAL EXPERIENCE
+% ============================================================
+\sectiontitle{PROFESSIONAL EXPERIENCE}
+
+\experienceheading{Capital One}{Business Analyst Intern}{McLean, VA}{June 2025 -- August 2025}
+\begin{itemize}
+    \item Spearheaded the business case for a Notifications Preferences Center for CreditWise, projected to streamline communication management for 60M+ users.
+    \item Partnered with cross-functional product, design, and engineering teams to present recommendations directly to senior leadership and drive alignment on roadmap direction.
+    \item Leveraged SQL, Python, Excel, and data visualization to evaluate KPIs and turn engagement signals into data-informed product decisions.
+\end{itemize}
+
+\experienceheading{Small Satellite Research Laboratory}{Flight Software Developer}{Athens, GA}{March 2024 -- December 2024}
+\begin{itemize}
+    \item Developed, debugged, and unit-tested embedded flight software in C/C++ for the MEMESat-1 CubeSat on STM32 microcontrollers, hardening the system against edge cases and failure conditions.
+    \item Reviewed teammates' code and documentation with engineering rigor, improving consistency and quality across the production flight codebase.
+\end{itemize}
+
+% ============================================================
+% TECHNICAL PROJECTS
+% ============================================================
+\sectiontitle{TECHNICAL PROJECTS}
+
+\projectheading{ATLAS Job Search Platform}{AI Agents \& Full Stack Engineering}{April 2026}
+\begin{itemize}
+    \item Built a full-stack React / TypeScript platform with a Kanban-style pipeline and full CRUD, centralizing every stage of a job search from outreach to offer in a single dashboard.
+    \item Integrated the Anthropic Claude API as a multi-tool agent layer (resume tailoring, cover-letter generation, company research, cold outreach, interview prep, offer comparison), designing prompts and parsing structured JSON outputs.
+    \item Engineered an analytics layer with interactive charts surfacing application velocity, response rates, and pipeline health for data-informed decisions.
+\end{itemize}
+
+\projectheading{Kitchen Chaos VR --- LLM Dish-Judge Agent}{Unity, C\#, Claude API}{October 2025 -- December 2025}
+\begin{itemize}
+    \item Built an Overcooked-style multiplayer VR cooking game for Meta Quest 3 with physics-driven interactions across a modular, object-oriented C\# architecture, synchronized in real time across clients via VelNet networking.
+    \item Designed an LLM ``dish judge'' agent: engineered prompts and strict JSON scoring outputs over REST, narrating spoken feedback through text-to-speech.
+\end{itemize}
+
+\projectheading{Live Election Platform}{Real-Time Infra \& Database Architecture}{March 2026 -- April 2026}
+\begin{itemize}
+    \item Shipped a presenter-paced live election system in Next.js / TypeScript for 60--80 concurrent voters across 14 roles and 39 candidates, coordinated by a finite-state machine.
+    \item Architected the realtime layer on Supabase Postgres with WebSocket Broadcast for sub-100ms ballot delivery, and engineered a SHA-256 fingerprinting + database-constraint anti-fraud stack to keep results tamper-resistant.
+\end{itemize}
+
+\projectheading{VR Portfolio 2 --- Conversational AI Assistant}{Unity, C\#, Wit.ai}{October 2025 -- November 2025}
+\begin{itemize}
+    \item Built XR experiences featuring a voice-driven AI assistant using Wit.ai for natural-language understanding, speech synthesis, and lip-synced responses to control spatial panels.
+\end{itemize}
+
+% ============================================================
+% LEADERSHIP
+% ============================================================
+\sectiontitle{LEADERSHIP}
+\experienceheading{National Society of Black Engineers (NSBE), UGA}{Vice President}{Athens, GA}{May 2025 -- May 2026}
+\begin{itemize}
+    \item Lead a 100+ member chapter in strategic planning and operations, coordinating national/regional convention logistics for 50+ members and shipping a centralized digital resource hub.
+\end{itemize}
+
+\end{document}

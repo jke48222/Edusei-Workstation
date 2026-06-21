@@ -3,7 +3,7 @@ import { Reveal, BtnPrimary } from "../ui";
 import Terminal from "./Terminal";
 
 function NoteCard({
-  eyebrow, title, body, cta, align = "right",
+  eyebrow, title, body, cta, align = "left",
 }: {
   eyebrow: string; title: string; body: string;
   cta: { label: string; href: string }; align?: "left" | "right";
@@ -24,34 +24,10 @@ function NoteCard({
   );
 }
 
-function BigWord({ word }: { word: string }) {
-  return (
-    <div className="pointer-events-none relative">
-      <span className="over-video font-display text-[88px] leading-[0.85] tracking-[-0.05em] md:text-[150px]">{word}</span>
-    </div>
-  );
-}
-
 export default function Editorial() {
   const { editorial: e } = site;
   return (
     <div className="relative z-10">
-      {/* The Approach */}
-      <section className="py-20 md:py-28">
-        <div className="mx-auto grid w-full max-w-container items-center gap-10 px-5 md:grid-cols-2 md:px-8">
-          <Reveal><BigWord word={e.approach.bigWord} /></Reveal>
-          <NoteCard {...e.approach} />
-        </div>
-      </section>
-
-      {/* The Craft */}
-      <section className="py-20 md:py-28">
-        <div className="mx-auto grid w-full max-w-container items-center gap-10 px-5 md:grid-cols-2 md:px-8">
-          <Reveal className="order-2 md:order-1"><BigWord word={e.craft.bigWord} /></Reveal>
-          <div className="order-1 md:order-2"><NoteCard {...e.craft} /></div>
-        </div>
-      </section>
-
       {/* The Workstation + terminal */}
       <section className="py-20 md:py-28">
         <div className="mx-auto grid w-full max-w-container items-stretch gap-6 px-5 md:grid-cols-2 md:px-8">

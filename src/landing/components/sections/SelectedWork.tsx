@@ -3,7 +3,19 @@ import { Link } from "react-router-dom";
 import {
   Globe, Cpu, Radio, Headset, FlaskConical, Brain, Github, type LucideIcon,
 } from "lucide-react";
-import { featuredProjects, type WorkProject, type ProjectCategory } from "../../../data";
+import { getProjectBySlug, type WorkProject, type ProjectCategory } from "../../../data";
+
+/** Curated Selected Work for the home page (decoupled from /work's featured order). */
+const HOME_WORK_IDS = [
+  "animaldot",
+  "personal-portfolio",
+  "musical-artist-site",
+  "kitchen-chaos-vr",
+  "live-election-platform",
+  "primeforge-fpga",
+  "parmco-ble-motor",
+  "ubersicht-widgets",
+];
 import { useInView } from "../../lib/hooks";
 import { EyebrowPill, Reveal, ArrowUpRight } from "../ui";
 
@@ -67,8 +79,8 @@ function TileMedia({ project }: { project: WorkProject }) {
   if (m?.kind === "image") {
     return <img src={m.src} alt={m.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />;
   }
-  // Live site → real iframe preview. (personal-portfolio frames itself, so use a panel.)
-  if (m?.kind === "site" && project.id !== "personal-portfolio") {
+  // Live site → real iframe preview.
+  if (m?.kind === "site") {
     return <SiteFrame url={m.url} />;
   }
   // model / globe / self-framing site → branded charcoal panel with the category glyph
@@ -133,18 +145,18 @@ function WorkCard({ project, featured = false }: { project: WorkProject; feature
 }
 
 export default function SelectedWork() {
-  const projects = featuredProjects.slice(0, 7);
+  const projects = HOME_WORK_IDS
+    .map((id) => getProjectBySlug(id))
+    .filter((p): p is WorkProject => Boolean(p));
   return (
     <section id="work" className="relative z-10 py-20 md:py-28">
       <div className="mx-auto max-w-container px-5 md:px-8">
-        <Reveal className="mb-12 flex flex-col items-start gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <EyebrowPill className="mb-6">SELECTED WORK</EyebrowPill>
-            <Link to="/work" className="over-bright group inline-flex items-baseline gap-3 font-display text-[40px] leading-[0.98] md:text-[64px]">
-              View all work
-              <ArrowUpRight className="h-7 w-7 self-center transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 md:h-10 md:w-10" />
-            </Link>
-          </div>
+        <Reveal className="mb-12">
+          <EyebrowPill className="mb-5">SELECTED WORK</EyebrowPill>
+          <Link to="/work" className="over-bright group inline-flex items-baseline gap-2 font-display text-[36px] leading-[0.98] md:text-[56px]">
+            View all work
+            <ArrowUpRight className="h-6 w-6 self-center transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 md:h-8 md:w-8" />
+          </Link>
         </Reveal>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

@@ -11,7 +11,9 @@ export default function StartHere() {
           <h2 className="over-video mx-auto max-w-[16ch] font-display text-[40px] leading-[1.0] md:text-[80px]">
             {s.title[0]} <span className="italic-accent">{s.title[1]}</span>
           </h2>
-          <p className="over-video-dim mx-auto mt-6 max-w-[54ch] text-[14px] leading-[1.6] md:text-[16px]">{s.body}</p>
+          <div className="glass mx-auto mt-7 max-w-[58ch] rounded-2xl px-6 py-5">
+            <p className="text-[14px] leading-[1.6] text-ink md:text-[16px]">{s.body}</p>
+          </div>
 
           <div className="mx-auto mt-10 flex max-w-[460px] items-center gap-2 rounded-full bg-white p-1.5 pl-2">
             <a href={site.socials.email}
