@@ -1,0 +1,1015 @@
+/**
+ * Global styles: Tailwind layers, base reset, and app-specific utilities.
+ * Sections: base/reset, iOS Safari zoom prevention, CRT/terminal components,
+ * scrollbar utilities, professional view scroll, terminal-scroll (themed), canvas/overlay containers.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+ * REDESIGN DESIGN SYSTEM (2026)
+ * Signature palette, surfaces, gradient-mesh atmosphere, grain, kinetic helpers.
+ * Scoped under .pf (portfolio) so the 3D workstation + terminal stay untouched.
+ * ============================================================================= */
+:root {
+  /* Declare that this page manages its own light/dark theming. The value must
+     include `dark` for the browser to treat the page as dark-aware — that is
+     what disables Chrome's "Auto Dark Mode" (force-dark), which otherwise
+     lightness-inverts our near-white surfaces while leaving saturated colors and
+     image cards alone, producing the broken half-light/half-dark "mixed up"
+     render. (.dark below narrows this to `dark` once the dark theme is active.)
+
+     Some aggressive WebView/flag-forced force-dark engines ignore color-scheme
+     entirely. For those we ALSO default the portfolio theme to the OS preference
+     (see getStoredPortfolioDark in themeStore.ts): a dark-preferring visitor
+     then gets our real dark theme — which force-dark leaves untouched because it
+     is already dark — instead of a mangled light one. */
+  color-scheme: light dark;
+
+  /* Signature accent — cobalt→cyan "current", with amber as the warm tertiary.
+     Intentionally not green, pink, or purple. */
+  --pf-accent: #2563eb;          /* cobalt blue 600 */
+  --pf-accent-bright: #60a5fa;   /* blue 400 */
+  --pf-accent-deep: #1d4ed8;     /* blue 700 */
+  --pf-accent-2: #06b6d4;        /* cyan 500 */
+  --pf-accent-2-bright: #22d3ee; /* cyan 400 */
+  --pf-accent-3: #f59e0b;        /* amber 500 (warm tertiary, sparingly) */
+  --pf-on-accent: #ffffff;       /* text/icon color on an accent fill */
+
+  /* Light surfaces */
+  --pf-bg: #f7f7f4;
+  --pf-bg-elev: #ffffff;
+  --pf-ink: #0a0a0a;
+  --pf-ink-soft: rgba(10, 10, 10, 0.66);
+  --pf-ink-faint: rgba(10, 10, 10, 0.42);
+  --pf-line: rgba(10, 10, 10, 0.10);
+
+  --pf-radius: 18px;
+  --pf-radius-lg: 26px;
+  --pf-shadow-sm: 0 2px 10px rgba(10, 10, 10, 0.05);
+  --pf-shadow: 0 18px 50px -22px rgba(10, 10, 10, 0.30);
+  --pf-shadow-accent: 0 24px 70px -30px rgba(37, 99, 235, 0.55);
+}
+
+.dark {
+  color-scheme: dark;
+  --pf-bg: #0a0b0d;
+  --pf-bg-elev: #131417;
+  --pf-ink: #f5f6f7;
+  --pf-ink-soft: rgba(245, 246, 247, 0.66);
+  --pf-ink-faint: rgba(245, 246, 247, 0.40);
+  --pf-line: rgba(255, 255, 255, 0.10);
+  --pf-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.75);
+  --pf-shadow-accent: 0 26px 80px -30px rgba(37, 99, 235, 0.5);
+}
+
+/* Atomic theme switch. While the root carries `.theme-switching` (added for a
+   single frame around a light/dark flip — see setDarkClass in themeStore.ts),
+   ALL color transitions are killed so every surface snaps to the new theme in
+   the same paint. Without this, large surfaces (e.g. .pro-scroll's background)
+   transition their resolved color over ~300ms while smaller elements snap
+   instantly, leaving a half-light/half-dark render mid-toggle — which Chromium
+   can occasionally leave permanently stuck when toggled rapidly. */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+@layer components {
+  /* Accent gradient text */
+  .pf-accent-text {
+    background-image: linear-gradient(100deg, var(--pf-accent-deep), var(--pf-accent-bright) 55%, var(--pf-accent-2-bright));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glass surface card */
+  .pf-glass {
+    background: color-mix(in srgb, var(--pf-bg-elev) 70%, transparent);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    border: 1px solid var(--pf-line);
+  }
+
+  /* Liquid glass — frosted, refractive surface with specular sheen + accent tint.
+     Self-contained (does not require content behind it) but also blurs whatever it overlaps. */
+  .pf-liquid-glass {
+    position: relative;
+    isolation: isolate;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--pf-accent) 26%, transparent), transparent 46%),
+      linear-gradient(315deg, color-mix(in srgb, var(--pf-accent-2) 24%, transparent), transparent 52%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 38%, rgba(255, 255, 255, 0.02));
+    background-color: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(22px) saturate(1.7);
+    -webkit-backdrop-filter: blur(22px) saturate(1.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+      inset 0 -18px 40px -28px rgba(0, 0, 0, 0.5);
+  }
+  /* Specular top sheen — the "liquid" highlight that catches light. */
+  .pf-liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(130% 80% at 12% -10%, rgba(255, 255, 255, 0.5), transparent 55%);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .dark .pf-liquid-glass {
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--pf-accent) 34%, transparent), transparent 48%),
+      linear-gradient(315deg, color-mix(in srgb, var(--pf-accent-2) 30%, transparent), transparent 54%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.04));
+    background-color: rgba(18, 20, 24, 0.30);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      inset 0 -18px 44px -28px rgba(0, 0, 0, 0.7);
+  }
+  .dark .pf-liquid-glass::before { opacity: 0.3; }
+
+  /* Blue frosted glass — used for the stat cards (light blue in light mode, deep blue in dark). */
+  .pf-stat-glass {
+    position: relative;
+    background:
+      linear-gradient(160deg, rgba(96, 165, 250, 0.22), rgba(37, 99, 235, 0.10) 58%, rgba(255, 255, 255, 0.05)),
+      rgba(219, 234, 254, 0.55);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(37, 99, 235, 0.20);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 6px 24px -14px rgba(37, 99, 235, 0.45);
+  }
+  .dark .pf-stat-glass {
+    background:
+      linear-gradient(160deg, rgba(37, 99, 235, 0.30), rgba(12, 26, 58, 0.55) 60%, rgba(255, 255, 255, 0.03)),
+      rgba(12, 22, 48, 0.55);
+    border: 1px solid rgba(96, 165, 250, 0.24);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 8px 28px -16px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Pill / tag */
+  .pf-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--pf-line);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--pf-ink-soft);
+    background: color-mix(in srgb, var(--pf-bg-elev) 60%, transparent);
+    transition: all 0.25s ease;
+  }
+  .pf-pill:hover {
+    color: var(--pf-ink);
+    border-color: color-mix(in srgb, var(--pf-accent) 60%, var(--pf-line));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pf-accent) 12%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Animated gradient-mesh atmosphere (dopamine color, performant via background-position) */
+  .pf-mesh {
+    background-color: var(--pf-bg);
+    background-image:
+      radial-gradient(48rem 48rem at 12% 8%, color-mix(in srgb, var(--pf-accent) 26%, transparent), transparent 60%),
+      radial-gradient(42rem 42rem at 88% 18%, color-mix(in srgb, var(--pf-accent-2) 24%, transparent), transparent 60%),
+      radial-gradient(40rem 40rem at 70% 92%, color-mix(in srgb, var(--pf-accent-3) 16%, transparent), transparent 62%);
+    background-size: 180% 180%, 170% 170%, 160% 160%;
+    animation: pf-mesh-drift 26s ease-in-out infinite alternate;
+  }
+  @keyframes pf-mesh-drift {
+    0%   { background-position: 0% 0%, 100% 0%, 50% 100%; }
+    100% { background-position: 30% 20%, 70% 30%, 40% 70%; }
+  }
+
+  /* Inverse-mode atmosphere for project tiles (dark panel in light mode, light panel in dark mode) */
+  .pf-tile-atmo {
+    background-color: #0b0d10;
+    background-image:
+      radial-gradient(30rem 30rem at 20% 0%, color-mix(in srgb, var(--pf-accent) 40%, transparent), transparent 55%),
+      radial-gradient(26rem 26rem at 95% 100%, color-mix(in srgb, var(--pf-accent-2) 38%, transparent), transparent 55%);
+  }
+  .dark .pf-tile-atmo {
+    background-color: #0e1116;
+    background-image:
+      radial-gradient(30rem 30rem at 20% 0%, color-mix(in srgb, var(--pf-accent) 26%, transparent), transparent 58%),
+      radial-gradient(26rem 26rem at 95% 100%, color-mix(in srgb, var(--pf-accent-2) 24%, transparent), transparent 58%);
+  }
+
+  /* Soft section band — a clean elevated surface that follows the theme:
+     light in light mode, dark in dark mode. Text uses the theme ink so it stays
+     legible in both. Used by the skills marquee and the experience section. */
+  .pf-band-soft {
+    background-color: var(--pf-bg-elev);
+    color: var(--pf-ink);
+  }
+  .pf-experience-band {
+    background-color: var(--pf-bg-elev);
+    color: var(--pf-ink);
+  }
+
+  /* Experience cards — theme-adaptive surface (dark tint in light mode, light
+     tint in dark mode) so they read correctly on the elevated band in both. */
+  .pf-exp-card {
+    border: 1px solid var(--pf-line);
+    background-color: color-mix(in srgb, var(--pf-ink) 4%, transparent);
+  }
+  .pf-exp-card:hover {
+    border-color: color-mix(in srgb, var(--pf-accent) 45%, var(--pf-line));
+    background-color: color-mix(in srgb, var(--pf-ink) 8%, transparent);
+  }
+
+  /* Film grain overlay (sustainable: pure CSS/SVG, no asset) */
+  .pf-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    z-index: 1;
+  }
+
+  /* Animated conic ring (used behind avatar / accents) */
+  .pf-spin-slow { animation: pf-spin 18s linear infinite; }
+  @keyframes pf-spin { to { transform: rotate(360deg); } }
+
+  /* Marquee shimmer line */
+  .pf-underline-grow {
+    background-image: linear-gradient(90deg, var(--pf-accent), var(--pf-accent-2));
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s ease;
+  }
+  .pf-underline-grow:hover { background-size: 100% 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-mesh, .pf-spin-slow { animation: none !important; }
+}
+
+/* -----------------------------------------------------------------------------
+ * Base: reset and root layout
+ * ----------------------------------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* -----------------------------------------------------------------------------
+ * iOS Safari: prevent zoom on input focus, overscroll, touch
+ * ----------------------------------------------------------------------------- */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  body {
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+}
+
+
+/* CRT / terminal simulation (scanlines, flicker, phosphor, cursor, glass, bezel, noise) */
+@layer components {
+  /* Scanline overlay */
+  .crt-scanlines {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .crt-scanlines::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.02) 2px,
+      rgba(0, 0, 0, 0.02) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  /* Screen flicker effect */
+  .crt-flicker {
+    animation: crt-flicker 0.15s infinite;
+  }
+  
+  @keyframes crt-flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.96; }
+    94% { opacity: 1; }
+  }
+  
+  /* Phosphor glow on text — softer, easier on the eyes */
+  .phosphor-text {
+    color: #4ade80;
+    text-shadow: 
+      0 0 4px rgba(74,222,128,0.4),
+      0 0 8px rgba(74,222,128,0.2);
+  }
+  
+  .phosphor-text-bright {
+    color: #86efac;
+    text-shadow: 
+      0 0 5px rgba(74,222,128,0.5),
+      0 0 12px rgba(74,222,128,0.25),
+      0 0 20px rgba(74,222,128,0.1);
+  }
+  
+  /* Terminal cursor */
+  .terminal-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1.2em;
+    background-color: #4ade80;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  /* Glass morphism card */
+  .glass-card {
+    background: rgba(12, 12, 12, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(74, 222, 128, 0.06),
+      inset 0 1px 0 rgba(74, 222, 128, 0.08);
+  }
+  
+  /* Hover glow effect for clickable items */
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+  
+  .hover-glow:hover {
+    text-shadow: 
+      0 0 6px rgba(74,222,128,0.5),
+      0 0 12px rgba(74,222,128,0.25);
+    transform: translateX(4px);
+  }
+  
+  /* Terminal prompt styling */
+  .terminal-prompt {
+    color: #4ade80;
+  }
+  
+  .terminal-prompt::before {
+    content: '>';
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+  
+  /* CRT screen border/bezel effect */
+  .crt-bezel {
+    border: 4px solid #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 
+      inset 0 0 50px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(74, 222, 128, 0.08);
+  }
+  
+  /* Noise texture overlay */
+  .noise-overlay {
+    position: relative;
+  }
+  
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  /* Tech tag styling */
+  .tech-tag {
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+ * Scrollbar utilities: no-scrollbar, pro-scroll (professional view), terminal-scroll (themed)
+ * ----------------------------------------------------------------------------- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Professional View overrides */
+.pro-scroll {
+  scroll-behavior: smooth;
+}
+
+.pro-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pro-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pro-scroll::-webkit-scrollbar-thumb {
+  background: rgba(10, 10, 10, 0.15);
+  border-radius: 3px;
+}
+
+.pro-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 10, 10, 0.3);
+}
+
+/* Timeline horizontal scroll — dark grey (no neon green) */
+.timeline-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: rgba(10, 10, 10, 0.25);
+  border-radius: 3px;
+}
+.timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 10, 10, 0.4);
+}
+.timeline-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 10, 10, 0.25) transparent;
+}
+/* Timeline scrollbar in dark mode (portfolio) — white. */
+.dark .timeline-scroll::-webkit-scrollbar-track,
+.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark .timeline-scroll::-webkit-scrollbar-thumb,
+.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+.dark .timeline-scroll::-webkit-scrollbar-thumb:hover,
+.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+.dark .timeline-scroll,
+.pro-scroll.dark .timeline-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+
+/* Terminal scrollbar — themed via CSS custom properties */
+.terminal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.terminal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.terminal-scroll::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color, rgba(100,100,100,0.3));
+  border-radius: 3px;
+}
+.terminal-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-color-hover, rgba(100,100,100,0.5));
+}
+.terminal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color, rgba(100,100,100,0.3)) transparent;
+}
+
+/* Command input — text cursor on hover; custom blinking caret */
+.terminal-input-wrap .terminal-input {
+  cursor: text;
+}
+.terminal-input-wrap.cursor-text {
+  cursor: text;
+}
+@keyframes terminal-caret-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.terminal-caret {
+  animation: terminal-caret-blink 1s step-end infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .terminal-caret {
+    animation: none;
+  }
+}
+.terminal-input-wrap .terminal-input::placeholder {
+  color: var(--placeholder-color);
+  opacity: var(--placeholder-opacity, 0.6);
+}
+
+/* Transition indicator spinner — CSS-only to avoid framer-motion per-frame cost */
+@keyframes overlay-spin {
+  to { transform: rotate(360deg); }
+}
+.overlay-spinner {
+  display: inline-block;
+  animation: overlay-spin 1s linear infinite;
+}
+
+/* Fixed full-viewport containers for canvas and overlay (z-index layering). */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Overlay container */
+.overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.overlay-container > * {
+  pointer-events: auto;
+  touch-action: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Search overlay list — neutral gray scrollbar (no neon green). */
+.search-modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.search-modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.search-modal-scroll::-webkit-scrollbar-thumb {
+  background: #a3a3a3;
+  border-radius: 3px;
+}
+.search-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #737373;
+}
+.search-modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #a3a3a3 transparent;
+}
+
+/* /work and /work/:id scrollbar — neutral gray (overrides global green). */
+.work-page-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.work-page-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+.work-page-scroll::-webkit-scrollbar-thumb {
+  background: #a3a3a3;
+  border-radius: 4px;
+}
+.work-page-scroll::-webkit-scrollbar-thumb:hover {
+  background: #737373;
+}
+
+/* Portfolio scrollbar — light: neutral gray; dark: white. */
+.pro-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.pro-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+.pro-scroll::-webkit-scrollbar-thumb {
+  background: #a3a3a3;
+  border-radius: 4px;
+}
+.pro-scroll::-webkit-scrollbar-thumb:hover {
+  background: #737373;
+}
+/* When portfolio root has .dark (toggle), or when .dark is an ancestor (e.g. html) */
+.dark .pro-scroll::-webkit-scrollbar-track,
+.pro-scroll.dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark .pro-scroll::-webkit-scrollbar-thumb,
+.pro-scroll.dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+.dark .pro-scroll::-webkit-scrollbar-thumb:hover,
+.pro-scroll.dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* -----------------------------------------------------------------------------
+ * Reduced motion (accessibility): respect prefers-reduced-motion
+ * ----------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .overlay-spinner {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Custom cursors                                                              */
+/* When a JS-driven cursor is active (fine-pointer devices only), hide the     */
+/* native pointer everywhere so it doesn't compete with the rendered cursor.   */
+/* The !important beats the inline body.style.cursor the 3D scene sets on hover.*/
+/* -------------------------------------------------------------------------- */
+html.cursor-hidden,
+html.cursor-hidden * {
+  cursor: none !important;
+}
+
+/* Keep the native caret for text entry — the JS cursor hides itself over these. */
+html.cursor-hidden input,
+html.cursor-hidden textarea,
+html.cursor-hidden select,
+html.cursor-hidden [contenteditable="true"] {
+  cursor: auto !important;
+}
+
+/* =============================================================================
+ * LANDING (scroll-scrubbed video site)
+ * Ported from the standalone Next.js draft (app/globals.css). Everything is
+ * namespaced under `.landing` so the bone/ink design system never collides with
+ * the 3D workstation's CRT theme or the portfolio's `--pf-*` engine. Placed after
+ * `@tailwind utilities` so `.landing .x` (specificity 0,2,0) wins ties against
+ * single-class Tailwind utilities (0,1,0) — e.g. forcing DM Sans for `.font-display`.
+ * ============================================================================= */
+
+/* The landing scrolls inside its own `fixed inset-0` container (`#landing-scroll`,
+   the `.landing` element), exactly like the /work pages — so the app's global
+   `overflow:hidden` (for the 3D canvas) is untouched. The hero's `position: sticky`
+   sticks relative to this container, and the scrubbed video is `fixed` to the viewport
+   behind it. The scrub + scroll-progress logic reads this element's scrollTop. */
+#landing-scroll {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  #landing-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+.landing {
+  /* Design tokens — monochrome bone + black, one warm brand pop. */
+  --bg: #f6f5f2;
+  --bg-elev: #ffffff;
+  --ink: #0a0a0a;
+  --ink-dim: #4a4a4a;
+  --ink-mute: #7a7a7a;
+  --line: rgba(10, 10, 10, 0.1);
+  --line-strong: rgba(10, 10, 10, 0.22);
+
+  --dark-ink: #f6f6f6;
+  --dark-ink-dim: #d4d4d4;
+  --dark-ink-mute: #9a9a9a;
+  --dark-line: rgba(246, 246, 246, 0.14);
+  --dark-line-strong: rgba(246, 246, 246, 0.28);
+
+  --brand: #e0352b;
+
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --container-max: 1920px;
+
+  color-scheme: light;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.landing ::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ---------- Display type ---------- */
+.landing .font-display {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+.landing .italic-accent {
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ---------- Eyebrows ---------- */
+.landing .eyebrow {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.landing .eyebrow-pill {
+  display: inline-block;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 3px;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  padding: 5px 11px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.landing .on-dark .eyebrow {
+  color: var(--dark-ink-dim);
+}
+
+/* ---------- Glassmorphism ---------- */
+.landing .glass {
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 40px rgba(10, 10, 10, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+}
+.landing .glass-strong {
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 16px 60px rgba(10, 10, 10, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+}
+.landing .glass-subtle {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+.landing .glass-dark {
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: rgba(10, 10, 10, 0.55);
+  border: 1px solid rgba(246, 246, 246, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(246, 246, 246, 0.05);
+  color: var(--dark-ink);
+}
+
+/* ---------- Buttons ---------- */
+.landing .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.08);
+  border-radius: 12px;
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding: 5px 5px 5px 18px;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+  cursor: pointer;
+  text-decoration: none;
+}
+.landing .btn-primary .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  transition: background 0.3s, color 0.3s;
+}
+.landing .btn-primary:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.landing .btn-primary:hover .chip {
+  background: #fff;
+  color: var(--ink);
+}
+.landing .btn-primary-match {
+  height: 44px;
+  padding: 0 6px 0 18px;
+}
+.landing .btn-primary-match .chip {
+  width: 36px;
+  height: 36px;
+}
+.landing .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+  text-decoration: none;
+}
+.landing .btn-ghost:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* ---------- Animated underline link ---------- */
+.landing .link-underline {
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+.landing .link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-bounce);
+}
+.landing .link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* ---------- Scroll reveal (IntersectionObserver toggles .is-visible) ---------- */
+.landing .reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s var(--ease-bounce), transform 0.8s var(--ease-bounce);
+  will-change: opacity, transform;
+}
+.landing .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* hero stages */
+.landing .stage {
+  transition: opacity 0.6s ease, transform 0.7s var(--ease-bounce);
+}
+
+/* The scrubbed video is BRIGHT through the top of the page (the face) and DARK lower
+   down. So text over the top uses ink (`over-bright`); text over the dark lower video
+   uses white (`over-video`). Both carry a halo so they survive frame-to-frame shifts —
+   no flat gray overlay needed. */
+.landing .over-video {
+  color: var(--dark-ink);
+  text-shadow: 0 1px 2px rgba(8, 10, 16, 0.85), 0 2px 18px rgba(8, 10, 16, 0.6), 0 4px 44px rgba(8, 10, 16, 0.5);
+}
+.landing .over-video-dim {
+  color: var(--dark-ink-dim);
+  text-shadow: 0 1px 2px rgba(8, 10, 16, 0.7), 0 2px 18px rgba(8, 10, 16, 0.5), 0 4px 40px rgba(8, 10, 16, 0.4);
+}
+.landing .over-bright {
+  color: var(--ink);
+  text-shadow: 0 1px 1px rgba(246, 245, 242, 0.7), 0 2px 22px rgba(246, 245, 242, 0.6);
+}
+.landing .over-bright-dim {
+  color: var(--ink-dim);
+  text-shadow: 0 1px 1px rgba(246, 245, 242, 0.7), 0 2px 16px rgba(246, 245, 242, 0.55);
+}
+
+/* tag chip */
+.landing .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.landing .on-dark .tag-chip {
+  border-color: var(--dark-line);
+  color: var(--dark-ink-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .landing .animate-marquee,
+  .landing .animate-msgIn,
+  .landing .animate-rise,
+  .landing .animate-bounceArrow,
+  .landing .animate-pulseDot {
+    animation: none !important;
+  }
+}
+
+/* =============================================================================
+ * WORK PAGES THEME (/work, /work/:id)
+ * Re-skins the existing `.pf-*` portfolio components to the home page's bone/ink
+ * + DM Sans system (monochrome — the cobalt accent collapses to ink), so the
+ * project index and detail pages match the landing. Applied via `.work-theme`.
+ * ============================================================================= */
+.work-theme {
+  --pf-accent: #0a0a0a;
+  --pf-accent-bright: #2a2a2a;
+  --pf-accent-deep: #0a0a0a;
+  --pf-accent-2: #0a0a0a;
+  --pf-accent-2-bright: #2a2a2a;
+  --pf-accent-3: #0a0a0a;
+  --pf-on-accent: #ffffff;
+  --pf-bg: #f6f5f2;
+  --pf-bg-elev: #ffffff;
+  --pf-ink: #0a0a0a;
+  --pf-ink-soft: rgba(10, 10, 10, 0.66);
+  --pf-ink-faint: rgba(10, 10, 10, 0.42);
+  --pf-line: rgba(10, 10, 10, 0.10);
+  --pf-radius: 18px;
+  --pf-radius-lg: 26px;
+  --pf-shadow-sm: 0 2px 10px rgba(10, 10, 10, 0.05);
+  --pf-shadow: 0 18px 50px -22px rgba(10, 10, 10, 0.30);
+  --pf-shadow-accent: 0 18px 50px -22px rgba(10, 10, 10, 0.30);
+  color-scheme: light;
+  background: #f6f5f2;
+  color: #0a0a0a;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+/* Force DM Sans over the pf components' Syne/Space-Grotesk utilities. */
+.work-theme .font-display,
+.work-theme .font-sans,
+.work-theme h1,
+.work-theme h2,
+.work-theme h3 {
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+/* Neutral grey scrollbar for the work pages (no neon green). */
+.work-theme::-webkit-scrollbar { width: 10px; }
+.work-theme::-webkit-scrollbar-track { background: transparent; }
+.work-theme::-webkit-scrollbar-thumb { background: rgba(10, 10, 10, 0.22); border-radius: 6px; }
+.work-theme::-webkit-scrollbar-thumb:hover { background: rgba(10, 10, 10, 0.4); }
