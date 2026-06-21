@@ -1,9 +1,14 @@
-import { useLayoutEffect, useState } from "react";
+import { lazy, Suspense, useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Globe, Cpu, Radio, Headset, FlaskConical, Brain, Github, type LucideIcon,
 } from "lucide-react";
 import { getProjectBySlug, type WorkProject, type ProjectCategory } from "../../../data";
+import { useInView } from "../../lib/hooks";
+import { EyebrowPill, Reveal, ArrowUpRight } from "../ui";
+
+// Lazy 3D mini-viewer — keeps three.js out of the home's initial bundle; mounts in-view.
+const TileModel = lazy(() => import("../../../components/work/ui/TileModel"));
 
 /** Curated Selected Work for the home page (decoupled from /work's featured order). */
 const HOME_WORK_IDS = [
@@ -14,14 +19,27 @@ const HOME_WORK_IDS = [
   "live-election-platform",
   "primeforge-fpga",
   "parmco-ble-motor",
-  "ubersicht-widgets",
+  "memesat",
 ];
-import { useInView } from "../../lib/hooks";
-import { EyebrowPill, Reveal, ArrowUpRight } from "../ui";
 
 const CAT_ICON: Record<ProjectCategory, LucideIcon> = {
   web: Globe, embedded: Cpu, hardware: Radio, vr: Headset, research: FlaskConical, ai: Brain,
 };
+
+/** Interactive 3D model preview (auto-rotates), mounted only once scrolled into view. */
+function ModelMedia({ src, rotation }: { src: string; rotation?: [number, number, number] }) {
+  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.1 });
+  return (
+    <div ref={ref} className="absolute inset-0 overflow-hidden bg-[#14151b]">
+      <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1.4px)", backgroundSize: "22px 22px" }} aria-hidden />
+      {inView && (
+        <Suspense fallback={null}>
+          <TileModel src={src} interactive={false} rotation={rotation} />
+        </Suspense>
+      )}
+    </div>
+  );
+}
 const CAT_LABEL: Record<ProjectCategory, string> = {
   web: "Web & Product", embedded: "Embedded", hardware: "Hardware",
   vr: "VR / XR", research: "Research", ai: "AI Application",
@@ -78,6 +96,9 @@ function TileMedia({ project }: { project: WorkProject }) {
   }
   if (m?.kind === "image") {
     return <img src={m.src} alt={m.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />;
+  }
+  if (m?.kind === "model") {
+    return <ModelMedia src={m.src} rotation={m.rotation} />;
   }
   // Live site → real iframe preview.
   if (m?.kind === "site") {
@@ -152,8 +173,10 @@ export default function SelectedWork() {
     <section id="work" className="relative z-10 py-20 md:py-28">
       <div className="mx-auto max-w-container px-5 md:px-8">
         <Reveal className="mb-12">
-          <EyebrowPill className="mb-5">SELECTED WORK</EyebrowPill>
-          <Link to="/work" className="over-bright group inline-flex items-baseline gap-2 font-display text-[36px] leading-[0.98] md:text-[56px]">
+          <div className="mb-5">
+            <EyebrowPill>SELECTED WORK</EyebrowPill>
+          </div>
+          <Link to="/work" className="over-bright group flex w-fit items-baseline gap-2 font-display text-[36px] leading-[0.98] md:text-[56px]">
             View all work
             <ArrowUpRight className="h-6 w-6 self-center transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 md:h-8 md:w-8" />
           </Link>

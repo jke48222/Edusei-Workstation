@@ -2,6 +2,7 @@ import { Award, Users } from "lucide-react";
 import { site } from "../../content/site";
 import { honors, leadership } from "../../../data";
 import { EyebrowPill, Reveal } from "../ui";
+import { OrgLogo } from "../../lib/orgLogos";
 
 /** Earliest start → latest end (or Present) across a set of periods. */
 function span(periods: string[]): string {
@@ -67,8 +68,13 @@ export default function Recognition() {
             <div className="grid gap-3 sm:grid-cols-2">
               {orgs.map((org) => (
                 <div key={org.organization} className="glass-strong flex flex-col rounded-2xl p-5">
-                  <p className="font-display text-[15px] leading-snug tracking-[-0.02em] text-ink">{org.organization}</p>
-                  <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute">{org.span}</p>
+                  <div className="flex items-start gap-3">
+                    <OrgLogo name={org.organization} size="h-10 w-10" />
+                    <div className="min-w-0">
+                      <p className="font-display text-[15px] leading-snug tracking-[-0.02em] text-ink">{org.organization}</p>
+                      <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute">{org.span}</p>
+                    </div>
+                  </div>
                   <ul className="mt-3 space-y-1.5">
                     {org.roles.map((r) => (
                       <li key={r.role + r.period} className="flex items-baseline justify-between gap-3 text-[13px]">

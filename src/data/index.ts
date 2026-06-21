@@ -29,7 +29,7 @@ export const profileData = {
   title: 'Software Engineer',
   university: 'University of Georgia',
   college: 'College of Engineering, Morehead Honors College',
-  degree: 'B.S. Computer Systems Engineering',
+  degree: 'B.S. Computer Systems Engineering, Cum Laude',
   graduationYear: 2026,
   graduated: true,
   email: 'jalen.edusei@gmail.com',
@@ -914,7 +914,7 @@ const PROJECT_CATEGORY: Record<string, ProjectCategory> = {
  */
 const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
   // 3D models
-  animaldot: { kind: 'video', src: '/media/animaldot.mp4', poster: '/media/animaldot-vidposter.jpg', alt: 'AnimalDot smart bed demo' },
+  animaldot: { kind: 'model', src: '/models/sleeping_dog.glb', alt: 'AnimalDot smart bed' },
   // Satellite model is authored lying flat — stand it upright (right-side up).
   memesat: { kind: 'model', src: '/models/satellite.glb', alt: 'MEMESat-1 CubeSat', rotation: [Math.PI / 2, 0, 0] },
   'kitchen-chaos-vr': { kind: 'video', src: '/media/kitchen-chaos.mp4', poster: '/media/kitchen-chaos-poster.jpg', alt: 'Kitchen Chaos VR gameplay' },
@@ -926,8 +926,8 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
 
   // Live, embeddable sites
   'live-election-platform': { kind: 'site', url: 'https://nsbe-election.vercel.app/', embed: true },
-  // Self-framing (this site) would render the embedded splash, so use a real clip of the portfolio's hero.
-  'personal-portfolio': { kind: 'video', src: '/videos/h264/jalen-edusei-black.mp4', poster: '/media/hero-poster.jpg', alt: 'Jalen Edusei portfolio hero' },
+  // Self-framing (this site) would render the embedded splash, so use a screenshot of the live site.
+  'personal-portfolio': { kind: 'image', src: '/media/portfolio-preview.jpg', alt: 'jalenedusei.com home page' },
   'musical-artist-site': { kind: 'site', url: 'https://www.akilahmali.com/', embed: true },
   'parmco-ble-motor': { kind: 'site', url: 'https://jke48222.github.io/parmco/', embed: true },
   'website-development': { kind: 'site', url: 'https://nsbe.uga.edu/', embed: true },
