@@ -24,10 +24,11 @@ export default function Hero() {
       <div id="hero-zone" className="sticky top-0 h-screen overflow-hidden">
         <div className="relative mx-auto h-full max-w-container px-5 md:px-8">
           {/* ── Left: headline + additive supporting lines (ink, over the bright video) ── */}
-          <div className="absolute bottom-[15%] left-5 right-5 md:left-8 md:max-w-[46%] lg:max-w-[42%]">
+          <div className="absolute bottom-[15%] left-5 right-5 md:left-8 md:max-w-[680px]">
             <EyebrowPill className="mb-5">{hero.eyebrow}</EyebrowPill>
             <h1 className="over-bright font-display text-[34px] leading-[1.02] sm:text-[48px] md:text-[64px]">
-              {hero.headline.lead} <span className="italic-accent">{hero.headline.accent}</span>
+              {hero.headline.line1}<br />
+              {hero.headline.line2} <span className="italic-accent">{hero.headline.accent}</span>
             </h1>
             <div className="mt-5 space-y-2.5">
               {hero.reveals.map((line, i) => (

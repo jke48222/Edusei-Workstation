@@ -1,7 +1,7 @@
-import { FileBadge } from "lucide-react";
 import { site } from "../../content/site";
 import { certifications } from "../../../data";
 import { EyebrowPill, Reveal } from "../ui";
+import { OrgLogo } from "../../lib/orgLogos";
 
 export default function Certifications() {
   const { certifications: s } = site;
@@ -20,7 +20,7 @@ export default function Certifications() {
             <Reveal key={c.title} delay={(i % 2) * 90}>
               <article className="glass-strong flex h-full flex-col rounded-2xl p-7 md:p-8">
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-white"><FileBadge className="h-5 w-5" /></span>
+                  <OrgLogo name={c.title} size="h-10 w-10" />
                   <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-mute">{c.date}</span>
                 </div>
                 <h3 className="font-display text-[19px] tracking-[-0.02em] text-ink">{c.title}</h3>

@@ -10,7 +10,7 @@ export const site = {
   brand: "Jalen Edusei",
   role: "SOFTWARE ENGINEER",
   tagline: "Software Engineer · UGA '26",
-  degree: "B.S. Computer Systems Engineering · University of Georgia '26",
+  degree: "B.S. Computer Systems Engineering, Cum Laude · University of Georgia '26",
   niche: "Computer Systems Engineer building across embedded systems, VR, and the web.",
   email: "jalen.edusei@gmail.com",
   locations: "Athens, GA",
@@ -38,7 +38,7 @@ export const site = {
   // ── Hero (additive reveals over the scroll-scrubbed video) ───────────────
   hero: {
     eyebrow: "JALEN EDUSEI · SOFTWARE ENGINEER",
-    headline: { lead: "Building software with real", accent: "impact." },
+    headline: { line1: "Building software", line2: "with real", accent: "impact." },
     // Supporting lines that fade in additively as the hero scrolls (they stack,
     // they don't replace each other), each at a narrower width.
     reveals: [
@@ -177,9 +177,9 @@ export const site = {
     title: ["The engineer", "behind", "it all."], // middle word italic
     greeting: "Hi, I'm Jalen.",
     bio:
-      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Class of 2026). I build across the whole stack: embedded firmware and signal processing, multiplayer VR for the Meta Quest 3, and full-stack web shipped on Vercel. Most recently I was a Business Analyst intern at Capital One, building the business case for a notifications center serving 60M+ CreditWise users.",
+      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: embedded firmware and signal processing, multiplayer VR for the Meta Quest 3, and full-stack web shipped on Vercel. Most recently I was a Business Analyst intern at Capital One, building the business case for a notifications center serving 60M+ CreditWise users.",
     info: [
-      { label: "DEGREE", value: "B.S. Computer Systems Engineering" },
+      { label: "DEGREE", value: "B.S. Computer Systems Engineering, Cum Laude" },
       { label: "SCHOOL", value: "University of Georgia · Morehead Honors" },
       { label: "BASED", value: "Atlanta, GA" },
       { label: "FOCUS", value: "Embedded · VR · Full-Stack · Product" },
