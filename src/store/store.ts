@@ -139,6 +139,9 @@ interface WorkstationState {
 
   /** Whether terminal sound effects are muted (persisted to localStorage). */
   soundMuted: boolean;
+
+  /** Whether the Kitchen Chaos mini-game overlay is currently open. */
+  kitchenGameOpen: boolean;
 }
 
 interface WorkstationActions {
@@ -150,6 +153,8 @@ interface WorkstationActions {
   setTerminalBooted: (booted: boolean) => void;
   setPrefersReducedMotion: (value: boolean) => void;
   setSoundMuted: (muted: boolean) => void;
+  openKitchenGame: () => void;
+  closeKitchenGame: () => void;
 }
 
 type StoreState = WorkstationState & GalleryState;
@@ -185,6 +190,7 @@ const initialWorkstationState: WorkstationState = {
   terminalBooted: false,
   prefersReducedMotion: false,
   soundMuted: getStoredSoundMuted(),
+  kitchenGameOpen: false,
 };
 
 const initialGalleryState: GalleryState = {
@@ -295,6 +301,9 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
         localStorage.setItem(SOUND_MUTED_STORAGE_KEY, String(muted));
       } catch (_) {}
     },
+
+    openKitchenGame: () => set({ kitchenGameOpen: true }),
+    closeKitchenGame: () => set({ kitchenGameOpen: false }),
 
     enterGallery: () => {
       const state = get();
@@ -441,6 +450,8 @@ export const useWorkstationStore = create<StoreState & StoreActions>()(
   }))
 );
 
+export const useKitchenGameOpen = () => useWorkstationStore((state) => state.kitchenGameOpen);
+
 export const useViewMode = () => useWorkstationStore((state) => state.viewMode);
 export const useCurrentView = () => useWorkstationStore((state) => state.currentView);
 export const useIsAnimating = () => useWorkstationStore((state) => state.isAnimating);
@@ -461,6 +472,7 @@ export const useBridgeStates = () => useWorkstationStore((state) => state.bridge
 export const useActiveIsland = () => useWorkstationStore((state) => state.activeIslandId);
 
 if (import.meta.env?.DEV) {
+  (window as unknown as { __ws?: typeof useWorkstationStore }).__ws = useWorkstationStore;
   useWorkstationStore.subscribe(
     (state) => state.sceneMode,
     (sceneMode) => console.log('[Store] Scene mode:', sceneMode)
