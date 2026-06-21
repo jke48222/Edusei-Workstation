@@ -197,44 +197,46 @@
     }
     </script>
 
-    <!-- Preload initial hero video — browser picks the first type it supports -->
-    <link rel="preload" href="/videos/jalen-edusei-black.webm" as="video" type="video/webm" fetchpriority="high" />
-    <link rel="preload" href="/videos/hevc/jalen-edusei-black.mov" as="video" type="video/mp4" />
-    <link rel="preload" href="/videos/h264/jalen-edusei-black.mp4" as="video" type="video/mp4" />
+    <!-- Landing hero: preload the lightweight poster for instant first paint. The
+         scroll-scrubbed clip (/media/hero.mp4) streams via the <video> element's
+         own preload. The 3D workstation's hero videos are loaded on demand when
+         that sub-route is entered, so they're intentionally not preloaded here. -->
+    <link rel="preload" href="/media/hero-poster.jpg" as="image" fetchpriority="high" />
     
     <!-- IBM Plex Mono for authentic terminal feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-      /* CRT Screen Effect Global Styles */
       body {
         background-color: #050505;
         overflow: hidden;
       }
-      
-      /* Custom scrollbar for terminal */
+
+      /* Neutral, theme-appropriate scrollbar (no neon green). The 3D workstation
+         canvas doesn't scroll; the bone portfolio + work pages use this. */
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
+        height: 10px;
       }
-      
       ::-webkit-scrollbar-track {
-        background: #050505;
+        background: transparent;
       }
-      
       ::-webkit-scrollbar-thumb {
-        background: #33FF00;
-        border-radius: 4px;
+        background: rgba(10, 10, 10, 0.22);
+        border-radius: 6px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
       }
-      
       ::-webkit-scrollbar-thumb:hover {
-        background: #008F11;
+        background: rgba(10, 10, 10, 0.4);
+        background-clip: padding-box;
       }
     </style>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

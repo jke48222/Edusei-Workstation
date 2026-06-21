@@ -19,12 +19,29 @@ export default {
           glow: '#4ade80',
           text: '#86efac',
           dim: '#22c55e',
-        }
+        },
+        // ── Landing design tokens (scoped via the `.landing` wrapper in index.css).
+        //    These resolve to CSS vars only inside the landing subtree. ──
+        bg: 'var(--bg)',
+        'bg-elev': 'var(--bg-elev)',
+        ink: 'var(--ink)',
+        'ink-dim': 'var(--ink-dim)',
+        'ink-mute': 'var(--ink-mute)',
+        'dark-ink': 'var(--dark-ink)',
+        'dark-ink-dim': 'var(--dark-ink-dim)',
+        'dark-ink-mute': 'var(--dark-ink-mute)',
+        brand: 'var(--brand)',
       },
       fontFamily: {
         mono: ['IBM Plex Mono', 'Fira Code', 'Consolas', 'monospace'],
         display: ['Syne', 'Space Grotesk', 'sans-serif'],
         sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+      },
+      maxWidth: {
+        container: '1920px',
+      },
+      transitionTimingFunction: {
+        bounce: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
       animation: {
         'blink': 'blink 1s step-end infinite',
@@ -33,8 +50,28 @@ export default {
         'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
         'typing': 'typing 3.5s steps(40, end)',
         'marquee': 'marquee 40s linear infinite',
+        // ── Landing keyframes (DM Sans video site) ──
+        msgIn: 'msgIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
+        rise: 'rise 1.2s cubic-bezier(0.34,1.56,0.64,1) both',
+        bounceArrow: 'bounceArrow 1.4s ease-in-out infinite',
+        pulseDot: 'pulseDot 2s cubic-bezier(0.4,0,0.6,1) infinite',
       },
       keyframes: {
+        msgIn: {
+          '0%': { opacity: '0', transform: 'translateY(8px) scale(0.98)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        rise: {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        bounceArrow: {
+          '0%,100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(6px)' },
+        },
+        pulseDot: {
+          '50%': { opacity: '0.4' },
+        },
         blink: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },

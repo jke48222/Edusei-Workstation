@@ -10,13 +10,12 @@ import { useParams, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight, Github, Globe } from 'lucide-react';
 import { getProjectBySlug, profileData, RELATED_TITLE_TO_SLUG } from '../../data';
-import { useThemeStore } from '../../store/themeStore';
-import { SiteHeader } from '../professional/SectionPage';
-import { Footer } from '../professional/ProfessionalView';
-import { ProjectTile } from '../professional/ui/ProjectTile';
-import { ProjectMedia, resolveMedia } from '../professional/ui/ProjectMedia';
-import { CATEGORY_ICON, CATEGORY_LABEL, MagneticButton } from '../professional/ui/Kit';
-import { ZoomableImage } from '../professional/ui/ZoomableImage';
+import { ProjectTile } from './ui/ProjectTile';
+import { ProjectMedia, resolveMedia } from './ui/ProjectMedia';
+import { CATEGORY_ICON, CATEGORY_LABEL, MagneticButton } from './ui/Kit';
+import { ZoomableImage } from './ui/ZoomableImage';
+import { WorkHeader } from './WorkHeader';
+import Footer from '../../landing/components/sections/Footer';
 
 const SITE_URL = 'https://www.jalenedusei.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/headshot.png`;
@@ -44,14 +43,12 @@ function setPageMeta(title: string, description: string, path: string, ogImage?:
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const portfolioDark = useThemeStore((s) => s.portfolioDark);
   const project = useMemo(() => (projectId ? getProjectBySlug(projectId) : undefined), [projectId]);
 
+  // Always light bone — clear any inherited portfolio dark class.
   useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (portfolioDark) root.classList.add('dark');
-    else root.classList.remove('dark');
-  }, [portfolioDark]);
+    document.documentElement.classList.remove('dark');
+  }, []);
 
   useEffect(() => {
     if (!project) return;
@@ -84,11 +81,8 @@ export function ProjectDetailPage() {
     .slice(0, 3);
 
   return (
-    <div
-      className={`pro-scroll pf fixed inset-0 z-40 overflow-y-auto font-sans ${portfolioDark ? 'dark' : ''}`}
-      style={{ background: 'var(--pf-bg)', color: 'var(--pf-ink)' }}
-    >
-      <SiteHeader active="/work" />
+    <div className="landing work-theme work-page-scroll fixed inset-0 z-40 overflow-y-auto">
+      <WorkHeader active="work" />
 
       {/* Atmospheric hero header */}
       <header className="pf-tile-atmo pf-grain relative overflow-hidden">
@@ -259,7 +253,7 @@ export function ProjectDetailPage() {
             <ArrowLeft className="h-4 w-4" /> All projects
           </MagneticButton>
           <MagneticButton href="/" variant="outline">
-            Back to portfolio <ArrowUpRight className="h-4 w-4" />
+            Back to home <ArrowUpRight className="h-4 w-4" />
           </MagneticButton>
         </nav>
       </main>
