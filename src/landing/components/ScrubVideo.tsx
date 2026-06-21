@@ -2,11 +2,14 @@ import { useEffect, useRef } from "react";
 
 /**
  * Fixed, full-viewport background video scrubbed by page scroll.
- * A rAF loop eases video.currentTime toward (scrollProgress * duration).
- * Reduced-motion users get a static poster frame only.
+ * A rAF loop eases video.currentTime toward (scrollProgress * duration), reading the
+ * landing's scroll container (#landing-scroll). Reduced-motion users get a poster only.
  *
- * The landing IS the whole-document scroll container at `/`, so this maps
- * window.scrollY → clip time directly.
+ * iOS/Safari quirk: a paused video that has never been *played* will not repaint when
+ * you set currentTime — it stays frozen on the poster, so scrubbing looks dead on
+ * mobile. The fix is to "prime" the element with a muted play() → pause() (permitted
+ * for muted + playsInline), after which seeks render normally. If autoplay is blocked
+ * (e.g. Low-Power Mode), we prime on the first touch instead.
  */
 export default function ScrubVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -21,15 +24,36 @@ export default function ScrubVideo() {
     let raf = 0;
     let current = 0;
     let ready = false;
+    let primed = false;
 
-    const onMeta = () => {
-      ready = true;
-      try {
-        video.pause();
-      } catch {}
+    const prime = () => {
+      if (primed || !video.paused) return;
+      const p = video.play();
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          primed = true;
+          try { video.pause(); } catch {}
+        }).catch(() => {
+          /* autoplay blocked — a touch listener will prime it on the first gesture */
+        });
+      } else {
+        primed = true;
+        try { video.pause(); } catch {}
+      }
     };
-    video.addEventListener("loadedmetadata", onMeta);
-    if (video.readyState >= 1) onMeta();
+
+    const onReady = () => {
+      ready = true;
+      prime();
+    };
+    video.addEventListener("loadedmetadata", onReady);
+    video.addEventListener("loadeddata", onReady);
+    if (video.readyState >= 1) onReady();
+
+    // Fallback for blocked autoplay (iOS Low-Power Mode, strict settings).
+    const primeOnGesture = () => prime();
+    window.addEventListener("touchstart", primeOnGesture, { passive: true });
+    window.addEventListener("pointerdown", primeOnGesture, { passive: true });
 
     const loop = () => {
       raf = requestAnimationFrame(loop);
@@ -45,7 +69,8 @@ export default function ScrubVideo() {
       const target = progress * (video.duration - 0.04);
       current += (target - current) * 0.18; // eased follow (snappier)
       if (Math.abs(target - current) < 0.0015) current = target;
-      // gate on `seeking` so we never queue a backlog of seeks -> stays smooth
+      // gate on `seeking` so we never queue a backlog of seeks -> stays smooth.
+      // (Desktop repaints seeks immediately; iOS repaints them once `prime()` has run.)
       if (!video.seeking && Math.abs(video.currentTime - current) > 0.008) {
         try {
           video.currentTime = current;
@@ -56,7 +81,10 @@ export default function ScrubVideo() {
 
     return () => {
       cancelAnimationFrame(raf);
-      video.removeEventListener("loadedmetadata", onMeta);
+      video.removeEventListener("loadedmetadata", onReady);
+      video.removeEventListener("loadeddata", onReady);
+      window.removeEventListener("touchstart", primeOnGesture);
+      window.removeEventListener("pointerdown", primeOnGesture);
     };
   }, []);
 
