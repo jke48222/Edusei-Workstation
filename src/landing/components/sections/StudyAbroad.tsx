@@ -62,9 +62,7 @@ export default function StudyAbroad() {
                 {/* carrier wordmark */}
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5">
-                      <Plane className="h-4 w-4 -rotate-45 text-dark-ink" />
-                    </span>
+                    <img src="/logos/uga-global-education.png" alt="UGA Global Education" className="h-12 w-auto object-contain" />
                     <div>
                       <h2 className="font-display text-[21px] leading-none tracking-[-0.03em] text-dark-ink md:text-[24px]">{title}</h2>
                       <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-dark-ink-mute">Boarding Pass</p>
