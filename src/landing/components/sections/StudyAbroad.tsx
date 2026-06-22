@@ -121,7 +121,7 @@ export default function StudyAbroad() {
 
               {/* ── Stub: scannable program QR (no repeated info) ────────── */}
               <div className="flex w-full shrink-0 flex-col items-center justify-center gap-4 p-7 sm:w-[220px] md:p-8">
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-dark-ink-mute">Scan to view</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-dark-ink-mute">Scan to board</span>
                 <a
                   href={url}
                   target="_blank"
