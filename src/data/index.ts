@@ -197,8 +197,21 @@ export const leadership = [
 ];
 
 export const studyAbroad = {
-  title: 'Study Abroad in Germany',
+  title: 'Study Abroad',
+  from: { code: 'USA', city: 'United States' },
+  to: { code: 'GER', city: 'Germany' },
+  visited: 'Germany · France · Austria',
+  depart: 'May 2023',
+  ret: 'June 2023',
+  term: "Summer '23",
   period: 'May 2023 – June 2023',
+  // Short, ticket-sized blurb (drawn from the highlights below).
+  description:
+    'A summer program on engineering ethics, professionalism, and global collaboration. It paired technical presentations and written case studies with independent travel through Central Europe.',
+  // UGA StudyAway program page — encoded into the boarding-pass QR.
+  url: 'https://studyaway.uga.edu/index.cfm?FuseAction=Programs.ViewProgramAngular&id=13851',
+  host: 'studyaway.uga.edu',
+  // Retained for résumé / detail views; not surfaced on the boarding pass.
   highlights: [
     'Completed coursework on engineering ethics, professionalism, and global collaboration, earning 3 credit hours.',
     'Delivered 3 technical presentations and authored 2 academic papers exploring case studies in ethical engineering practice.',

@@ -9,6 +9,7 @@ import Skills from "./components/sections/Skills";
 import Experience from "./components/sections/Experience";
 import Recognition from "./components/sections/Recognition";
 import Certifications from "./components/sections/Certifications";
+import StudyAbroad from "./components/sections/StudyAbroad";
 import About from "./components/sections/About";
 import Editorial from "./components/sections/Editorial";
 import ForBrands from "./components/sections/ForBrands";
@@ -53,6 +54,7 @@ export function Landing() {
           <Experience />
           <Recognition />
           <Certifications />
+          <StudyAbroad />
           <About />
           <Editorial />
           <ForBrands />
