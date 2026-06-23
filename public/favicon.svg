@@ -1,21 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Iridescent Neon Gradient for main lettermark -->
-    <linearGradient id="iridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff007f" />   <!-- Hot Pink -->
-      <stop offset="50%" stop-color="#00f3ff" />  <!-- Electric Cyan -->
-      <stop offset="100%" stop-color="#9dff00" /> <!-- Acid Lime -->
+    <!-- Gradients -->
+    <!-- Cube wireframe gradient (Neon Pink to Cyan) -->
+    <linearGradient id="cubeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="100%" stop-color="#00f3ff" />
     </linearGradient>
 
-    <!-- Reticle Gradient -->
-    <linearGradient id="reticleGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00f3ff" />
-      <stop offset="100%" stop-color="#9dff00" />
+    <!-- Orbit 1 (Cyan to Neon Green) -->
+    <linearGradient id="orbitGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f3ff" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#00f3ff" stop-opacity="1" />
+      <stop offset="100%" stop-color="#00ff87" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="orbitGrad1Front" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00ff87" stop-opacity="1" />
+      <stop offset="50%" stop-color="#00f3ff" stop-opacity="1" />
+      <stop offset="100%" stop-color="#00f3ff" stop-opacity="0.1" />
     </linearGradient>
 
-    <!-- Glowing effect -->
+    <!-- Orbit 2 (Pink to Sun Gold) -->
+    <linearGradient id="orbitGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff007f" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#ff007f" stop-opacity="1" />
+      <stop offset="100%" stop-color="#ffeb3b" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="orbitGrad2Front" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffeb3b" stop-opacity="1" />
+      <stop offset="50%" stop-color="#ff007f" stop-opacity="1" />
+      <stop offset="100%" stop-color="#ff007f" stop-opacity="0.1" />
+    </linearGradient>
+
+    <!-- Center Core Node Radial Gradient (White to Gold to Orange) -->
+    <radialGradient id="coreGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#ffeb3b" />
+      <stop offset="100%" stop-color="#ff5722" />
+    </radialGradient>
+
+    <!-- Neon Glow Filter -->
     <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Intense glow for nodes -->
+    <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
       <feMerge>
         <feMergeNode in="blur" />
         <feMergeNode in="SourceGraphic" />
@@ -23,88 +57,69 @@
     </filter>
 
     <style>
-      .grid-line {
+      .hud-hud {
         stroke: #ffffff;
-        opacity: 0.12;
-      }
-      .hud-element {
-        stroke: #ffffff;
-        opacity: 0.35;
-      }
-      .hud-accent {
-        stroke: url(#reticleGrad);
-        opacity: 0.8;
+        opacity: 0.15;
       }
       @media (prefers-color-scheme: light) {
-        .grid-line {
+        .hud-hud {
           stroke: #0a0a0a;
-          opacity: 0.1;
-        }
-        .hud-element {
-          stroke: #0a0a0a;
-          opacity: 0.4;
+          opacity: 0.12;
         }
       }
     </style>
   </defs>
 
-  <!-- 3D Globe Wireframe Grid (Background) -->
-  <g fill="none">
-    <!-- Outer boundary of the globe -->
-    <circle cx="256" cy="256" r="170" class="grid-line" stroke-width="4" />
-    <!-- Equator -->
-    <line x1="86" y1="256" x2="426" y2="256" class="grid-line" stroke-width="2" />
-    <!-- Prime Meridian -->
-    <line x1="256" y1="86" x2="256" y2="426" class="grid-line" stroke-width="2" />
-    <!-- Latitudes -->
-    <path d="M 112,171 A 170,85 0 0,1 400,171" class="grid-line" stroke-width="2" />
-    <path d="M 112,341 A 170,85 0 0,0 400,341" class="grid-line" stroke-width="2" />
-    <!-- Longitudes -->
-    <path d="M 256,86 A 85,170 0 0,0 256,426" class="grid-line" stroke-width="2" />
-    <path d="M 256,86 A 85,170 0 0,1 256,426" class="grid-line" stroke-width="2" />
+  <!-- Ambient HUD Background Markings -->
+  <g fill="none" class="hud-hud">
+    <circle cx="256" cy="256" r="240" stroke-width="1.5" />
+    <circle cx="256" cy="256" r="246" stroke-width="1" stroke-dasharray="10 30" />
+    <line x1="256" y1="0" x2="256" y2="512" stroke-width="0.5" stroke-dasharray="4 8" />
+    <line x1="0" y1="256" x2="512" y2="256" stroke-width="0.5" stroke-dasharray="4 8" />
   </g>
 
-  <!-- HUD Reticle Rings & Crosshairs -->
-  <g fill="none">
-    <!-- Dotted circular reticle -->
-    <circle cx="256" cy="256" r="215" stroke="url(#reticleGrad)" stroke-width="3.5" stroke-dasharray="6 14" opacity="0.65" />
-    <!-- Outer accent rings -->
-    <circle cx="256" cy="256" r="235" class="hud-element" stroke-width="1.5" stroke-dasharray="40 180" />
-    <circle cx="256" cy="256" r="242" class="hud-element" stroke-width="1" />
+  <!-- Layer 1: Back Orbits (Behind Cube) -->
+  <!-- Horizontal Orbit Back -->
+  <g transform="translate(256, 256) rotate(-15)">
+    <path d="M -210,0 A 210,60 0 0,0 210,0" fill="none" stroke="url(#orbitGrad1)" stroke-width="12" stroke-linecap="round" />
+  </g>
+  <!-- Vertical Orbit Back -->
+  <g transform="translate(256, 256) rotate(75)">
+    <path d="M -210,0 A 210,50 0 0,0 210,0" fill="none" stroke="url(#orbitGrad2)" stroke-width="10" stroke-linecap="round" />
   </g>
 
-  <!-- HUD Corner Viewfinder Brackets -->
-  <g fill="none" stroke-width="5" class="hud-element">
-    <!-- Top-Left -->
-    <path d="M 60,100 L 60,60 L 100,60" stroke-linecap="round" />
-    <!-- Top-Right -->
-    <path d="M 452,100 L 452,60 L 412,60" stroke-linecap="round" />
-    <!-- Bottom-Left -->
-    <path d="M 60,412 L 60,452 L 100,452" stroke-linecap="round" />
-    <!-- Bottom-Right -->
-    <path d="M 452,412 L 452,452 L 412,452" stroke-linecap="round" />
+  <!-- Layer 2: Cube Back Edges (Low Opacity, Translucent) -->
+  <g fill="none" stroke="url(#cubeGrad)" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+    <path d="M 152,316 L 256,256 L 360,316 M 256,136 L 256,256" stroke-width="12" />
   </g>
 
-  <!-- Glowing J-E Monogram (Primary Layer) -->
-  <g filter="url(#neonGlow)">
-    <!-- J -->
-    <path d="M 205,120 A 85,170 0 0,0 256,426 A 170,170 0 0,1 112,341" 
-          fill="none" stroke="url(#iridGrad)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
-    
-    <!-- E -->
-    <g fill="none" stroke="url(#iridGrad)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M 307,120 A 85,170 0 0,1 307,392" />
-      <path d="M 307,120 C 340,120 375,135 390,155" />
-      <path d="M 290,256 L 385,256" />
-      <path d="M 307,392 C 340,392 375,377 390,357" />
-    </g>
+  <!-- Layer 3: Cube Front Edges (High Opacity, Glowing) -->
+  <g fill="none" stroke="url(#cubeGrad)" stroke-linecap="round" stroke-linejoin="round" filter="url(#neonGlow)">
+    <path d="M 256,136 L 152,196 L 152,316 L 256,376 L 360,316 L 360,196 Z" stroke-width="20" />
+    <path d="M 256,256 L 152,196 M 256,256 L 360,196 M 256,256 L 256,376" stroke-width="20" />
   </g>
 
-  <!-- Micro HUD details (Floating data nodes) -->
-  <g fill="url(#reticleGrad)">
-    <circle cx="256" cy="74" r="6" />
-    <circle cx="256" cy="438" r="6" />
-    <circle cx="74" cy="256" r="6" />
-    <circle cx="438" cy="256" r="6" />
+  <!-- Layer 4: Front Orbits (In Front of Cube) -->
+  <!-- Horizontal Orbit Front -->
+  <g transform="translate(256, 256) rotate(-15)">
+    <path d="M 210,0 A 210,60 0 0,0 -210,0" fill="none" stroke="url(#orbitGrad1Front)" stroke-width="12" stroke-linecap="round" />
   </g>
+  <!-- Vertical Orbit Front -->
+  <g transform="translate(256, 256) rotate(75)">
+    <path d="M 210,0 A 210,50 0 0,0 -210,0" fill="none" stroke="url(#orbitGrad2Front)" stroke-width="10" stroke-linecap="round" />
+  </g>
+
+  <!-- Layer 5: Glowing Vertex Nodes -->
+  <!-- Outer vertices (White glow) -->
+  <g fill="#ffffff" filter="url(#nodeGlow)">
+    <circle cx="256" cy="136" r="10" />
+    <circle cx="152" cy="196" r="10" />
+    <circle cx="360" cy="196" r="10" />
+    <circle cx="152" cy="316" r="10" />
+    <circle cx="360" cy="316" r="10" />
+    <circle cx="256" cy="376" r="10" />
+  </g>
+  
+  <!-- Central Core Node (Gold Glow - Processor / CubeSat Payload) -->
+  <circle cx="256" cy="256" r="16" fill="url(#coreGrad)" filter="url(#nodeGlow)" />
 </svg>
