@@ -1,4 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0a0a0a"/>
-  <text x="16" y="21.5" text-anchor="middle" font-family="DM Sans, system-ui, -apple-system, Segoe UI, sans-serif" font-weight="700" font-size="15.5" letter-spacing="-0.6" fill="#f6f5f2">JE</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="letterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c6ff" />
+      <stop offset="100%" stop-color="#0072ff" />
+    </linearGradient>
+    <linearGradient id="orbitBack" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff5858" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#f857a6" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="orbitFront" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#f857a6" stop-opacity="1" />
+      <stop offset="100%" stop-color="#ff5858" stop-opacity="0.2" />
+    </linearGradient>
+    <radialGradient id="satGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#f857a6" />
+      <stop offset="100%" stop-color="#7a003c" />
+    </radialGradient>
+  </defs>
+
+  <!-- Back Orbit (behind letters) -->
+  <g transform="translate(256, 256) rotate(-25)">
+    <path d="M -220,0 A 220,70 0 0,0 220,0" fill="none" stroke="url(#orbitBack)" stroke-width="16" stroke-linecap="round" />
+  </g>
+
+  <!-- Monogram JE (centered) -->
+  <g transform="translate(256, 256)">
+    <!-- J -->
+    <path d="M -30,-110 L -30,50 A 60,60 0 0,1 -150,50" fill="none" stroke="url(#letterGrad)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- E -->
+    <path d="M 150,-110 L 30,-110 L 30,110 L 150,110 M 30,0 L 120,0" fill="none" stroke="url(#letterGrad)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Front Orbit (in front of letters) -->
+  <g transform="translate(256, 256) rotate(-25)">
+    <path d="M 220,0 A 220,70 0 0,0 -220,0" fill="none" stroke="url(#orbitFront)" stroke-width="16" stroke-linecap="round" />
+    <!-- Satellite Sphere -->
+    <circle cx="180" cy="40" r="18" fill="url(#satGrad)" />
+  </g>
 </svg>
