@@ -1,42 +1,110 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Gradients -->
-    <linearGradient id="letterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00c6ff" />
-      <stop offset="100%" stop-color="#0072ff" />
+    <!-- Iridescent Neon Gradient for main lettermark -->
+    <linearGradient id="iridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />   <!-- Hot Pink -->
+      <stop offset="50%" stop-color="#00f3ff" />  <!-- Electric Cyan -->
+      <stop offset="100%" stop-color="#9dff00" /> <!-- Acid Lime -->
     </linearGradient>
-    <linearGradient id="orbitBack" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#ff5858" stop-opacity="0.2" />
-      <stop offset="100%" stop-color="#f857a6" stop-opacity="1" />
+
+    <!-- Reticle Gradient -->
+    <linearGradient id="reticleGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f3ff" />
+      <stop offset="100%" stop-color="#9dff00" />
     </linearGradient>
-    <linearGradient id="orbitFront" x1="100%" y1="0%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="#f857a6" stop-opacity="1" />
-      <stop offset="100%" stop-color="#ff5858" stop-opacity="0.2" />
-    </linearGradient>
-    <radialGradient id="satGrad" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="60%" stop-color="#f857a6" />
-      <stop offset="100%" stop-color="#7a003c" />
-    </radialGradient>
+
+    <!-- Glowing effect -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      .grid-line {
+        stroke: #ffffff;
+        opacity: 0.12;
+      }
+      .hud-element {
+        stroke: #ffffff;
+        opacity: 0.35;
+      }
+      .hud-accent {
+        stroke: url(#reticleGrad);
+        opacity: 0.8;
+      }
+      @media (prefers-color-scheme: light) {
+        .grid-line {
+          stroke: #0a0a0a;
+          opacity: 0.1;
+        }
+        .hud-element {
+          stroke: #0a0a0a;
+          opacity: 0.4;
+        }
+      }
+    </style>
   </defs>
 
-  <!-- Back Orbit (behind letters) -->
-  <g transform="translate(256, 256) rotate(-25)">
-    <path d="M -220,0 A 220,70 0 0,0 220,0" fill="none" stroke="url(#orbitBack)" stroke-width="16" stroke-linecap="round" />
+  <!-- 3D Globe Wireframe Grid (Background) -->
+  <g fill="none">
+    <!-- Outer boundary of the globe -->
+    <circle cx="256" cy="256" r="170" class="grid-line" stroke-width="4" />
+    <!-- Equator -->
+    <line x1="86" y1="256" x2="426" y2="256" class="grid-line" stroke-width="2" />
+    <!-- Prime Meridian -->
+    <line x1="256" y1="86" x2="256" y2="426" class="grid-line" stroke-width="2" />
+    <!-- Latitudes -->
+    <path d="M 112,171 A 170,85 0 0,1 400,171" class="grid-line" stroke-width="2" />
+    <path d="M 112,341 A 170,85 0 0,0 400,341" class="grid-line" stroke-width="2" />
+    <!-- Longitudes -->
+    <path d="M 256,86 A 85,170 0 0,0 256,426" class="grid-line" stroke-width="2" />
+    <path d="M 256,86 A 85,170 0 0,1 256,426" class="grid-line" stroke-width="2" />
   </g>
 
-  <!-- Monogram JE (centered) -->
-  <g transform="translate(256, 256)">
+  <!-- HUD Reticle Rings & Crosshairs -->
+  <g fill="none">
+    <!-- Dotted circular reticle -->
+    <circle cx="256" cy="256" r="215" stroke="url(#reticleGrad)" stroke-width="3.5" stroke-dasharray="6 14" opacity="0.65" />
+    <!-- Outer accent rings -->
+    <circle cx="256" cy="256" r="235" class="hud-element" stroke-width="1.5" stroke-dasharray="40 180" />
+    <circle cx="256" cy="256" r="242" class="hud-element" stroke-width="1" />
+  </g>
+
+  <!-- HUD Corner Viewfinder Brackets -->
+  <g fill="none" stroke-width="5" class="hud-element">
+    <!-- Top-Left -->
+    <path d="M 60,100 L 60,60 L 100,60" stroke-linecap="round" />
+    <!-- Top-Right -->
+    <path d="M 452,100 L 452,60 L 412,60" stroke-linecap="round" />
+    <!-- Bottom-Left -->
+    <path d="M 60,412 L 60,452 L 100,452" stroke-linecap="round" />
+    <!-- Bottom-Right -->
+    <path d="M 452,412 L 452,452 L 412,452" stroke-linecap="round" />
+  </g>
+
+  <!-- Glowing J-E Monogram (Primary Layer) -->
+  <g filter="url(#neonGlow)">
     <!-- J -->
-    <path d="M -30,-110 L -30,50 A 60,60 0 0,1 -150,50" fill="none" stroke="url(#letterGrad)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 205,120 A 85,170 0 0,0 256,426 A 170,170 0 0,1 112,341" 
+          fill="none" stroke="url(#iridGrad)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+    
     <!-- E -->
-    <path d="M 150,-110 L 30,-110 L 30,110 L 150,110 M 30,0 L 120,0" fill="none" stroke="url(#letterGrad)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+    <g fill="none" stroke="url(#iridGrad)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 307,120 A 85,170 0 0,1 307,392" />
+      <path d="M 307,120 C 340,120 375,135 390,155" />
+      <path d="M 290,256 L 385,256" />
+      <path d="M 307,392 C 340,392 375,377 390,357" />
+    </g>
   </g>
 
-  <!-- Front Orbit (in front of letters) -->
-  <g transform="translate(256, 256) rotate(-25)">
-    <path d="M 220,0 A 220,70 0 0,0 -220,0" fill="none" stroke="url(#orbitFront)" stroke-width="16" stroke-linecap="round" />
-    <!-- Satellite Sphere -->
-    <circle cx="180" cy="40" r="18" fill="url(#satGrad)" />
+  <!-- Micro HUD details (Floating data nodes) -->
+  <g fill="url(#reticleGrad)">
+    <circle cx="256" cy="74" r="6" />
+    <circle cx="256" cy="438" r="6" />
+    <circle cx="74" cy="256" r="6" />
+    <circle cx="438" cy="256" r="6" />
   </g>
 </svg>
