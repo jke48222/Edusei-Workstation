@@ -941,6 +941,30 @@ html.cursor-hidden [contenteditable="true"] {
   color: var(--ink-dim);
 }
 
+/* Light liquid-glass chip — frosted, refractive surface behind the hero's
+   supporting lines. Self-contained sheen (inset highlights) so it reads as glass
+   even over the bright video; blurs whatever it overlaps. */
+.landing .hero-glass {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.12) 60%, rgba(255, 255, 255, 0.08));
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(14px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 30px -18px rgba(0, 0, 0, 0.45);
+}
+.dark .landing .hero-glass {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 12px 32px -18px rgba(0, 0, 0, 0.6);
+}
+
 /* tag chip */
 .landing .tag-chip {
   display: inline-flex;

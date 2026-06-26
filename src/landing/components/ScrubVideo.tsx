@@ -15,12 +15,11 @@ export default function ScrubVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   // Phones/tablets get a lighter 720p encode — same all-intra frames, ~7.5MB vs ~18MB —
   // so the decoder can keep up with rapid scrub seeks instead of stuttering.
-  const [src] = useState(() =>
+  const [isMobile] = useState(() =>
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
-      ? "/media/hero-mobile.mp4"
-      : "/media/hero.mp4"
   );
+  const src = isMobile ? "/media/hero-mobile.mp4" : "/media/hero.mp4";
 
   useEffect(() => {
     const video = videoRef.current;
@@ -28,6 +27,11 @@ export default function ScrubVideo() {
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return; // poster frame only
+
+    // On mobile, autoplay-priming would make the muted video visibly play before the
+    // user ever scrolls. So mobile skips the load-time prime and primes on the first
+    // touch/pointer gesture instead (listeners below); desktop primes immediately.
+    const isMobile = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
 
     let raf = 0;
     let current = 0;
@@ -52,7 +56,7 @@ export default function ScrubVideo() {
 
     const onReady = () => {
       ready = true;
-      prime();
+      if (!isMobile) prime(); // mobile waits for the first gesture (see below)
     };
     video.addEventListener("loadedmetadata", onReady);
     video.addEventListener("loadeddata", onReady);
