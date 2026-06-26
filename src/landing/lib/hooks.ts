@@ -68,6 +68,24 @@ export function useScrollProgress(targetRef?: React.RefObject<HTMLElement | null
   return progress;
 }
 
+/** True below the `md` breakpoint (768px) — the width-based "mobile" layout that
+ *  also drives Tailwind's `md:` visibility (hero right-rail, scroll cue). */
+export function useIsNarrow(query = "(max-width: 767px)") {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [query]);
+
+  return matches;
+}
+
 export function prefersReducedMotion() {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;

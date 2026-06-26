@@ -43,7 +43,7 @@ export const site = {
     // they don't replace each other), each at a narrower width.
     reveals: [
       "From CubeSat flight software to multiplayer VR, I build the whole system.",
-      "Computer Systems Engineer · B.S., University of Georgia, Class of 2026.",
+      "Computer Systems Engineer · B.S. Cum Laude, University of Georgia, Class of 2026.",
     ],
     tagline: "EMBEDDED · VR · FULL-STACK · DATA",
     recentLabel: "RECENT BUILDS",
