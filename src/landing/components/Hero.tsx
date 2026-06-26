@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { site } from "../content/site";
-import { useScrollProgress } from "../lib/hooks";
+import { useScrollProgress, useIsNarrow } from "../lib/hooks";
 import { getProjectBySlug } from "../../data";
 import { EyebrowPill } from "./ui";
 
@@ -14,11 +14,43 @@ function appear(p: number, start: number, span = 0.12) {
 export default function Hero() {
   const zoneRef = useRef<HTMLDivElement>(null);
   const p = useScrollProgress(zoneRef);
+  const isMobile = useIsNarrow();
   const { hero } = site;
   const projects = hero.recentProjectIds
     .map((id) => getProjectBySlug(id))
     .filter((x): x is NonNullable<typeof x> => Boolean(x));
 
+  // ── Mobile: no scroll-scrub. The first screen is the initial view (headline over
+  //    the video); the supporting lines sit already-rendered right under it, in normal
+  //    flow, so a small scroll lands on them — nothing fades/reveals. ──
+  if (isMobile) {
+    return (
+      <section id="top" ref={zoneRef} className="relative">
+        {/* Initial starting view — one screen, headline over the bright video */}
+        <div className="relative flex h-screen flex-col justify-end px-5 pb-[16vh]">
+          <EyebrowPill className="mb-5">{hero.eyebrow}</EyebrowPill>
+          <h1 className="over-bright font-display text-[34px] leading-[1.02] sm:text-[48px]">
+            {hero.headline.line1}<br />
+            {hero.headline.line2} <span className="italic-accent">{hero.headline.accent}</span>
+          </h1>
+        </div>
+
+        {/* Supporting lines — already on the page, right under the initial view */}
+        <div className="flex flex-col items-start gap-10 px-5 pb-24 pt-8">
+          {hero.reveals.map((line, i) => (
+            <p
+              key={i}
+              className="hero-glass over-bright max-w-[440px] rounded-2xl px-4 py-3 text-[14px] leading-[1.55]"
+            >
+              {line}
+            </p>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // ── Desktop: sticky, scroll-scrubbed hero with additive reveals. ──
   return (
     <section id="top" ref={zoneRef} className="relative" style={{ height: "300vh" }}>
       <div id="hero-zone" className="sticky top-0 h-screen overflow-hidden">
@@ -30,11 +62,11 @@ export default function Hero() {
               {hero.headline.line1}<br />
               {hero.headline.line2} <span className="italic-accent">{hero.headline.accent}</span>
             </h1>
-            <div className="mt-5 space-y-2.5">
+            <div className="mt-5 flex flex-col items-start gap-2.5">
               {hero.reveals.map((line, i) => (
                 <p
                   key={i}
-                  className="over-bright-dim max-w-[420px] text-[14px] leading-[1.55] md:text-[15px]"
+                  className="hero-glass over-bright max-w-[420px] rounded-2xl px-4 py-2.5 text-[14px] leading-[1.55] md:text-[15px]"
                   style={appear(p, 0.16 + i * 0.22)}
                 >
                   {line}
