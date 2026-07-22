@@ -770,6 +770,9 @@ html.cursor-hidden [contenteditable="true"] {
 }
 .landing .eyebrow-pill {
   display: inline-block;
+  /* Hug the text even when dropped into a flex/grid parent, whose default
+     `align-items: stretch` would otherwise blow the chip out to full width. */
+  align-self: flex-start;
   background: var(--ink);
   color: #fff;
   border-radius: 3px;
