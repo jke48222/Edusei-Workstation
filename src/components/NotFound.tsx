@@ -3,18 +3,9 @@
  * @description Custom 404 page themed to the 3D workstation: terminal-style layout with link back home.
  */
 
-import { Link, useNavigate } from 'react-router-dom';
-import { useWorkstationStore } from '../store/store';
+import { Link } from 'react-router-dom';
 
 export function NotFound() {
-  const navigate = useNavigate();
-  const setViewMode = useWorkstationStore((s) => s.setViewMode);
-
-  const goTo = (mode: 'professional' | 'immersive') => {
-    setViewMode(mode);
-    navigate('/', { replace: true });
-  };
-
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] px-6 font-mono text-[#fafafa]">
       {/* Faint purple/cyan hue (matches Hero background) */}
@@ -50,27 +41,24 @@ export function NotFound() {
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-3">
           <Link
             to="/"
-            onClick={() => setViewMode('professional')}
             className="rounded-full bg-[#fafafa] px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fafafa]/50"
           >
             Back to home
           </Link>
           <span className="text-[#525252]">·</span>
           <div className="flex flex-wrap justify-center gap-2">
-            <button
-              type="button"
-              onClick={() => goTo('professional')}
+            <Link
+              to="/work"
               className="rounded-full border border-[#404040] px-4 py-2 text-xs text-[#fafafa]/80 transition-colors hover:border-[#737373] hover:bg-white/5"
             >
-              Portfolio
-            </button>
-            <button
-              type="button"
-              onClick={() => goTo('immersive')}
+              Work archive
+            </Link>
+            <Link
+              to="/workstation"
               className="rounded-full border border-[#404040] px-4 py-2 text-xs text-[#fafafa]/80 transition-colors hover:border-[#737373] hover:bg-white/5"
             >
               3D Workstation
-            </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -14,20 +14,7 @@ import {
 import type { ViewState } from '../store/store';
 import { resumeAudioContext, playKeystroke, playBootComplete } from '../utils/terminalSound';
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== 'undefined') return window.innerWidth < 768;
-    return false;
-  });
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  return isMobile;
-}
+import { useIsNarrowViewport as useIsMobile } from '../hooks/useIsMobile';
 
 function getStaggerList(reducedMotion: boolean) {
   return { visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.015 } } };
@@ -45,15 +32,20 @@ function BootSequence({ lines, onComplete, reducedMotion }: { lines: string[]; o
   const lineDelay = reducedMotion ? 0 : 250;
   const doneDelay = reducedMotion ? 100 : 2000;
 
+  // Latest-callback ref: the parent passes an inline arrow, and having it in the
+  // effect deps would restart the pending timer on every parent re-render.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     if (visibleLines < lines.length) {
       const timer = setTimeout(() => setVisibleLines((p) => p + 1), lineDelay);
       return () => clearTimeout(timer);
     } else {
-      const done = setTimeout(onComplete, doneDelay);
+      const done = setTimeout(() => onCompleteRef.current(), doneDelay);
       return () => clearTimeout(done);
     }
-  }, [visibleLines, lines.length, onComplete, lineDelay, doneDelay]);
+  }, [visibleLines, lines.length, lineDelay, doneDelay]);
 
   return (
     <div className="flex h-full flex-col items-center justify-center font-mono text-sm">
@@ -363,7 +355,13 @@ function getCompletionSuffix(inputValue: string): string {
 }
 
 function TerminalView() {
-  const { setView, isAnimating, terminalBooted, setTerminalBooted, prefersReducedMotion, soundMuted, setSoundMuted } = useWorkstationStore();
+  const setView = useWorkstationStore((s) => s.setView);
+  const isAnimating = useWorkstationStore((s) => s.isAnimating);
+  const terminalBooted = useWorkstationStore((s) => s.terminalBooted);
+  const setTerminalBooted = useWorkstationStore((s) => s.setTerminalBooted);
+  const prefersReducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
+  const soundMuted = useWorkstationStore((s) => s.soundMuted);
+  const setSoundMuted = useWorkstationStore((s) => s.setSoundMuted);
   const setTheme = useThemeStore((s) => s.setTheme);
   const theme = useActiveTheme();
   const staggerList = useMemo(() => getStaggerList(prefersReducedMotion), [prefersReducedMotion]);
@@ -389,9 +387,50 @@ function TerminalView() {
     return completionSuggestion;
   }, [inputValue, completionSuggestion]);
 
+  // When the typed text is wider than the field, the input scrolls internally but the
+  // absolutely-positioned underlay/caret can't follow — fall back to native rendering.
+  const [inputOverflowing, setInputOverflowing] = useState(false);
   useLayoutEffect(() => {
-    if (mirrorRef.current) setCaretLeft(mirrorRef.current.offsetWidth);
+    if (mirrorRef.current) {
+      const w = mirrorRef.current.offsetWidth;
+      setCaretLeft(w);
+      const field = inputRef.current;
+      setInputOverflowing(field ? w > field.clientWidth - 8 : false);
+    }
   }, [inputValue]);
+
+  // One launch sequence at a time: teaser timers are tracked so a second `run`
+  // can't interleave output, and unmount clears them (no setState-after-unmount).
+  const runTimersRef = useRef<number[]>([]);
+  const launchPending = () => runTimersRef.current.length > 0;
+  useEffect(() => {
+    const timers = runTimersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const startLaunchSequence = (viewId: ViewState, title: string, echoLine: string) => {
+    const teaser = PROJECT_TEASERS[viewId];
+    const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
+    const lineDelayMs = 400;
+    setCommandOutput((prev) => [...prev, echoLine]);
+    teaserLines.forEach((line, i) => {
+      runTimersRef.current.push(
+        window.setTimeout(() => setCommandOutput((prev) => [...prev, line]), (i + 1) * lineDelayMs)
+      );
+    });
+    runTimersRef.current.push(
+      window.setTimeout(() => {
+        setCommandOutput((prev) => [...prev, `Loading ${title}...`]);
+        runTimersRef.current.push(
+          window.setTimeout(() => {
+            // Mutate (don't replace) so the unmount cleanup's captured array stays live.
+            runTimersRef.current.length = 0;
+            setView(viewId);
+          }, 500)
+        );
+      }, (teaserLines.length + 1) * lineDelayMs)
+    );
+  };
 
   const handleCommand = (cmd: string) => {
     const raw = cmd.trim();
@@ -406,7 +445,9 @@ function TerminalView() {
     } else if (trimmedCmd === 'golden' || trimmedCmd === 'secret') {
       setTheme('gold');
       response = ['Theme set to Gold.'];
-    } else if (GAG_COMMANDS[trimmedCmd]) {
+    } else if (Object.prototype.hasOwnProperty.call(GAG_COMMANDS, trimmedCmd)) {
+      // hasOwnProperty guard: bare indexing would also "find" Object.prototype
+      // keys, so typing `constructor` would hand back a function, not lines.
       response = GAG_COMMANDS[trimmedCmd];
     } else     if (trimmedCmd === 'clear') {
       if (raw) {
@@ -469,35 +510,25 @@ function TerminalView() {
     } else if (trimmedCmd === 'run') {
       response = ['Available projects:', ...projectsData.map((p) => `  → run ${p.executable}`)];
     } else if (trimmedCmd.startsWith('run ')) {
-      const raw = trimmedCmd.replace('run ', '').trim();
-      const normalized = raw.toLowerCase().replace(/\.exe$/i, '').trim();
+      const execName = trimmedCmd.replace('run ', '').trim();
+      const normalized = execName.replace(/\.exe$/i, '').trim();
       const project = projectsData.find(
         (p) => p.executable.toLowerCase() === normalized,
       );
       if (project) {
-        if (raw) {
-          setCommandHistory((h) => (h[h.length - 1] === raw ? h : [...h.slice(-(MAX_HISTORY - 1)), raw]));
-        }
+        // History records the full command (`run x.exe`), not just the executable.
+        setCommandHistory((h) => (h[h.length - 1] === raw ? h : [...h.slice(-(MAX_HISTORY - 1)), raw]));
         setHistoryIndex(-1);
-        const teaser = PROJECT_TEASERS[project.id];
-        const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
-        const lineDelayMs = 400;
-        setCommandOutput((prev) => [...prev, `> ${cmd}`]);
         setInputValue('');
-        teaserLines.forEach((line, i) => {
-          setTimeout(() => setCommandOutput((prev) => [...prev, line]), (i + 1) * lineDelayMs);
-        });
-        const loadingLine = `Loading ${project.title}...`;
-        const viewId = project.id;
-        const loadingAt = (teaserLines.length + 1) * lineDelayMs;
-        setTimeout(() => {
-          setCommandOutput((prev) => [...prev, loadingLine]);
-          setTimeout(() => setView(viewId), 500);
-        }, loadingAt);
+        if (launchPending() || isAnimating) {
+          setCommandOutput((prev) => [...prev, `> ${cmd}`, 'A program is already launching — hold on.']);
+          return;
+        }
+        startLaunchSequence(project.id, project.title, `> ${cmd}`);
         return;
       } else {
         response = [
-          `Error: '${raw}' not found.`,
+          `Error: '${execName}' not found.`,
           'Available projects:',
           ...projectsData.map((p) => `  → run ${p.executable}`),
         ];
@@ -553,23 +584,10 @@ function TerminalView() {
   };
 
   const handleProjectClick = (id: ViewState) => {
-    if (!isAnimating) {
-      const project = getProjectById(id);
-      if (project) {
-        const teaser = PROJECT_TEASERS[id];
-        const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
-        const lineDelayMs = 400;
-        setCommandOutput((prev) => [...prev, `> run ${project.executable}`]);
-        teaserLines.forEach((line, i) => {
-          setTimeout(() => setCommandOutput((prev) => [...prev, line]), (i + 1) * lineDelayMs);
-        });
-        const loadingLine = `Loading ${project.title}...`;
-        const loadingAt = (teaserLines.length + 1) * lineDelayMs;
-        setTimeout(() => {
-          setCommandOutput((prev) => [...prev, loadingLine]);
-          setTimeout(() => setView(id), 500);
-        }, loadingAt);
-      }
+    if (isAnimating || launchPending()) return;
+    const project = getProjectById(id);
+    if (project) {
+      startLaunchSequence(id, project.title, `> run ${project.executable}`);
     }
   };
 
@@ -597,7 +615,13 @@ function TerminalView() {
   return (
     <div
       className="absolute inset-0 flex items-center justify-center p-3 sm:p-6"
-      onClick={() => inputRef.current?.focus()}
+      onClick={(e) => {
+        // Refocus the prompt on background clicks only: never steal focus from
+        // interactive children, and never pop the on-screen keyboard on touch taps.
+        if ((e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
+        if (window.matchMedia('(pointer: coarse)').matches) return;
+        inputRef.current?.focus();
+      }}
     >
       <div
         className="w-full max-w-5xl h-[92vh] sm:h-[82vh] max-h-[780px] flex flex-col rounded-xl overflow-hidden shadow-2xl crt-scanlines"
@@ -851,16 +875,18 @@ function TerminalView() {
                       aria-hidden
                     >
                       {inputValue ? (
-                        <>
-                          <span style={{ color: theme.text }}>{inputValue}</span>
-                          <span style={{ color: theme.textDim, opacity: 0.35 }}>{completionToShow}</span>
-                        </>
+                        !inputOverflowing && (
+                          <>
+                            <span style={{ color: theme.text }}>{inputValue}</span>
+                            <span style={{ color: theme.textDim, opacity: 0.35 }}>{completionToShow}</span>
+                          </>
+                        )
                       ) : (
                         <span style={{ color: theme.textDim, opacity: 0.6 }}>type 'help' for commands</span>
                       )}
                     </div>
                     {/* Custom blinking caret (accent color; inverse for light/dark) */}
-                    {inputFocused && (
+                    {inputFocused && !inputOverflowing && (
                       <span
                         className="terminal-caret absolute top-1/2 -translate-y-1/2 w-0.5 pointer-events-none"
                         style={{
@@ -879,6 +905,7 @@ function TerminalView() {
                     <input
                       ref={inputRef}
                       type="text"
+                      aria-label="Terminal command input"
                       value={inputValue}
                       onChange={(e) => {
                         setHistoryIndex(-1);
@@ -893,7 +920,8 @@ function TerminalView() {
                       className="terminal-input absolute inset-0 z-10 w-full bg-transparent outline-none font-mono text-xs sm:text-sm cursor-text"
                       style={{
                         color: theme.text,
-                        caretColor: 'transparent',
+                        // Native caret takes over once the text overflows the field.
+                        caretColor: inputOverflowing ? theme.text : 'transparent',
                         cursor: 'text',
                       }}
                       autoFocus
@@ -948,10 +976,19 @@ function TerminalView() {
 // ─── Project Detail Panel ────────────────────────────────────────
 
 function ProjectDetailPanel() {
-  const { currentView, returnToMonitor, isAnimating, prefersReducedMotion } = useWorkstationStore();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const returnToMonitor = useWorkstationStore((s) => s.returnToMonitor);
+  const isAnimating = useWorkstationStore((s) => s.isAnimating);
+  const prefersReducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
   const theme = useActiveTheme();
   const isMobile = useIsMobile();
-  const project = getProjectById(currentView);
+  // During the exit animation the store has already flipped back to 'monitor';
+  // keep rendering the last project so AnimatePresence has content to animate out
+  // (returning null here is what used to make the exit animation impossible).
+  const liveProject = getProjectById(currentView);
+  const lastProjectRef = useRef(liveProject);
+  if (currentView !== 'monitor' && liveProject) lastProjectRef.current = liveProject;
+  const project = currentView === 'monitor' ? lastProjectRef.current : liveProject;
   const [expandedRelated, setExpandedRelated] = useState<Record<number, boolean>>({});
   const [mobileExpanded, setMobileExpanded] = useState(true);
   const d = prefersReducedMotion ? 0 : 0.25;
@@ -962,7 +999,17 @@ function ProjectDetailPanel() {
     if (!isMobile) setMobileExpanded(true);
   }, [isMobile]);
 
-  if (!project || currentView === 'monitor') return null;
+  // Move keyboard focus into the panel when a project opens — otherwise it stays
+  // wherever it was and keyboard/SR users get no indication anything happened.
+  // Wait for the camera animation to finish: the Back button is disabled (and
+  // therefore unfocusable) while isAnimating is true.
+  const backRef = useRef<HTMLButtonElement>(null);
+  const projectId = project?.id;
+  useEffect(() => {
+    if (projectId && !isAnimating && currentView !== 'monitor') backRef.current?.focus();
+  }, [projectId, isAnimating, currentView]);
+
+  if (!project) return null;
 
   if (isMobile) {
     return (
@@ -985,6 +1032,7 @@ function ProjectDetailPanel() {
           <div className="flex items-center justify-between px-4 py-3"
             style={{ borderBottom: `1px solid ${theme.projectBorder}` }}>
             <button
+              ref={backRef}
               onClick={() => !isAnimating && returnToMonitor()}
               disabled={isAnimating}
               className="font-mono text-xs transition-colors disabled:opacity-40"
@@ -1105,6 +1153,7 @@ function ProjectDetailPanel() {
         } as React.CSSProperties}
       >
         <motion.button
+          ref={backRef}
           onClick={() => !isAnimating && returnToMonitor()}
           disabled={isAnimating}
           className="mb-5 font-mono text-xs transition-colors disabled:opacity-40"
@@ -1282,9 +1331,10 @@ function ProjectDetailPanel() {
 // ─── Transition indicator ────────────────────────────────────────
 
 function TransitionIndicator() {
-  const { isAnimating, currentView, prefersReducedMotion } = useWorkstationStore();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const prefersReducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
   const theme = useActiveTheme();
-  if (!isAnimating) return null;
+  // Mounting is gated by the parent (inside AnimatePresence) so the exit animation runs.
 
   return (
     <motion.div
@@ -1313,7 +1363,8 @@ function TransitionIndicator() {
 // ─── Main Overlay Export ─────────────────────────────────────────
 
 export function Overlay() {
-  const { currentView } = useWorkstationStore();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const isAnimating = useWorkstationStore((s) => s.isAnimating);
   const isMonitor = currentView === 'monitor';
 
   // Keep TerminalView mounted and toggle visibility so "Back" never shows a black frame
@@ -1334,7 +1385,7 @@ export function Overlay() {
       </AnimatePresence>
 
       <AnimatePresence>
-        <TransitionIndicator key="transition" />
+        {isAnimating && <TransitionIndicator key="transition" />}
       </AnimatePresence>
     </div>
   );

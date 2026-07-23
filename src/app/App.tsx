@@ -1,7 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Home, LayoutGrid } from 'lucide-react';
-import { Analytics } from '@vercel/analytics/react';
 
 // Lazy-loaded: keeps three.js / R3F out of the initial bundle for the default
 // landing + professional views; only fetched when the user enters the 3D workstation.
@@ -11,21 +10,8 @@ import { Overlay } from '../components/Overlay';
 import { useKonamiCode } from '../hooks/useKonamiCode';
 import { usePrefersReducedMotion } from '../hooks/useIsMobile';
 import { useWorkstationStore } from '../store/store';
-import { useActiveTheme, useThemeStore, useResolvedThemeId, SYSTEM_THEME_ID, setDarkClass } from '../store/themeStore';
+import { useActiveTheme, useThemeStore, useResolvedThemeId, setDarkClass, themePreviewColors as previewColors } from '../store/themeStore';
 import { ThemeSelector } from '../components/ThemeSelector';
-
-const previewColors: Record<string, string> = {
-  [SYSTEM_THEME_ID]: '#71717a',
-  clean: '#ffffff',
-  dark: '#262626',
-  classic: '#4ade80',
-  blue: '#90c9f5',
-  pink: '#f5bcce',
-  purple: '#cbbcf5',
-  uga: '#BA0C2F',
-  grayBlue: '#8a9bb5',
-  gold: '#daa520',
-};
 
 /**
  * Shared, route-agnostic chrome: Konami easter egg + reduced-motion sync.
@@ -76,7 +62,9 @@ function WorkstationNav() {
 
 /** The immersive 3D workstation scene + overlay (rendered at /workstation). */
 function ImmersiveExperience() {
-  const { currentView, returnToMonitor, isAnimating } = useWorkstationStore();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const returnToMonitor = useWorkstationStore((s) => s.returnToMonitor);
+  const isAnimating = useWorkstationStore((s) => s.isAnimating);
   const kitchenGameOpen = useWorkstationStore((s) => s.kitchenGameOpen);
   const theme = useActiveTheme();
   const activeTheme = useThemeStore((s) => s.activeTheme);
@@ -86,13 +74,16 @@ function ImmersiveExperience() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // While the minigame overlay is open, ESC belongs to the game (closing it);
+      // without this guard the same keypress would also yank the camera back.
+      if (kitchenGameOpen) return;
       if (e.key === 'Escape' && !isAnimating && currentView !== 'monitor') {
         returnToMonitor();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentView, isAnimating, returnToMonitor]);
+  }, [currentView, isAnimating, returnToMonitor, kitchenGameOpen]);
 
   return (
     <div className="w-full h-screen overflow-hidden" style={{ backgroundColor: useAccentBg ? theme.accent : theme.bg }}>
@@ -117,24 +108,17 @@ function ImmersiveExperience() {
 
       <WorkstationNav />
       <ThemeSelector />
-
-      <Analytics />
     </div>
   );
 }
 
 /** Route: the 3D workstation sub-experience, linked from the landing. */
 export function WorkstationRoute() {
-  const setViewMode = useWorkstationStore((s) => s.setViewMode);
   useGlobalChrome();
 
   useLayoutEffect(() => {
     setDarkClass(false); // the canvas drives its own palette via the theme preset
   }, []);
-
-  useEffect(() => {
-    setViewMode('immersive');
-  }, [setViewMode]);
 
   return <ImmersiveExperience />;
 }

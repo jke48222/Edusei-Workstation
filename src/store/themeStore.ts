@@ -271,7 +271,6 @@ export const themePresets: Record<string, ThemePreset> = {
 };
 
 const THEME_STORAGE_KEY = 'edusei-workstation-theme';
-const PORTFOLIO_DARK_KEY = 'edusei-portfolio-dark';
 
 let themeSwitchToken = 0;
 
@@ -322,35 +321,30 @@ function getStoredTheme(): string {
   return SYSTEM_THEME_ID;
 }
 
-function getStoredPortfolioDark(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const stored = localStorage.getItem(PORTFOLIO_DARK_KEY);
-    if (stored === 'true') return true;
-    if (stored === 'false') return false;
-  } catch (_) {}
-  // No explicit choice yet — follow the OS/browser preference. This keeps the
-  // portfolio's theme aligned with the environment so a dark-preferring browser
-  // gets our real dark theme instead of a light one that its force-dark engine
-  // would mangle. The pre-paint boot script in index.html mirrors this logic.
-  try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  } catch (_) {
-    return false;
-  }
-}
-
 /** Resolve system preference: dark -> dark theme, light -> clean (Modern). */
 function resolveSystemThemeId(): 'clean' | 'dark' {
   if (typeof window === 'undefined') return 'clean';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'clean';
 }
 
+/** Swatch color per theme id for pickers/hints — single source of truth
+ *  (was duplicated verbatim in App.tsx and ThemeSelector.tsx). */
+export const themePreviewColors: Record<string, string> = {
+  [SYSTEM_THEME_ID]: '#71717a',
+  clean: '#ffffff',
+  dark: '#262626',
+  classic: '#4ade80',
+  blue: '#90c9f5',
+  pink: '#f5bcce',
+  purple: '#cbbcf5',
+  uga: '#BA0C2F',
+  grayBlue: '#8a9bb5',
+  gold: '#daa520',
+};
+
 interface ThemeState {
   activeTheme: string;
   setTheme: (themeId: string) => void;
-  portfolioDark: boolean;
-  setPortfolioDark: (value: boolean) => void;
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
@@ -362,13 +356,6 @@ export const useThemeStore = create<ThemeState>((set) => ({
         localStorage.setItem(THEME_STORAGE_KEY, themeId);
       } catch (_) {}
     }
-  },
-  portfolioDark: getStoredPortfolioDark(),
-  setPortfolioDark: (value: boolean) => {
-    set({ portfolioDark: value });
-    try {
-      localStorage.setItem(PORTFOLIO_DARK_KEY, value ? 'true' : 'false');
-    } catch (_) {}
   },
 }));
 

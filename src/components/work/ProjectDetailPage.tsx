@@ -5,7 +5,7 @@
  * and related-project tiles. Sets document title and meta for SEO/sharing.
  */
 
-import { useEffect, useLayoutEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight, Github, Globe } from 'lucide-react';
@@ -44,11 +44,19 @@ function setPageMeta(title: string, description: string, path: string, ogImage?:
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const project = useMemo(() => (projectId ? getProjectBySlug(projectId) : undefined), [projectId]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Always light bone — clear any inherited portfolio dark class.
   useLayoutEffect(() => {
     document.documentElement.classList.remove('dark');
   }, []);
+
+  // The page scrolls inside its own fixed container, so the browser never resets it:
+  // navigating between projects (e.g. via Related tiles) reuses the same element and
+  // would otherwise land the next project at the previous scroll depth.
+  useLayoutEffect(() => {
+    scrollRef.current?.scrollTo(0, 0);
+  }, [projectId]);
 
   useEffect(() => {
     if (!project) return;
@@ -81,7 +89,7 @@ export function ProjectDetailPage() {
     .slice(0, 3);
 
   return (
-    <div className="landing work-theme work-page-scroll fixed inset-0 z-40 overflow-y-auto">
+    <div ref={scrollRef} className="landing work-theme work-page-scroll fixed inset-0 z-40 overflow-y-auto">
       <WorkHeader active="work" />
 
       {/* Atmospheric hero header */}
