@@ -13,17 +13,15 @@
     <script>
       // Decide the portfolio's dark mode before first paint, so the page never
       // boots into the light theme on a dark-preferring browser (which would then
-      // be force-darkened into a broken half-light render). Honor an explicit
-      // saved choice; otherwise follow the OS/browser preference. Keep this in
-      // sync with getStoredPortfolioDark() in src/store/themeStore.ts.
+      // be force-darkened into a broken half-light render). There is no explicit
+      // in-app toggle — the page follows the OS/browser preference.
       try {
-        var saved = localStorage.getItem('edusei-portfolio-dark');
-        var dark = saved === 'true'
-          || (saved == null && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (dark) document.documentElement.classList.add('dark');
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        }
       } catch (e) {}
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jalen Edusei | Software Engineer · UGA 2026</title>
     <meta name="description" content="Jalen Edusei — Software Engineer. B.S. Computer Systems Engineering at UGA. VR, embedded systems, CubeSat flight software, and product engineering. Portfolio and 3D workstation." />
     <meta name="author" content="Jalen Edusei" />

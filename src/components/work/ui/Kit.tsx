@@ -6,10 +6,11 @@
  */
 
 import { useRef, type ReactNode, type MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useInView } from 'framer-motion';
 import {
-  Cpu, Code2, Boxes, Sparkles, Microscope, Headset, Brain, Wrench,
-  Rocket, Radio, Globe, FlaskConical, Gamepad2, type LucideIcon,
+  Cpu, Headset, Brain,
+  Radio, Globe, FlaskConical, type LucideIcon,
 } from 'lucide-react';
 import type { ProjectCategory } from '../../../data';
 
@@ -34,16 +35,6 @@ export const CATEGORY_LABEL: Record<ProjectCategory, string> = {
   research: 'Research',
   ai: 'AI Application',
 };
-
-export const SKILL_ICON: Record<string, LucideIcon> = {
-  Programming: Code2,
-  'AI & Machine Learning': Brain,
-  'Software & Tools': Boxes,
-  Hardware: Cpu,
-  'Core Strengths': Sparkles,
-};
-
-export const MISC_ICONS = { Rocket, Microscope, Wrench, Gamepad2 };
 
 /* -------------------------------------------------------------------------- */
 /* Section heading — eyebrow + kinetic title + optional action                  */
@@ -136,6 +127,7 @@ export function MagneticButton({
   className?: string;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const navigate = useNavigate();
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const x = useSpring(mx, { stiffness: 280, damping: 18 });
@@ -167,7 +159,20 @@ export function MagneticButton({
     <motion.a
       ref={ref}
       href={href}
-      onClick={onClick}
+      onClick={(e) => {
+        onClick?.();
+        // Internal routes go through the SPA router — a raw <a href> would trigger
+        // a full page reload. Modified clicks (new tab, etc.) keep native behavior.
+        if (
+          href?.startsWith('/') &&
+          !external &&
+          e.button === 0 &&
+          !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey
+        ) {
+          e.preventDefault();
+          navigate(href);
+        }
+      }}
       onMouseMove={handleMove}
       onMouseLeave={reset}
       style={{ x, y }}

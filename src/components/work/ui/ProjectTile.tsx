@@ -20,13 +20,9 @@ import { ProjectMedia, resolveMedia } from './ProjectMedia';
 export function ProjectTile({
   project,
   index = 0,
-  featured = false,
-  cardId,
 }: {
   project: WorkProject;
   index?: number;
-  featured?: boolean;
-  cardId?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
@@ -53,28 +49,24 @@ export function ProjectTile({
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      className={featured ? 'sm:col-span-2' : ''}
-      {...(cardId ? { id: cardId } : {})}
-      style={cardId ? { scrollMarginTop: '6rem' } : undefined}
     >
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`group relative flex flex-col overflow-hidden rounded-[var(--pf-radius-lg)] border border-[var(--pf-line)] bg-[var(--pf-bg-elev)] shadow-[var(--pf-shadow-sm)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[var(--pf-shadow-accent)] ${
-          featured ? 'min-h-[26rem]' : 'min-h-[22rem]'
-        }`}
+        className={`group relative flex flex-col overflow-hidden rounded-[var(--pf-radius-lg)] border border-[var(--pf-line)] bg-[var(--pf-bg-elev)] shadow-[var(--pf-shadow-sm)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[var(--pf-shadow-accent)] min-h-[22rem]`}
       >
         {/* Media area */}
-        <div className={`relative w-full overflow-hidden ${featured ? 'h-64 md:h-72' : 'h-52'}`}>
+        <div className="relative w-full overflow-hidden h-52">
           {!inView ? (
             <div className="pf-liquid-glass absolute inset-0" />
           ) : (
             <ProjectMedia project={project} interactive={mediaInteractive} />
           )}
 
-          {/* Transparent nav overlay for non-interactive media */}
+          {/* Transparent nav overlay for non-interactive media — mouse affordance only;
+              the title link below is the tile's single keyboard/SR entry point. */}
           {overlayLink && (
-            <Link to={to} aria-label={`Open ${project.title}`} className="absolute inset-0 z-[1]" />
+            <Link to={to} tabIndex={-1} aria-hidden className="absolute inset-0 z-[1]" />
           )}
 
           {/* Category badge */}
@@ -94,10 +86,11 @@ export function ProjectTile({
             </div>
           )}
 
-          {/* Open arrow (always navigates) */}
+          {/* Open arrow (always navigates; duplicate of the title link, so out of tab order) */}
           <Link
             to={to}
-            aria-label={`Open ${project.title}`}
+            tabIndex={-1}
+            aria-hidden
             className="absolute bottom-4 right-4 z-[3] flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all duration-500 hover:bg-[var(--pf-accent)] hover:text-[var(--pf-on-accent)] group-hover:bg-[var(--pf-accent)] group-hover:text-[var(--pf-on-accent)]"
           >
             <ArrowUpRight className="h-5 w-5 transition-transform duration-500 group-hover:rotate-45" />
@@ -116,9 +109,7 @@ export function ProjectTile({
           <div className="flex items-start justify-between gap-3">
             <Link
               to={to}
-              className={`font-display font-bold leading-tight text-[var(--pf-ink)] underline-offset-4 transition-colors hover:text-[var(--pf-accent-deep)] hover:underline dark:hover:text-[var(--pf-accent-bright)] ${
-                featured ? 'text-2xl' : 'text-xl'
-              }`}
+              className={`font-display font-bold leading-tight text-[var(--pf-ink)] underline-offset-4 transition-colors hover:text-[var(--pf-accent-deep)] hover:underline dark:hover:text-[var(--pf-accent-bright)] text-xl`}
             >
               {project.title}
             </Link>
@@ -140,14 +131,14 @@ export function ProjectTile({
           <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[var(--pf-ink-soft)]">{project.tagline}</p>
 
           <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
-            {project.techStack.slice(0, featured ? 5 : 3).map((t) => (
+            {project.techStack.slice(0, 3).map((t) => (
               <span key={t} className="pf-pill !py-1 !text-[10px]">
                 {t}
               </span>
             ))}
-            {project.techStack.length > (featured ? 5 : 3) && (
+            {project.techStack.length > 3 && (
               <span className="self-center font-mono text-[10px] text-[var(--pf-ink-faint)]">
-                +{project.techStack.length - (featured ? 5 : 3)}
+                +{project.techStack.length - 3}
               </span>
             )}
           </div>

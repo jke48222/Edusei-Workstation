@@ -47,7 +47,9 @@ export default function Header() {
             </BtnPrimary>
           </div>
           <button
-            aria-label="Menu"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="landing-mobile-menu"
             onClick={() => setOpen((v) => !v)}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-white/60 text-ink backdrop-blur lg:hidden"
           >
@@ -61,7 +63,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="glass-strong mx-4 rounded-2xl p-4 lg:hidden">
+        <div id="landing-mobile-menu" className="glass-strong mx-4 rounded-2xl p-4 lg:hidden">
           <nav className="flex flex-col">
             {site.nav.map((n) => (
               <a

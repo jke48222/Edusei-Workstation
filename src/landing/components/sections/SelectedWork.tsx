@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { getProjectBySlug, type WorkProject, type ProjectCategory } from "../../../data";
 import { useInView } from "../../lib/hooks";
+import { useAutoplayInView } from "../../../hooks/useOnScreen";
 import { EyebrowPill, Reveal, ArrowUpRight } from "../ui";
 
 // Lazy 3D mini-viewer — keeps three.js out of the home's initial bundle; mounts in-view.
@@ -99,6 +100,10 @@ function SiteFrame({ url }: { url: string }) {
           loading="lazy"
           tabIndex={-1}
           aria-hidden
+          // Third-party content: sandbox blocks top-navigation/popups from a
+          // compromised embed while still letting the site render normally.
+          sandbox="allow-scripts allow-same-origin"
+          referrerPolicy="no-referrer"
           onLoad={() => setLoaded(true)}
           className="absolute left-0 top-0 origin-top-left border-0 bg-white"
           style={{ width: LOGICAL_W, height: LOGICAL_W * 0.62, transform: `scale(${scale})`, pointerEvents: "none" }}
@@ -112,11 +117,12 @@ function SiteFrame({ url }: { url: string }) {
 function TileMedia({ project }: { project: WorkProject }) {
   const m = project.tileMedia;
   const Glyph = project.category ? CAT_ICON[project.category] : Globe;
+  const videoRef = useAutoplayInView();
 
   if (m?.kind === "video") {
     return (
       <>
-        <video className="absolute inset-0 h-full w-full object-cover" src={m.src} poster={m.poster} autoPlay loop muted playsInline preload="metadata" aria-label={m.alt} />
+        <video ref={videoRef} className="absolute inset-0 h-full w-full object-cover" src={m.src} poster={m.poster} loop muted playsInline preload="metadata" aria-label={m.alt} />
         <span className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/5" />
       </>
     );
@@ -127,9 +133,14 @@ function TileMedia({ project }: { project: WorkProject }) {
   if (m?.kind === "model") {
     return <ModelMedia src={m.src} rotation={m.rotation} />;
   }
-  // Live site → real iframe preview.
+  // Live site → real iframe preview — but only when the site allows framing
+  // (`embed`), mirroring /work's resolveMedia; otherwise fall back to the
+  // screenshot so an X-Frame-Options block doesn't leave a dead tile.
   if (m?.kind === "site") {
-    return <SiteFrame url={m.url} />;
+    if (m.embed) return <SiteFrame url={m.url} />;
+    if (m.screenshot) {
+      return <img src={m.screenshot} alt={`${project.title} screenshot`} loading="lazy" className="absolute inset-0 h-full w-full object-cover object-top" />;
+    }
   }
   // model / globe / self-framing site → branded charcoal panel with the category glyph
   return (
@@ -159,7 +170,8 @@ function WorkCard({ project, size, delay = 0 }: { project: WorkProject; size: Be
         {/* Media fills a fixed strip on mobile, then flexes to fill the bento cell from md up. */}
         <div className="relative h-52 w-full overflow-hidden md:h-auto md:min-h-0 md:flex-1">
           <TileMedia project={project} />
-          <Link to={to} aria-label={`Open ${project.title}`} className="absolute inset-0 z-[1]" />
+          {/* Mouse affordance only — the title link is the tile's single tab stop. */}
+          <Link to={to} tabIndex={-1} aria-hidden className="absolute inset-0 z-[1]" />
           <span className="pointer-events-none absolute left-4 top-4 z-[2] inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-md">
             <Icon className="h-3.5 w-3.5" strokeWidth={2} /> {catLabel}
           </span>
@@ -168,7 +180,7 @@ function WorkCard({ project, size, delay = 0 }: { project: WorkProject; size: Be
               <span className="h-1.5 w-1.5 animate-pulseDot rounded-full bg-ink" /> Live
             </span>
           )}
-          <Link to={to} aria-label={`Open ${project.title}`} className="absolute bottom-4 right-4 z-[2] flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink backdrop-blur-md transition-all duration-500 group-hover:bg-ink group-hover:text-white">
+          <Link to={to} tabIndex={-1} aria-hidden className="absolute bottom-4 right-4 z-[2] flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-ink backdrop-blur-md transition-all duration-500 group-hover:bg-ink group-hover:text-white">
             <ArrowUpRight className="h-5 w-5" />
           </Link>
         </div>

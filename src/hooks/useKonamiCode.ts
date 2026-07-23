@@ -22,8 +22,13 @@ const SESSION_KEY = 'konami-done';
 
 /** Returns true if Konami was already triggered this session. */
 export function wasKonamiTriggered(): boolean {
-  if (typeof sessionStorage === 'undefined') return false;
-  return sessionStorage.getItem(SESSION_KEY) === '1';
+  // try/catch, not a typeof guard: with cookies/site data blocked, merely touching
+  // sessionStorage throws a SecurityError in some browsers.
+  try {
+    return sessionStorage.getItem(SESSION_KEY) === '1';
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -49,7 +54,7 @@ export function useKonamiCode(onSuccess: () => void): void {
         sequence.current.every((k, i) => k === KONAMI_SEQUENCE[i])
       ) {
         triggered.current = true;
-        if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(SESSION_KEY, '1');
+        try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* storage blocked */ }
         onSuccess();
       }
     };

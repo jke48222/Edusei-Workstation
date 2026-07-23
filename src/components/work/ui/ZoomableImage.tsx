@@ -4,7 +4,7 @@
  * Close with the button, a backdrop click, or Escape. Self-contained state.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 
 export function ZoomableImage({
@@ -17,11 +17,20 @@ export function ZoomableImage({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    // Move focus into the dialog; the close button is its only focusable element,
+    // so trapping Tab means simply keeping focus there. Restore focus on close.
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        closeRef.current?.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     // Prevent background scroll while the lightbox is open.
@@ -30,6 +39,7 @@ export function ZoomableImage({
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
+      previouslyFocused?.focus?.();
     };
   }, [open]);
 
@@ -54,6 +64,7 @@ export function ZoomableImage({
           aria-label={alt}
         >
           <button
+            ref={closeRef}
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close image"
