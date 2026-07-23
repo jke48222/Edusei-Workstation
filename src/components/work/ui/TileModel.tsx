@@ -6,11 +6,12 @@
  * loads fast. Default-exported for React.lazy().
  */
 
-import { Suspense, useMemo, useRef } from 'react';
+import { Suspense, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Bounds } from '@react-three/drei';
 import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { Box3, Vector3, type Group } from 'three';
+import { useOnScreen } from '../../../hooks/useOnScreen';
 
 /**
  * Renders the model centered on its own bounding-box center and slowly spins it about the vertical
@@ -64,10 +65,18 @@ export default function TileModel({
   interactive?: boolean;
   rotation?: [number, number, number];
 }) {
+  // Tiles mount once-in-view and never unmount, so gate the render loop on actual
+  // visibility: off-screen tiles freeze, and reduced-motion users get a static frame.
+  const { ref, onScreen } = useOnScreen<HTMLDivElement>();
+  const [reduced] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
   return (
+    <div ref={ref} style={{ width: '100%', height: '100%' }}>
     <Canvas
       camera={{ position: [2.4, 1.4, 3.4], fov: 38 }}
       dpr={[1, 1.8]}
+      frameloop={!onScreen ? 'never' : reduced ? 'demand' : 'always'}
       gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
       style={{ width: '100%', height: '100%' }}
     >
@@ -81,15 +90,20 @@ export default function TileModel({
           <Model src={src} rotation={rotation} />
         </Bounds>
       </Suspense>
-      <OrbitControls
-        makeDefault
-        enablePan={false}
-        enableZoom={false}
-        enableRotate={interactive}
-        target={[0, 0, 0]}
-        minPolarAngle={Math.PI * 0.30}
-        maxPolarAngle={Math.PI * 0.62}
-      />
+      {/* Mount controls only while interactive: OrbitControls.connect() sets an inline
+          touch-action:none on the canvas, which would turn every passive tile into a
+          dead zone for touch scrolling. */}
+      {interactive && (
+        <OrbitControls
+          makeDefault
+          enablePan={false}
+          enableZoom={false}
+          target={[0, 0, 0]}
+          minPolarAngle={Math.PI * 0.30}
+          maxPolarAngle={Math.PI * 0.62}
+        />
+      )}
     </Canvas>
+    </div>
   );
 }

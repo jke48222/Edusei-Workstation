@@ -72,23 +72,25 @@ function checkIsMobile(): boolean {
 }
 
 /**
- * Hook to detect if device has touch capability
- * (useful for showing touch hints even on large touch screens)
+ * Pure layout breakpoint (no device sniffing): true below `breakpoint` px.
+ * Default 768 matches Tailwind's `md`. Use this for layout decisions; use
+ * useIsMobile above only when you genuinely care about the device class.
  */
-export function useHasTouch(): boolean {
-  const [hasTouch, setHasTouch] = useState<boolean>(() => {
+export function useIsNarrowViewport(breakpoint = 768): boolean {
+  const [narrow, setNarrow] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    return window.matchMedia(`(max-width: ${breakpoint - 1}px)`).matches;
   });
 
   useEffect(() => {
-    const check = () => {
-      setHasTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    };
-    check();
-  }, []);
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const onChange = () => setNarrow(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [breakpoint]);
 
-  return hasTouch;
+  return narrow;
 }
 
 /**
@@ -111,26 +113,3 @@ export function usePrefersReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
-/**
- * Hook to get current viewport dimensions
- */
-export function useViewportSize(): { width: number; height: number } {
-  const [size, setSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-    height: typeof window !== 'undefined' ? window.innerHeight : 1080,
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return size;
-}
