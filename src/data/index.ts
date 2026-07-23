@@ -42,7 +42,8 @@ export const profileData = {
 };
 
 export function getSayHiMailto(): string {
-  const subject = encodeURIComponent(`Portfolio – Say hi from ${profileData.name}`);
+  // The visitor is the sender — the subject must not claim to be "from" the site owner.
+  const subject = encodeURIComponent(`Say hi — via ${profileData.name}'s portfolio`);
   const body = encodeURIComponent(
     `Hi ${profileData.name},\n\nI came across your portfolio and wanted to reach out.\n\n`
   );
@@ -706,17 +707,24 @@ export const FEATURED_IDS = [
   'ubersicht-widgets',
 ] as const;
 
+/** Fail fast with a named error — a bare non-null assertion would surface a renamed
+ *  id as a cryptic "cannot read properties of undefined" far from the cause. */
+function mustFind(id: string) {
+  const p = projectsData.find((x) => x.id === id);
+  if (!p) throw new Error(`data/index.ts: core project '${id}' missing from projectsData`);
+  return p;
+}
+
 function buildCoreProjects(): WorkProject[] {
   const list: WorkProject[] = [];
 
-  const main = projectsData;
   const defaultLocation = 'Athens, GA';
 
-  const animaldot = main.find(p => p.id === 'animaldot')!;
-  const kitchen = main.find(p => p.id === 'kitchen-chaos-vr')!;
-  const audioCar = main.find(p => p.id === 'audio-tracking-car')!;
-  const memesat = main.find(p => p.id === 'memesat')!;
-  const capital = main.find(p => p.id === 'capital-one')!;
+  const animaldot = mustFind('animaldot');
+  const kitchen = mustFind('kitchen-chaos-vr');
+  const audioCar = mustFind('audio-tracking-car');
+  const memesat = mustFind('memesat');
+  const capital = mustFind('capital-one');
 
   list.push({
     id: animaldot.id,
@@ -1022,9 +1030,6 @@ export function getAllProjectsForWork(): WorkProject[] {
   const rest = all.filter(p => !featuredSet.has(p.id));
   return [...featured, ...rest];
 }
-
-/** Curated projects shown as "Selected Work" cards and on the Timeline. */
-export const featuredProjects: WorkProject[] = getAllProjectsForWork().slice(0, FEATURED_IDS.length);
 
 export function getProjectBySlug(slug: string): WorkProject | undefined {
   return getAllProjectsForWork().find(p => p.id === slug);

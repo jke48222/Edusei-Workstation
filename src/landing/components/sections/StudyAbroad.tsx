@@ -15,8 +15,9 @@ function Field({ label, value, className = "" }: { label: string; value: string;
 
 /**
  * Scannable QR for the UGA StudyAway program page — generated offline from
- * `studyAbroad.url` (the boarding-pass "barcode"). Dark modules on white so it
- * actually scans; quiet zone is baked into the 0 0 45 45 viewBox.
+ * `studyAbroad.url` (the boarding-pass "barcode"). Deliberately WHITE modules on
+ * the pass's dark glass — an inverted QR, which modern iOS/Android scanners read
+ * fine; quiet zone is baked into the 0 0 45 45 viewBox.
  */
 function ProgramQR({ className = "" }: { className?: string }) {
   return (
