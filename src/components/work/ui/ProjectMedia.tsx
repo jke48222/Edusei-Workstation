@@ -14,6 +14,7 @@
 
 import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react';
 import { Globe } from 'lucide-react';
+import { useAutoplayInView } from '../../../hooks/useOnScreen';
 import type { WorkProject, ProjectCategory, TileMedia } from '../../../data';
 import { CATEGORY_ICON } from './Kit';
 
@@ -114,15 +115,16 @@ function GlobeMedia() {
   );
 }
 
-/** Looping, muted, autoplaying video preview (e.g. a hardware demo). */
+/** Looping, muted video preview (e.g. a hardware demo) — plays only while on screen. */
 function VideoMedia({ src, poster, alt }: { src: string; poster?: string; alt: string }) {
+  const videoRef = useAutoplayInView();
   return (
     <div className="pf-liquid-glass absolute inset-0 overflow-hidden">
       <video
+        ref={videoRef}
         className="relative z-[1] h-full w-full object-cover"
         src={src}
         poster={poster}
-        autoPlay
         loop
         muted
         playsInline
@@ -165,6 +167,10 @@ function SiteEmbed({ url, title, interactive = false }: { url: string; title: st
             loading="lazy"
             tabIndex={interactive ? 0 : -1}
             aria-hidden={!interactive}
+            // Third-party content: sandbox blocks top-navigation/popups from a
+            // compromised embed; forms stay allowed for the interactive detail view.
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            referrerPolicy="no-referrer"
             onLoad={() => setLoaded(true)}
             className="h-full w-full border-0 bg-white"
           />

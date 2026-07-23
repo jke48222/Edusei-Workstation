@@ -6,7 +6,7 @@
  * Preloads GLTF models and exports OBJECT_POSITIONS constant for camera alignment.
  */
 
-import { useRef, useState, Suspense } from 'react';
+import { useRef, useState, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { 
   Environment, 
@@ -80,7 +80,10 @@ interface ClickableObjectProps {
 }
 
 function ClickableObject({ viewId, children, position, isActive }: ClickableObjectProps) {
-  const { setView, currentView, isAnimating } = useWorkstationStore();
+  // Narrow selectors: subscribing to the whole store re-renders every model on any write.
+  const setView = useWorkstationStore((s) => s.setView);
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const isAnimating = useWorkstationStore((s) => s.isAnimating);
   const theme = useActiveTheme();
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<Group>(null);
@@ -122,7 +125,7 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
         penumbra={0.8}
         intensity={(isActive ? 2 : 0.5) * theme.spotlightIntensity}
         color={theme.spotlightColor}
-        castShadow
+        castShadow={isActive}
       />
       
       <pointLight
@@ -185,7 +188,9 @@ function ClickableObject({ viewId, children, position, isActive }: ClickableObje
 function CRTMonitor() {
   const { scene } = useGLTF('/models/crt_monitor.glb');
   const theme = useActiveTheme();
-  const clonedScene = scene.clone();
+  // Clone once per loaded scene: a fresh clone every render hands <primitive> a new
+  // object identity, forcing R3F to tear down and remount the whole subtree.
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS.monitor;
   
   return (
@@ -226,8 +231,8 @@ function CRTMonitor() {
 
 function RobotCar() {
   const { scene } = useGLTF('/models/robot_car.glb');
-  const { currentView } = useWorkstationStore();
-  const clonedScene = scene.clone();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS['audio-tracking-car'];
   
   return (
@@ -241,8 +246,8 @@ function RobotCar() {
 
 function SleepingDog() {
   const { scene } = useGLTF('/models/sleeping_dog.glb');
-  const { currentView } = useWorkstationStore();
-  const clonedScene = scene.clone();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS.animaldot;
   
   return (
@@ -256,9 +261,9 @@ function SleepingDog() {
 
 function VRHeadset() {
   const { scene } = useGLTF('/models/quest3.glb');
-  const { currentView } = useWorkstationStore();
+  const currentView = useWorkstationStore((s) => s.currentView);
   const openKitchenGame = useWorkstationStore((s) => s.openKitchenGame);
-  const clonedScene = scene.clone();
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS['kitchen-chaos-vr'];
   const isActive = currentView === 'kitchen-chaos-vr';
 
@@ -295,8 +300,8 @@ function VRHeadset() {
 
 function CubeSat() {
   const { scene } = useGLTF('/models/satellite.glb');
-  const { currentView } = useWorkstationStore();
-  const clonedScene = scene.clone();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS.memesat;
   
   return (
@@ -310,8 +315,8 @@ function CubeSat() {
 
 function CapitalOneLogo() {
   const { scene } = useGLTF('/models/capital_one.glb');
-  const { currentView } = useWorkstationStore();
-  const clonedScene = scene.clone();
+  const currentView = useWorkstationStore((s) => s.currentView);
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS['capital-one'];
   
   return (
@@ -325,7 +330,7 @@ function CapitalOneLogo() {
 
 function HomepageDesk() {
   const { scene } = useGLTF('/models/desk_set.glb');
-  const clonedScene = scene.clone();
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS.monitor;
   
   return (
@@ -376,7 +381,12 @@ function WorkstationContent() {
       <color attach="background" args={[bgColor]} />
       <fog attach="fog" args={[theme.fogColor, 10, 50]} />
       
-      <Environment preset="night" environmentIntensity={envIntensity} />
+      {/* Self-hosted HDR (was preset="night", which fetches the same file from
+          raw.githack.com at runtime). Own Suspense so a slow/failed env load can
+          never block or break the rest of the scene. */}
+      <Suspense fallback={null}>
+        <Environment files="/textures/dikhololo_night_1k.hdr" environmentIntensity={envIntensity} />
+      </Suspense>
       
       <Stars 
         radius={100} 
@@ -440,9 +450,12 @@ function SceneContent() {
 }
 
 export function Experience() {
+  // Freeze the render loop while the (fully opaque) minigame overlay covers the scene.
+  const kitchenGameOpen = useWorkstationStore((s) => s.kitchenGameOpen);
   return (
     <Canvas
       className="canvas-container"
+      frameloop={kitchenGameOpen ? 'never' : 'always'}
       shadows
       camera={{
         fov: 45,
