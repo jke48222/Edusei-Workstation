@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { site } from "./content/site";
 import ScrubVideo from "./components/ScrubVideo";
 import Header from "./components/Header";
@@ -25,16 +26,32 @@ import Footer from "./components/sections/Footer";
  * video so the footage stays visible through the gaps as you scroll. The scrub +
  * scroll-progress logic reads this container's scrollTop (see ScrubVideo / hooks).
  */
+/** sessionStorage key for the landing's scroll position (it scrolls in its own div,
+ *  so native browser scroll restoration never applies). */
+const SCROLL_KEY = "landing-scroll-top";
+
 export function Landing() {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const { hash } = useLocation();
 
   useLayoutEffect(() => {
-    scrollerRef.current?.scrollTo(0, 0);
+    const el = scrollerRef.current;
+    // A #fragment deep link wins; otherwise restore where the user left off
+    // (back navigation from /work etc.); otherwise start at the top.
+    if (hash) {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "auto", block: "start" });
+    } else {
+      let saved = 0;
+      try { saved = Number(sessionStorage.getItem(SCROLL_KEY)) || 0; } catch { /* storage blocked */ }
+      el?.scrollTo(0, saved);
+    }
     const prevTitle = document.title;
     document.title = `${site.name} | ${site.tagline}`;
     return () => {
       document.title = prevTitle;
+      try { sessionStorage.setItem(SCROLL_KEY, String(el?.scrollTop ?? 0)); } catch { /* storage blocked */ }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -5,7 +5,7 @@
  * monochrome via the `.work-theme` palette remap in index.css).
  */
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getAllProjectsForWork, type ProjectCategory } from '../../data';
@@ -22,14 +22,13 @@ const CATEGORY_SET: ProjectCategory[] = ['web', 'ai', 'embedded', 'hardware', 'v
 export function WorkPage() {
   const projects = useMemo(() => getAllProjectsForWork(), []);
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialCat = searchParams.get('cat');
-  const [filter, setFilter] = useState<ProjectCategory | typeof ALL>(
-    initialCat && (CATEGORY_SET as string[]).includes(initialCat) ? (initialCat as ProjectCategory) : ALL
-  );
 
-  // Reflect the active filter in the URL (?cat=) so a filtered view is shareable.
+  // The URL is the single source of truth for the filter (?cat=), so shared links,
+  // reloads, and back/forward navigation all agree with the chips.
+  const catParam = searchParams.get('cat');
+  const filter: ProjectCategory | typeof ALL =
+    catParam && (CATEGORY_SET as string[]).includes(catParam) ? (catParam as ProjectCategory) : ALL;
   const selectFilter = (next: ProjectCategory | typeof ALL) => {
-    setFilter(next);
     setSearchParams(next === ALL ? {} : { cat: next }, { replace: true });
   };
 

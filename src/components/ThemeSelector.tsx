@@ -6,36 +6,26 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useWorkstationStore } from '../store/store';
-import { useThemeStore, themePresets, useActiveTheme, useResolvedThemeId, SYSTEM_THEME_ID } from '../store/themeStore';
+import { useThemeStore, themePresets, useActiveTheme, useResolvedThemeId, SYSTEM_THEME_ID, themePreviewColors as previewColors } from '../store/themeStore';
 
 /** Order of theme presets in the dropdown. System first, then light (Modern) and dark, then rest. */
 const presetOrder = [SYSTEM_THEME_ID, 'clean', 'dark', 'classic', 'blue', 'pink', 'purple', 'uga', 'grayBlue'];
-
-const previewColors: Record<string, string> = {
-  [SYSTEM_THEME_ID]: '#71717a',
-  clean: '#ffffff',
-  dark: '#262626',
-  classic: '#4ade80',
-  blue: '#90c9f5',
-  pink: '#f5bcce',
-  purple: '#cbbcf5',
-  uga: '#BA0C2F',
-  grayBlue: '#8a9bb5',
-  gold: '#daa520',
-};
 
 const themeDisplayNames: Record<string, string> = {
   [SYSTEM_THEME_ID]: 'System',
 };
 
 export function ThemeSelector() {
-  const { activeTheme, setTheme } = useThemeStore();
+  const activeTheme = useThemeStore((s) => s.activeTheme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const resolvedId = useResolvedThemeId();
   const theme = useActiveTheme();
   const prefersReducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
   const [expanded, setExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 640 : false
   );
@@ -46,11 +36,49 @@ export function ThemeSelector() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Dropdown dismissal + keyboard support: Escape closes (restoring focus to the
+  // toggle), clicking outside closes, and Up/Down move focus through the options.
+  useEffect(() => {
+    if (!expanded) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setExpanded(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setExpanded(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const options = Array.from(
+          containerRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? []
+        );
+        if (!options.length) return;
+        e.preventDefault();
+        const idx = options.indexOf(document.activeElement as HTMLButtonElement);
+        const next =
+          e.key === 'ArrowDown'
+            ? (idx + 1) % options.length
+            : (idx - 1 + options.length) % options.length;
+        options[next]?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [expanded]);
+
   const circleColor = activeTheme === 'classic' ? theme.text : previewColors[resolvedId] ?? previewColors[activeTheme] ?? theme.accent;
   const motionTransition = prefersReducedMotion ? { delay: 0, duration: 0 } : { delay: 0.2, duration: 0.25 };
 
   return (
     <motion.div
+      ref={containerRef}
       className={`fixed z-[100] isolate ${
         isMobile
           ? 'top-[3.25rem] right-5'
@@ -62,6 +90,7 @@ export function ThemeSelector() {
     >
       {/* Toggle button — clean: black bg; uga: white bg + black border; other: transparent */}
       <button
+        ref={toggleRef}
         type="button"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}

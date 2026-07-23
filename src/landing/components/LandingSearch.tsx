@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, CornerDownLeft } from "lucide-react";
 import { getAllProjectsForWork } from "../../data";
+import { prefersReducedMotion } from "../lib/hooks";
 
 type Item = { label: string; hint: string; kind: "section" | "project" | "page"; go: () => void };
 
@@ -16,7 +17,10 @@ export default function LandingSearch() {
   const items = useMemo<Item[]>(() => {
     const scrollTo = (id: string) => () => {
       setOpen(false);
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById(id)?.scrollIntoView({
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
+        block: "start",
+      });
     };
     const sections: Item[] = [
       { label: "Selected Work", hint: "section", kind: "section", go: scrollTo("work") },
@@ -47,15 +51,23 @@ export default function LandingSearch() {
 
   useEffect(() => {
     if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     const t = setTimeout(() => inputRef.current?.focus(), 20);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
       if (e.key === "ArrowDown") { e.preventDefault(); setActive((a) => Math.min(a + 1, results.length - 1)); }
       if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(a - 1, 0)); }
       if (e.key === "Enter") { e.preventDefault(); results[active]?.go(); }
+      // Command-palette focus model: the input owns focus, arrows drive the list —
+      // Tab must not escape into the page obscured behind the overlay.
+      if (e.key === "Tab") { e.preventDefault(); inputRef.current?.focus(); }
     };
     window.addEventListener("keydown", onKey);
-    return () => { clearTimeout(t); window.removeEventListener("keydown", onKey); };
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus?.();
+    };
   }, [open, results, active]);
 
   // Global ⌘K / Ctrl-K shortcut.
@@ -85,6 +97,9 @@ export default function LandingSearch() {
           onClick={() => setOpen(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site search"
             className="w-full max-w-[560px] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10"
             onClick={(e) => e.stopPropagation()}
           >
@@ -94,6 +109,7 @@ export default function LandingSearch() {
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                aria-label="Search work, skills, sections"
                 placeholder="Search work, skills, sections…"
                 className="w-full bg-transparent py-4 text-[15px] text-ink outline-none placeholder:text-ink-mute"
               />

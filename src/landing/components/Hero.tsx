@@ -80,19 +80,27 @@ export default function Hero() {
             <p className="over-bright font-display text-[11px] leading-[1.6] tracking-[0.04em]">{hero.tagline}</p>
             <p className="over-bright-dim mt-7 font-display text-[10px] tracking-[0.14em]">{hero.recentLabel}</p>
             <div className="mt-2.5 space-y-2.5">
-              {projects.map((proj, i) => (
+              {projects.map((proj, i) => {
+                const reveal = appear(p, 0.1 + i * 0.18);
+                const shown = reveal.opacity > 0.5;
+                return (
                 <Link
                   key={proj.id}
                   to={`/work/${proj.id}`}
                   className="group block"
-                  style={appear(p, 0.1 + i * 0.18)}
+                  style={reveal}
+                  // Invisible links must leave the tab order: opacity:0 +
+                  // pointer-events:none still allows keyboard focus/activation.
+                  tabIndex={shown ? 0 : -1}
+                  aria-hidden={!shown}
                 >
                   <span className="over-bright block font-display text-[15px] leading-[1.2] tracking-[-0.03em] transition-opacity group-hover:opacity-60">
                     {proj.shortTitle ?? proj.title}
                   </span>
                   <span className="over-bright-dim block font-mono text-[9px] uppercase tracking-[0.1em]">{proj.period}</span>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
 

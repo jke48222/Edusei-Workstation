@@ -8,6 +8,7 @@
 import { StrictMode, Suspense, lazy, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import DotRingCursor from '../components/DotRingCursor';
 import ReticleCursor from '../components/ReticleCursor';
@@ -89,7 +90,15 @@ if (isEmbedded()) {
       <ErrorBoundary>
         <BrowserRouter>
           <SiteCursor />
-          <Suspense fallback={null}>
+          {/* Visible fallback: a null fallback blanks the whole page while a lazy
+              route chunk downloads on slow connections. */}
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 grid place-items-center" aria-label="Loading page">
+                <span className="h-8 w-8 animate-spin rounded-full border-2 border-black/15 border-t-black/60" />
+              </div>
+            }
+          >
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/workstation" element={<WorkstationRoute />} />
@@ -98,6 +107,8 @@ if (isEmbedded()) {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          {/* Site-wide analytics — previously only the /workstation route reported. */}
+          <Analytics />
         </BrowserRouter>
       </ErrorBoundary>
     </StrictMode>
