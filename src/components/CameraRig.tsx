@@ -7,11 +7,12 @@
  * for alignment with the Experience component.
  */
 
-import { useRef, useMemo, useState, useEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import * as easing from 'maath/easing';
 import { useWorkstationStore } from '../store/store';
+import { useIsNarrowViewport as useIsMobile } from '../hooks/useIsMobile';
 import type { ViewState } from '../store/store';
 
 /** Camera configuration interface defining position and look-at target for a single view. */
@@ -29,23 +30,6 @@ const OBJECT_POSITIONS = {
   memesat: { x: 100, y: 1.5, z: 0 },
   'capital-one': { x: 125, y: 1.5, z: 0 },
 };
-
-/** Custom hook that detects mobile viewport (width < 768px) for responsive camera configuration. */
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-  
-  return isMobile;
-}
 
 /** Generates camera position and target configurations for all workstation views. Distance and height parameters adapt based on mobile vs desktop viewport. */
 function getCameraConfigs(isMobile: boolean): Record<ViewState, CameraConfig> {
@@ -142,7 +126,8 @@ export function CameraRig() {
   const { camera } = useThree();
   const { currentView, isAnimating, completeAnimation, prefersReducedMotion } = useWorkstationStore();
   const isMobile = useIsMobile();
-  const dampingFactor = prefersReducedMotion ? 25 : 0.4;
+  // maath damp3's third arg is smoothTime (seconds to converge; LARGER = SLOWER).
+  const dampingFactor = 0.4;
 
   const currentPosition = useRef(new Vector3());
   const currentTarget = useRef(new Vector3());
@@ -169,19 +154,25 @@ export function CameraRig() {
   useFrame((_, delta) => {
     const clampedDelta = Math.min(delta, 0.1);
 
-    easing.damp3(
-      currentPosition.current,
-      targetConfig.position,
-      dampingFactor,
-      clampedDelta
-    );
+    if (prefersReducedMotion) {
+      // Instant cut: no camera travel at all for reduced-motion users.
+      currentPosition.current.copy(targetConfig.position);
+      currentTarget.current.copy(targetConfig.target);
+    } else {
+      easing.damp3(
+        currentPosition.current,
+        targetConfig.position,
+        dampingFactor,
+        clampedDelta
+      );
 
-    easing.damp3(
-      currentTarget.current,
-      targetConfig.target,
-      dampingFactor,
-      clampedDelta
-    );
+      easing.damp3(
+        currentTarget.current,
+        targetConfig.target,
+        dampingFactor,
+        clampedDelta
+      );
+    }
 
     camera.position.copy(currentPosition.current);
     camera.lookAt(currentTarget.current);

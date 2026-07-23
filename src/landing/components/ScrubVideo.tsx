@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
+/** Phone/tablet detection — kept in sync with useIsNarrow's md breakpoint (767px). */
+const MOBILE_MEDIA = "(max-width: 767px), (pointer: coarse)";
+
 /**
  * Fixed, full-viewport background video scrubbed by page scroll.
  * A rAF loop eases video.currentTime toward (scrollProgress * duration), reading the
- * landing's scroll container (#landing-scroll). Reduced-motion users get a poster only.
+ * landing's scroll container (#landing-scroll). The loop only runs while there is
+ * work to do: it wakes on scroll/resize and stops again once the seek has settled.
+ * Reduced-motion users get the static poster only — the video never downloads.
  *
  * iOS/Safari quirk: a paused video that has never been *played* will not repaint when
  * you set currentTime — it stays frozen on the poster, so scrubbing looks dead on
@@ -15,23 +20,19 @@ export default function ScrubVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   // Phones/tablets get a lighter 720p encode — same all-intra frames, ~7.5MB vs ~18MB —
   // so the decoder can keep up with rapid scrub seeks instead of stuttering.
-  const [isMobile] = useState(() =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
+  const [isMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(MOBILE_MEDIA).matches
+  );
+  // No scrubbing will ever happen for reduced-motion users, so skip the video entirely.
+  const [reduced] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
   const src = isMobile ? "/media/hero-mobile.mp4" : "/media/hero.mp4";
 
   useEffect(() => {
+    if (reduced) return; // poster image only — no video element mounted
     const video = videoRef.current;
     if (!video) return;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return; // poster frame only
-
-    // On mobile, autoplay-priming would make the muted video visibly play before the
-    // user ever scrolls. So mobile skips the load-time prime and primes on the first
-    // touch/pointer gesture instead (listeners below); desktop primes immediately.
-    const isMobile = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
 
     let raf = 0;
     let current = 0;
@@ -54,24 +55,12 @@ export default function ScrubVideo() {
       }
     };
 
-    const onReady = () => {
-      ready = true;
-      if (!isMobile) prime(); // mobile waits for the first gesture (see below)
-    };
-    video.addEventListener("loadedmetadata", onReady);
-    video.addEventListener("loadeddata", onReady);
-    if (video.readyState >= 1) onReady();
-
-    // Fallback for blocked autoplay (iOS Low-Power Mode, strict settings).
-    const primeOnGesture = () => prime();
-    window.addEventListener("touchstart", primeOnGesture, { passive: true });
-    window.addEventListener("pointerdown", primeOnGesture, { passive: true });
+    // The landing scrolls inside #landing-scroll (a fixed container), not the window.
+    const scroller = document.getElementById("landing-scroll");
 
     const loop = () => {
-      raf = requestAnimationFrame(loop);
-      if (!ready || !video.duration || !isFinite(video.duration)) return;
-      // The landing scrolls inside #landing-scroll (a fixed container), not the window.
-      const scroller = document.getElementById("landing-scroll");
+      raf = 0;
+      if (!ready || !video.duration || !isFinite(video.duration)) return; // wake() re-arms via onReady
       const scrollTop = scroller ? scroller.scrollTop : window.scrollY;
       const total = scroller
         ? scroller.scrollHeight - scroller.clientHeight
@@ -88,8 +77,41 @@ export default function ScrubVideo() {
           video.currentTime = current;
         } catch {}
       }
+      // Keep looping only while the eased follow or an in-flight seek still has work;
+      // once settled the loop stops and the next scroll/resize wakes it.
+      const settled =
+        current === target && !video.seeking && Math.abs(video.currentTime - current) <= 0.008;
+      if (!settled) raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+
+    // On mobile, autoplay-priming would make the muted video visibly play before the
+    // user ever scrolls. So mobile skips the load-time prime and primes on the first
+    // touch/pointer gesture instead (listeners below); desktop primes immediately.
+    const onReady = () => {
+      ready = true;
+      if (!isMobile) prime(); // mobile waits for the first gesture (see below)
+      wake();
+    };
+    video.addEventListener("loadedmetadata", onReady);
+    video.addEventListener("loadeddata", onReady);
+    if (video.readyState >= 1) onReady();
+
+    // Fallback for blocked autoplay (iOS Low-Power Mode, strict settings).
+    const primeOnGesture = () => {
+      prime();
+      wake();
+    };
+    window.addEventListener("touchstart", primeOnGesture, { passive: true });
+    window.addEventListener("pointerdown", primeOnGesture, { passive: true });
+
+    const scrollTarget: HTMLElement | Window = scroller ?? window;
+    scrollTarget.addEventListener("scroll", wake, { passive: true } as AddEventListenerOptions);
+    window.addEventListener("resize", wake);
+    wake();
 
     return () => {
       cancelAnimationFrame(raf);
@@ -97,21 +119,31 @@ export default function ScrubVideo() {
       video.removeEventListener("loadeddata", onReady);
       window.removeEventListener("touchstart", primeOnGesture);
       window.removeEventListener("pointerdown", primeOnGesture);
+      scrollTarget.removeEventListener("scroll", wake);
+      window.removeEventListener("resize", wake);
     };
-  }, []);
+  }, [isMobile, reduced]);
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden>
-      <video
-        ref={videoRef}
-        className="h-full w-full object-cover [transform:translateZ(0)] [will-change:transform]"
-        src={src}
-        poster="/media/hero-poster.jpg"
-        muted
-        playsInline
-        preload="auto"
-        disablePictureInPicture
-      />
+      {reduced ? (
+        <img
+          src="/media/hero-poster.jpg"
+          alt=""
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          className="h-full w-full object-cover [transform:translateZ(0)] [will-change:transform]"
+          src={src}
+          poster="/media/hero-poster.jpg"
+          muted
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+        />
+      )}
     </div>
   );
 }

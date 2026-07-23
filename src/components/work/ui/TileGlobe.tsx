@@ -77,7 +77,11 @@ export default function TileGlobe() {
       CY = H / 2;
     };
     resize();
-    const ro = new ResizeObserver(resize);
+    // Repaint on resize so idle canvases (reduced motion / off-screen) don't go stale.
+    const ro = new ResizeObserver(() => {
+      resize();
+      drawFrame();
+    });
     ro.observe(cv);
 
     const dot = (x: number, y: number, r: number) => {
@@ -86,7 +90,7 @@ export default function TileGlobe() {
       ctx.fill();
     };
 
-    const draw = () => {
+    const drawFrame = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
       const s = R / 80; // dot sizing relative to the source design (R=80)
@@ -111,15 +115,42 @@ export default function TileGlobe() {
         ctx.fillStyle = landColor(ld.lat, p.z);
         dot(CX + p.x * R, CY - p.y * R, 1.15 * s);
       }
-
-      if (!reduced) rot = (rot + 0.4) % 360;
-      raf = requestAnimationFrame(draw);
     };
-    raf = requestAnimationFrame(draw);
+
+    // The loop only runs while the canvas is on screen; reduced-motion users get a
+    // single static frame instead of a 60fps redraw of an unchanging image.
+    let visible = true;
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      drawFrame();
+      rot = (rot + 0.4) % 360;
+    };
+    const start = () => {
+      if (!raf && visible && !reduced) raf = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    drawFrame();
+    start();
+
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) {
+        if (reduced) drawFrame();
+        else start();
+      } else {
+        stop();
+      }
+    });
+    io.observe(cv);
 
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
       ro.disconnect();
+      io.disconnect();
     };
   }, []);
 
