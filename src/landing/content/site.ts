@@ -13,7 +13,6 @@ export const site = {
   degree: "B.S. Computer Systems Engineering, Cum Laude · University of Georgia '26",
   niche: "Computer Systems Engineer building across embedded systems, VR, and the web.",
   email: "jalen.edusei@gmail.com",
-  locations: "Athens, GA",
 
   // ── Links ──────────────────────────────────────────────────────────────
   socials: {
@@ -115,24 +114,8 @@ export const site = {
     title: ["Certifications &", "programs."],
   },
 
-  // ── Editorial blocks (Approach / Craft / Workstation) ────────────────────
+  // ── Editorial block (the Workstation card next to the terminal) ──────────
   editorial: {
-    approach: {
-      eyebrow: "THE APPROACH",
-      title: "Build it, then prove it.",
-      body:
-        "Every project here is a real system I shipped, from breadboard to deploy. I care about the unglamorous parts: the tests, the edge cases, the details that decide whether it holds up in the field.",
-      cta: { label: "See the work", href: "#work" },
-      bigWord: "Ship.",
-    },
-    craft: {
-      eyebrow: "THE CRAFT",
-      title: "Hardware-deep, product-minded.",
-      body:
-        "Years across embedded labs, a CubeSat flight-software team, and a Capital One internship. I care as much about why a thing should exist as whether the firmware boots.",
-      cta: { label: "About me", href: "#about" },
-      bigWord: "Craft.",
-    },
     community: {
       eyebrow: "THE WORKSTATION",
       title: "There's a terminal under the hood.",

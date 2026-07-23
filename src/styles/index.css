@@ -22,7 +22,7 @@
 
      Some aggressive WebView/flag-forced force-dark engines ignore color-scheme
      entirely. For those we ALSO default the portfolio theme to the OS preference
-     (see getStoredPortfolioDark in themeStore.ts): a dark-preferring visitor
+     (see the pre-paint boot script in index.html): a dark-preferring visitor
      then gets our real dark theme — which force-dark leaves untouched because it
      is already dark — instead of a mangled light one. */
   color-scheme: light dark;
@@ -111,6 +111,14 @@
       inset 0 0 0 1px rgba(255, 255, 255, 0.10),
       inset 0 -18px 40px -28px rgba(0, 0, 0, 0.5);
   }
+  /* Mobile: ~12 simultaneous 22px backdrop blurs are a real GPU/battery cost, and the
+     tiles sit over a flat page background there — the tint/sheen carries the look alone. */
+  @media (pointer: coarse) and (max-width: 767px) {
+    .pf-liquid-glass {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
   /* Specular top sheen — the "liquid" highlight that catches light. */
   .pf-liquid-glass::before {
     content: '';
@@ -135,25 +143,6 @@
       inset 0 -18px 44px -28px rgba(0, 0, 0, 0.7);
   }
   .dark .pf-liquid-glass::before { opacity: 0.3; }
-
-  /* Blue frosted glass — used for the stat cards (light blue in light mode, deep blue in dark). */
-  .pf-stat-glass {
-    position: relative;
-    background:
-      linear-gradient(160deg, rgba(96, 165, 250, 0.22), rgba(37, 99, 235, 0.10) 58%, rgba(255, 255, 255, 0.05)),
-      rgba(219, 234, 254, 0.55);
-    backdrop-filter: blur(18px) saturate(1.4);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
-    border: 1px solid rgba(37, 99, 235, 0.20);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 6px 24px -14px rgba(37, 99, 235, 0.45);
-  }
-  .dark .pf-stat-glass {
-    background:
-      linear-gradient(160deg, rgba(37, 99, 235, 0.30), rgba(12, 26, 58, 0.55) 60%, rgba(255, 255, 255, 0.03)),
-      rgba(12, 22, 48, 0.55);
-    border: 1px solid rgba(96, 165, 250, 0.24);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 8px 28px -16px rgba(0, 0, 0, 0.7);
-  }
 
   /* Pill / tag */
   .pf-pill {
@@ -319,190 +308,11 @@ html, body, #root {
     pointer-events: none;
     z-index: 10;
   }
-  
-  /* Screen flicker effect */
-  .crt-flicker {
-    animation: crt-flicker 0.15s infinite;
-  }
-  
-  @keyframes crt-flicker {
-    0%, 100% { opacity: 1; }
-    92% { opacity: 1; }
-    93% { opacity: 0.96; }
-    94% { opacity: 1; }
-  }
-  
-  /* Phosphor glow on text — softer, easier on the eyes */
-  .phosphor-text {
-    color: #4ade80;
-    text-shadow: 
-      0 0 4px rgba(74,222,128,0.4),
-      0 0 8px rgba(74,222,128,0.2);
-  }
-  
-  .phosphor-text-bright {
-    color: #86efac;
-    text-shadow: 
-      0 0 5px rgba(74,222,128,0.5),
-      0 0 12px rgba(74,222,128,0.25),
-      0 0 20px rgba(74,222,128,0.1);
-  }
-  
-  /* Terminal cursor */
-  .terminal-cursor {
-    display: inline-block;
-    width: 10px;
-    height: 1.2em;
-    background-color: #4ade80;
-    margin-left: 2px;
-    animation: blink 1s step-end infinite;
-    vertical-align: text-bottom;
-  }
-  
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-  
-  /* Glass morphism card */
-  .glass-card {
-    background: rgba(12, 12, 12, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(74, 222, 128, 0.15);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.5),
-      0 0 40px rgba(74, 222, 128, 0.06),
-      inset 0 1px 0 rgba(74, 222, 128, 0.08);
-  }
-  
-  /* Hover glow effect for clickable items */
-  .hover-glow {
-    transition: all 0.3s ease;
-  }
-  
-  .hover-glow:hover {
-    text-shadow: 
-      0 0 6px rgba(74,222,128,0.5),
-      0 0 12px rgba(74,222,128,0.25);
-    transform: translateX(4px);
-  }
-  
-  /* Terminal prompt styling */
-  .terminal-prompt {
-    color: #4ade80;
-  }
-  
-  .terminal-prompt::before {
-    content: '>';
-    margin-right: 8px;
-    opacity: 0.7;
-  }
-  
-  /* CRT screen border/bezel effect */
-  .crt-bezel {
-    border: 4px solid #1a1a1a;
-    border-radius: 8px;
-    box-shadow: 
-      inset 0 0 50px rgba(0, 0, 0, 0.5),
-      0 0 15px rgba(74, 222, 128, 0.08);
-  }
-  
-  /* Noise texture overlay */
-  .noise-overlay {
-    position: relative;
-  }
-  
-  .noise-overlay::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 5;
-  }
-  
-  /* Tech tag styling */
-  .tech-tag {
-    background: rgba(74, 222, 128, 0.08);
-    border: 1px solid rgba(74, 222, 128, 0.2);
-    color: #4ade80;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-family: 'IBM Plex Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-}
+                  }
 
 /* -----------------------------------------------------------------------------
  * Scrollbar utilities: no-scrollbar, pro-scroll (professional view), terminal-scroll (themed)
  * ----------------------------------------------------------------------------- */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* Professional View overrides */
-.pro-scroll {
-  scroll-behavior: smooth;
-}
-
-.pro-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.pro-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.pro-scroll::-webkit-scrollbar-thumb {
-  background: rgba(10, 10, 10, 0.15);
-  border-radius: 3px;
-}
-
-.pro-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(10, 10, 10, 0.3);
-}
-
-/* Timeline horizontal scroll — dark grey (no neon green) */
-.timeline-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-.timeline-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.timeline-scroll::-webkit-scrollbar-thumb {
-  background: rgba(10, 10, 10, 0.25);
-  border-radius: 3px;
-}
-.timeline-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(10, 10, 10, 0.4);
-}
-.timeline-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(10, 10, 10, 0.25) transparent;
-}
-/* Timeline scrollbar in dark mode (portfolio) — white. */
-.dark .timeline-scroll::-webkit-scrollbar-track,
-.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.dark .timeline-scroll::-webkit-scrollbar-thumb,
-.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.4);
-}
-.dark .timeline-scroll::-webkit-scrollbar-thumb:hover,
-.pro-scroll.dark .timeline-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.65);
-}
-.dark .timeline-scroll,
-.pro-scroll.dark .timeline-scroll {
-  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
-}
 
 /* Terminal scrollbar — themed via CSS custom properties */
 .terminal-scroll::-webkit-scrollbar {
@@ -583,25 +393,6 @@ html, body, #root {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Search overlay list — neutral gray scrollbar (no neon green). */
-.search-modal-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-.search-modal-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.search-modal-scroll::-webkit-scrollbar-thumb {
-  background: #a3a3a3;
-  border-radius: 3px;
-}
-.search-modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #737373;
-}
-.search-modal-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #a3a3a3 transparent;
-}
-
 /* /work and /work/:id scrollbar — neutral gray (overrides global green). */
 .work-page-scroll::-webkit-scrollbar {
   width: 8px;
@@ -615,34 +406,6 @@ html, body, #root {
 }
 .work-page-scroll::-webkit-scrollbar-thumb:hover {
   background: #737373;
-}
-
-/* Portfolio scrollbar — light: neutral gray; dark: white. */
-.pro-scroll::-webkit-scrollbar {
-  width: 8px;
-}
-.pro-scroll::-webkit-scrollbar-track {
-  background: #f0f0f0;
-}
-.pro-scroll::-webkit-scrollbar-thumb {
-  background: #a3a3a3;
-  border-radius: 4px;
-}
-.pro-scroll::-webkit-scrollbar-thumb:hover {
-  background: #737373;
-}
-/* When portfolio root has .dark (toggle), or when .dark is an ancestor (e.g. html) */
-.dark .pro-scroll::-webkit-scrollbar-track,
-.pro-scroll.dark::-webkit-scrollbar-track {
-  background: transparent;
-}
-.dark .pro-scroll::-webkit-scrollbar-thumb,
-.pro-scroll.dark::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.4);
-}
-.dark .pro-scroll::-webkit-scrollbar-thumb:hover,
-.pro-scroll.dark::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.65);
 }
 
 /* -----------------------------------------------------------------------------
@@ -866,28 +629,6 @@ html.cursor-hidden [contenteditable="true"] {
   width: 36px;
   height: 36px;
 }
-.landing .btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: 9px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.3s, color 0.3s, border-color 0.3s;
-  text-decoration: none;
-}
-.landing .btn-ghost:hover {
-  background: var(--ink);
-  color: #fff;
-  border-color: var(--ink);
-}
-
 /* ---------- Animated underline link ---------- */
 .landing .link-underline {
   display: inline-block;
@@ -921,11 +662,8 @@ html.cursor-hidden [contenteditable="true"] {
 .landing .reveal.is-visible {
   opacity: 1;
   transform: none;
-}
-
-/* hero stages */
-.landing .stage {
-  transition: opacity 0.6s ease, transform 0.7s var(--ease-bounce);
+  /* Release the composited layer once the one-shot reveal has played. */
+  will-change: auto;
 }
 
 /* The scrubbed video is BRIGHT through the top of the page (the face) and DARK lower
@@ -942,6 +680,16 @@ html.cursor-hidden [contenteditable="true"] {
 }
 .landing .over-bright-dim {
   color: var(--ink-dim);
+}
+
+/* Reduced motion swaps the scrubbed video for its BRIGHT static poster, so the white
+   over-video text lower on the page loses the dark footage it was designed against.
+   A soft dark halo keeps it readable without changing the motion experience. */
+@media (prefers-reduced-motion: reduce) {
+  .landing .over-video,
+  .landing .over-video-dim {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65), 0 2px 16px rgba(0, 0, 0, 0.5);
+  }
 }
 
 /* Light liquid-glass chip — frosted, refractive surface behind the hero's
