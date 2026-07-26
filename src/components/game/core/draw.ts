@@ -36,9 +36,16 @@ export interface DrawOpts {
   /** Seconds since mount (frozen to 0 when reduced motion is on). */
   t: number;
   reducedMotion: boolean;
-  weather: WeatherState;
   assets: GameAssets | null;
 }
+
+const WEATHER_ANGLE: Record<WeatherState, number> = {
+  fair: -1.1,
+  fresh: -0.5,
+  squall: 0.1,
+  gale: 0.65,
+  century: 1.15,
+};
 
 export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: Sim, opts: DrawOpts): void {
   const L = sim.layout;
@@ -54,6 +61,8 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
 
   drawPortholeRain(ctx, L, t, reducedMotion, !bg);
   drawLanternLight(ctx, L, t, reducedMotion, !bg);
+  drawBarometer(ctx, L, sim, t, reducedMotion);
+  drawShutterAndGust(ctx, L, sim, t, reducedMotion);
 
   if (!bg) {
     const sway = reducedMotion ? 0 : Math.sin(t * 1.1) * 6;
@@ -76,6 +85,9 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
   drawPan(ctx, L, sim, t, reducedMotion, assets);
   drawDrinks(ctx, L, sim, t, reducedMotion, assets);
   drawPass(ctx, L, sim, t, reducedMotion, !bg);
+
+  // The puddle lies on the open floor IN FRONT of the stations — it must read.
+  drawLeak(ctx, sim, t, reducedMotion);
 
   drawFx(ctx, sim, assets);
 
@@ -105,8 +117,87 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
     }
   }
 
-  /* ── Weather tint: one composite pass ── */
-  const tint = WEATHER_TINT[opts.weather];
+  /* ── Flying tickets (catch them!) ── */
+  for (const f of sim.flying) {
+    const age = (sim.now - f.born) / 1000;
+    ctx.save();
+    ctx.translate(f.p.x, f.p.y);
+    ctx.rotate(reducedMotion ? 0.1 : Math.sin(sim.now / 130 + f.ticketId) * 0.4);
+    ctx.fillStyle = P.cream;
+    ctx.fillRect(-26, -18, 52, 36);
+    ctx.fillStyle = rgba(P.charcoal, 0.5);
+    ctx.fillRect(-18, -8, 36, 3);
+    ctx.fillRect(-18, 0, 28, 3);
+    ctx.restore();
+    // Catch countdown ring.
+    ctx.strokeStyle = rgba(P.alert, 0.85);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(f.p.x, f.p.y, 34, -Math.PI / 2, -Math.PI / 2 + (1 - age / 2.2) * Math.PI * 2);
+    ctx.stroke();
+  }
+
+  /* ── Dropped food on the floor ── */
+  for (const item of sim.floorItems) {
+    const left = (item.despawnAt - sim.now) / 1000;
+    ctx.fillStyle = rgba(P.charcoal, 0.4);
+    ellipse(ctx, item.p.x, item.p.y + 22, 30, 8);
+    if (item.dish) drawDish(ctx, item.dish, item.p.x, item.p.y, 0.8, assets);
+    else if (item.ing) drawIngredient(ctx, item.ing, item.processed, item.p.x, item.p.y, 0.8, assets);
+    if (left < 2.5) {
+      ctx.font = '800 13px ui-rounded, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = rgba(P.alert, 0.9);
+      ctx.fillText(`${Math.ceil(left)}`, item.p.x, item.p.y - 34);
+    }
+  }
+
+  /* ── Blackout beat: the room drops to lantern light (doc §7.2) ── */
+  if (sim.now < sim.blackoutUntil) {
+    ctx.fillStyle = rgba('#06090F', reducedMotion ? 0.55 : 0.82);
+    ctx.fillRect(0, 0, vw, vh);
+    // The warm things survive: lantern, flame, the pass.
+    const { x, y } = L.lantern;
+    ctx.fillStyle = rgba(P.amber, 0.16);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 320, y + 580);
+    ctx.lineTo(x + 280, y + 580);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = P.amber;
+    circle(ctx, x, y + 8, 10);
+    ctx.fillStyle = rgba(P.ember, 0.9);
+    ctx.fillRect(L.pot.x + L.pot.w * 0.2, L.pot.y + L.pot.h - 12, L.pot.w * 0.6, 7);
+    ctx.fillStyle = rgba(P.amber, 0.2);
+    ctx.fillRect(L.pass.x, L.pass.y, L.pass.w, L.pass.h);
+    // The carried thing stays visible — losing your hands in the dark is unfair.
+    if (sim.carry) {
+      if (sim.carry.dish) drawDish(ctx, sim.carry.dish, sim.carry.pos.x, sim.carry.pos.y, 1, assets);
+      else if (sim.carry.ing) drawIngredient(ctx, sim.carry.ing, sim.carry.processed, sim.carry.pos.x, sim.carry.pos.y, 1, assets);
+    }
+  }
+
+  /* ── Lightning flash ── */
+  if (sim.now < sim.flashUntil && !reducedMotion) {
+    ctx.fillStyle = rgba(P.lightning, 0.16);
+    ctx.fillRect(0, 0, vw, vh);
+    ctx.strokeStyle = rgba(P.lightning, 0.9);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(L.porthole.x - 20, L.porthole.y - L.porthole.r);
+    ctx.lineTo(L.porthole.x + 8, L.porthole.y - 10);
+    ctx.lineTo(L.porthole.x - 12, L.porthole.y + 4);
+    ctx.lineTo(L.porthole.x + 18, L.porthole.y + L.porthole.r * 0.8);
+    ctx.stroke();
+  } else if (sim.now < sim.flashUntil && reducedMotion) {
+    // Non-motion equivalent: a brief cool dim instead of a hard flash.
+    ctx.fillStyle = rgba(P.lightning, 0.08);
+    ctx.fillRect(0, 0, vw, vh);
+  }
+
+  /* ── Weather tint: one composite pass, driven by the sim's live state ── */
+  const tint = WEATHER_TINT[sim.weather];
   if (tint.alpha > 0) {
     ctx.fillStyle = rgba(tint.color, tint.alpha);
     ctx.fillRect(0, 0, vw, vh);
@@ -202,6 +293,116 @@ function drawLanternLight(ctx: CanvasRenderingContext2D, L: GalleyLayout, t: num
     ctx.fillStyle = P.butter;
     circle(ctx, x, y + 9, 8);
   }
+}
+
+/* ── Weather instruments & events ───────────────────────────────────── */
+
+function drawBarometer(ctx: CanvasRenderingContext2D, L: GalleyLayout, sim: Sim, t: number, rm: boolean): void {
+  const bx = L.porthole.x - L.porthole.r - 58;
+  const by = L.porthole.y - 26;
+  ctx.fillStyle = P.charcoal;
+  circle(ctx, bx, by, 26);
+  ctx.fillStyle = P.slate;
+  circle(ctx, bx, by, 22);
+  // Dial arc: calm → storm.
+  ctx.strokeStyle = rgba(P.lightning, 0.6);
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(bx, by, 16, Math.PI * 0.75, Math.PI * 2.25);
+  ctx.stroke();
+  // The needle points at what's COMING (the forecast is the contract, §7.1).
+  const target = WEATHER_ANGLE[sim.barometer];
+  const wobble = rm ? 0 : Math.sin(t * 3.1) * 0.05;
+  const a = -Math.PI / 2 + target + wobble;
+  ctx.strokeStyle = sim.barometer === 'fair' || sim.barometer === 'fresh' ? P.cream : P.alert;
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(bx, by);
+  ctx.lineTo(bx + Math.cos(a) * 17, by + Math.sin(a) * 17);
+  ctx.stroke();
+  ctx.fillStyle = P.butter;
+  circle(ctx, bx, by, 3);
+  label(ctx, 'BAROMETER', bx, by + 44);
+}
+
+function drawShutterAndGust(ctx: CanvasRenderingContext2D, L: GalleyLayout, sim: Sim, t: number, rm: boolean): void {
+  const { x, y, r } = L.porthole;
+  const closed = sim.shiftT < sim.shutterClosedUntilShiftT;
+  if (closed) {
+    // Storm shutter: three battened planks over the glass.
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, r + 4, 0, Math.PI * 2);
+    ctx.clip();
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i % 2 ? P.kelp : P.tide;
+      ctx.fillRect(x - r - 6, y - r + (i * 2 * r) / 3, r * 2 + 12, (2 * r) / 3 - 4);
+    }
+    ctx.restore();
+    ctx.fillStyle = P.charcoal;
+    ctx.fillRect(x - 14, y + r - 2, 28, 12); // latch
+    return;
+  }
+  // Gust telegraph: whistle streaks + a pull-down hint on the porthole.
+  if (sim.now < sim.gustTelegraphUntil) {
+    const pulse = rm ? 0.7 : 0.4 + 0.4 * Math.sin(t * 10);
+    ctx.strokeStyle = rgba(P.alert, pulse);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, r + 10, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = rgba(P.lightning, 0.7);
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) {
+      const wy = 40 + i * 16;
+      const drift = rm ? 0 : (t * 320) % 200;
+      ctx.beginPath();
+      ctx.moveTo(-40 + drift + i * 90, wy);
+      ctx.lineTo(20 + drift + i * 90, wy);
+      ctx.stroke();
+    }
+    // Pull-down arrow.
+    ctx.fillStyle = rgba(P.cream, 0.9);
+    ctx.beginPath();
+    ctx.moveTo(x - 9, y - 14);
+    ctx.lineTo(x + 9, y - 14);
+    ctx.lineTo(x, y + 6);
+    ctx.closePath();
+    ctx.fill();
+    label(ctx, 'PULL DOWN!', x, y + r + 24);
+  }
+}
+
+function drawLeak(ctx: CanvasRenderingContext2D, sim: Sim, t: number, rm: boolean): void {
+  const leak = sim.leak;
+  if (!leak) return;
+  const R = 36 + leak.puddle * 74;
+  // Puddle: must READ on the dark floor — bright fog pool, hard sheen, ripple ring.
+  ctx.fillStyle = rgba(P.fog, 0.6);
+  ellipse(ctx, leak.p.x, leak.p.y, R, R * 0.34);
+  ctx.fillStyle = rgba(P.lightning, 0.5);
+  ellipse(ctx, leak.p.x - R * 0.22, leak.p.y - 4, R * 0.44, R * 0.11);
+  const ripple = rm ? 0.5 : (t * 0.7) % 1;
+  ctx.strokeStyle = rgba(P.lightning, 0.5 * (1 - ripple));
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.ellipse(leak.p.x, leak.p.y, R * (0.4 + ripple * 0.6), R * 0.34 * (0.4 + ripple * 0.6), 0, 0, Math.PI * 2);
+  ctx.stroke();
+  if (leak.active) {
+    // The drip line from the beams.
+    const phase = rm ? 0.5 : (t * 1.6) % 1;
+    ctx.fillStyle = rgba(P.lightning, 0.85);
+    ctx.fillRect(leak.p.x - 2, phase * (leak.p.y - 40), 4, 14);
+    ctx.fillStyle = rgba(P.fog, 0.7);
+    circle(ctx, leak.p.x, 8, 5);
+  }
+  if (leak.mopStrokes > 0) {
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < leak.mopStrokes ? P.lightning : rgba(P.charcoal, 0.55);
+      circle(ctx, leak.p.x - 16 + i * 16, leak.p.y - R * 0.34 - 12, 4);
+    }
+  }
+  label(ctx, 'MOP IT', leak.p.x, leak.p.y + R * 0.34 + 16);
 }
 
 /* ── Stations ───────────────────────────────────────────────────────── */
@@ -497,6 +698,12 @@ function drawDrinks(
       ctx.strokeStyle = rgba(P.lightning, pulse);
       ctx.lineWidth = 3;
       ctx.strokeRect(br.x - 3, br.y - 3, br.w + 6, br.h + 6);
+    }
+    // Storm-charged brine hums (perfect pours while it glows — §7.2).
+    if (source === 'brine' && sim.now < sim.chargedUntil) {
+      const hum = rm ? 0.6 : 0.4 + 0.35 * Math.sin(t * 9);
+      ctx.fillStyle = rgba(P.lightning, hum * 0.35);
+      ellipse(ctx, br.x + br.w / 2, br.y + br.h / 2, br.w * 0.8, br.h * 0.7);
     }
   }
 
