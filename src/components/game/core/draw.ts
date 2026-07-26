@@ -84,10 +84,14 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
   drawKettle(ctx, L, sim, assets);
   drawPan(ctx, L, sim, t, reducedMotion, assets);
   drawDrinks(ctx, L, sim, t, reducedMotion, assets);
+  drawDumbwaiter(ctx, L, sim, t, reducedMotion, assets);
+  drawToastSpot(ctx, L, sim, t, reducedMotion, assets);
   drawPass(ctx, L, sim, t, reducedMotion, !bg);
 
   // The puddle lies on the open floor IN FRONT of the stations — it must read.
   drawLeak(ctx, sim, t, reducedMotion);
+
+  drawGulls(ctx, L, sim, t, reducedMotion, assets);
 
   drawFx(ctx, sim, assets);
 
@@ -779,6 +783,192 @@ function drawPass(ctx: CanvasRenderingContext2D, L: GalleyLayout, sim: Sim, t: n
   label(ctx, 'THE PASS', r.x + r.w / 2, r.y + r.h + 18);
 }
 
+function drawDumbwaiter(
+  ctx: CanvasRenderingContext2D,
+  L: GalleyLayout,
+  sim: Sim,
+  t: number,
+  rm: boolean,
+  assets: GameAssets | null,
+): void {
+  const r = L.dumbwaiter;
+  const sprite = assets?.sprites['prop-dumbwaiter'];
+  if (sprite) blitContain(ctx, sprite, r.x, r.y, r.w, r.h);
+  else {
+    ctx.fillStyle = P.kelp;
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.fillStyle = P.charcoal;
+    ctx.fillRect(r.x + 6, r.y + 8, r.w - 12, r.h - 26);
+  }
+  const toast = sim.toast_;
+  if (toast.stage === 'docked') {
+    drawDish(ctx, 'black-toast', r.x + r.w / 2, r.y + r.h * 0.4, 0.55, assets);
+    // Crank progress ring.
+    const frac = Math.min(toast.crankAngle / (Math.PI * 2 * 1.5), 1);
+    ctx.strokeStyle = rgba(P.lightning, 0.85);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(r.x + r.w / 2, r.y + r.h + 16, 13, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2);
+    ctx.stroke();
+    const pulse = rm ? 0.5 : 0.35 + 0.3 * Math.sin(t * 5);
+    ctx.strokeStyle = rgba(P.butter, pulse);
+    ctx.lineWidth = 3;
+    ctx.strokeRect(r.x - 3, r.y - 3, r.w + 6, r.h + 6);
+    label(ctx, 'CRANK!', r.x + r.w / 2, r.y - 8);
+  } else {
+    label(ctx, 'DUMBWAITER', r.x + r.w / 2, r.y + r.h + 14);
+  }
+}
+
+function drawToastSpot(
+  ctx: CanvasRenderingContext2D,
+  L: GalleyLayout,
+  sim: Sim,
+  t: number,
+  rm: boolean,
+  assets: GameAssets | null,
+): void {
+  const toast = sim.toast_;
+  if (toast.stage === 'idle' || toast.stage === 'docked') return;
+  const r = L.toastSpot;
+  const cx = r.x + r.w / 2;
+  if (toast.stage === 'resting') {
+    const img = assets?.sprites['ing-loaf'];
+    if (img) blitContain(ctx, img, r.x, r.y, r.w, r.h);
+    else {
+      ctx.fillStyle = P.cream;
+      ellipse(ctx, cx, r.y + r.h / 2, r.w * 0.4, r.h * 0.32);
+    }
+    // Char shows on the loaf itself.
+    if (toast.char > 0) {
+      ctx.fillStyle = rgba('#1A1410', Math.min(toast.char, 0.92));
+      ellipse(ctx, cx, r.y + r.h / 2, r.w * 0.38 * (0.4 + toast.char * 0.6), r.h * 0.3 * (0.4 + toast.char * 0.6));
+    }
+    // Char meter: the panic cue lies early; the true band sits deeper (§4's joke).
+    const gw = r.w + 20;
+    const gx = r.x - 10;
+    const gy = r.y - 16;
+    ctx.fillStyle = rgba(P.charcoal, 0.85);
+    ctx.fillRect(gx - 3, gy - 3, gw + 6, 14);
+    ctx.fillStyle = rgba(P.slate, 0.95);
+    ctx.fillRect(gx, gy, gw, 8);
+    // Panic zone (looks like the end of the world, is not).
+    ctx.fillStyle = rgba(P.alert, 0.55);
+    ctx.fillRect(gx + gw * 0.62, gy, gw * 0.16, 8);
+    // The true band, quiet and pale.
+    ctx.fillStyle = rgba(P.lightning, 0.9);
+    ctx.fillRect(gx + gw * 0.78, gy, gw * 0.14, 8);
+    ctx.fillStyle = P.cream;
+    ctx.fillRect(gx + gw * Math.min(toast.char, 1) - 2, gy - 2, 4, 12);
+    if (toast.char > 0.6 && toast.char < 0.78) {
+      const shake = rm ? 0 : Math.sin(t * 30) * 2;
+      label(ctx, 'NOW?! (no.)', cx + shake, gy - 8);
+    }
+    label(ctx, 'HOLD TO CHAR', cx, r.y + r.h + 14);
+  } else if (toast.stage === 'charred') {
+    drawDish(ctx, 'black-toast', cx, r.y + r.h / 2, 0.8, assets);
+    const pulse = rm ? 0.5 : 0.35 + 0.25 * Math.sin(t * 4);
+    ctx.strokeStyle = rgba(P.amber, pulse);
+    ctx.lineWidth = 4;
+    ctx.strokeRect(r.x - 3, r.y - 3, r.w + 6, r.h + 6);
+    label(ctx, '→ DUMBWAITER', cx, r.y - 8);
+  }
+}
+
+function drawGulls(
+  ctx: CanvasRenderingContext2D,
+  L: GalleyLayout,
+  sim: Sim,
+  t: number,
+  rm: boolean,
+  assets: GameAssets | null,
+): void {
+  // Telegraph: a shadow sweeps the floor before the raid (the tell, §7.3).
+  if (sim.now < sim.gullShadowUntil) {
+    const frac = rm ? 0.5 : 1 - (sim.gullShadowUntil - sim.now) / 1400;
+    const sx = L.size.w * (0.15 + frac * 0.7);
+    ctx.fillStyle = rgba(P.charcoal, 0.4);
+    ellipse(ctx, sx, L.size.h * 0.75, 60, 14);
+    ellipse(ctx, sx + 40, L.size.h * 0.75 + 6, 34, 9);
+  }
+
+  for (const g of sim.gulls) {
+    const img =
+      g.state === 'pecking' ? assets?.sprites['gull-standing'] : assets?.sprites['gull-flying'];
+    const flap = rm || g.state === 'pecking' ? 0 : Math.sin(t * 14 + g.id) * 5;
+    if (img) {
+      const box = g.state === 'pecking' ? 62 : 74;
+      ctx.save();
+      if (g.p.x > L.size.w / 2 && g.state !== 'pecking') {
+        ctx.translate(g.p.x, g.p.y + flap);
+        ctx.scale(-1, 1);
+        blitContain(ctx, img, -box / 2, -box / 2, box, box, false);
+      } else {
+        blitContain(ctx, img, g.p.x - box / 2, g.p.y - box / 2 + flap, box, box, false);
+      }
+      ctx.restore();
+    } else {
+      ctx.fillStyle = P.cream;
+      ellipse(ctx, g.p.x, g.p.y + flap, 24, 14);
+      ctx.fillStyle = P.butter;
+      ctx.beginPath();
+      ctx.moveTo(g.p.x + 20, g.p.y + flap);
+      ctx.lineTo(g.p.x + 32, g.p.y + flap + 4);
+      ctx.lineTo(g.p.x + 20, g.p.y + flap + 7);
+      ctx.closePath();
+      ctx.fill();
+    }
+    if (g.state === 'pecking') {
+      // Shoo countdown + tap pips.
+      ctx.strokeStyle = rgba(P.alert, 0.85);
+      ctx.lineWidth = 3;
+      const left = 1 - (sim.now - g.peckStart) / 1800;
+      ctx.beginPath();
+      ctx.arc(g.p.x, g.p.y, 40, -Math.PI / 2, -Math.PI / 2 + Math.max(left, 0) * Math.PI * 2);
+      ctx.stroke();
+      label(ctx, 'SHOO! (tap tap)', g.p.x, g.p.y - 48);
+    }
+  }
+
+  // Bosun blocks the pass like a small feathered harbor master.
+  if (sim.bosunHere) {
+    const r = L.pass;
+    const img = assets?.sprites['bosun-gull'];
+    const bx = r.x + r.w / 2;
+    const by = r.y + r.h - 40;
+    if (img) blitContain(ctx, img, bx - 55, by - 80, 110, 110);
+    else {
+      ctx.fillStyle = P.fog;
+      ellipse(ctx, bx, by, 44, 30);
+    }
+    const left = Math.max(0, (sim.bosunUntil - sim.now) / 1000);
+    label(ctx, `BOSUN — rolls or ${Math.ceil(left)}s`, bx, r.y - 10);
+  }
+
+  // Grudge ledger: chalk tallies by the pass. The gulls keep count. So should you.
+  if (sim.grudge > 0) {
+    const gx = L.pass.x + L.pass.w - 8;
+    const gy = L.pass.y + L.pass.h + 28;
+    const marks = Math.round(sim.grudge / GRUDGE_TALLY);
+    ctx.strokeStyle = rgba(P.cream, 0.75);
+    ctx.lineWidth = 2;
+    for (let i = 0; i < marks; i++) {
+      const mx = gx - i * 7 - (i % 5 === 4 ? 2 : 0);
+      ctx.beginPath();
+      if (i % 5 === 4) {
+        ctx.moveTo(mx - 6, gy - 12);
+        ctx.lineTo(mx + 8, gy);
+      } else {
+        ctx.moveTo(mx, gy - 12);
+        ctx.lineTo(mx, gy);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+const GRUDGE_TALLY = 18;
+
 function drawFx(ctx: CanvasRenderingContext2D, sim: Sim, assets: GameAssets | null): void {
   for (const f of sim.fx) {
     const age = (sim.now - f.born) / f.ttl;
@@ -869,7 +1059,10 @@ export function drawDish(
   assets: GameAssets | null = null,
 ): void {
   const spriteId: keyof GameAssets['sprites'] =
-    dish === 'ninefathom-chowder' ? 'dish-chowder' : dish === 'fogcutter' ? 'dish-fogcutter' : 'dish-rolls';
+    dish === 'ninefathom-chowder' ? 'dish-chowder'
+    : dish === 'fogcutter' ? 'dish-fogcutter'
+    : dish === 'black-toast' ? 'dish-black-toast'
+    : 'dish-rolls';
   const img = assets?.sprites[spriteId];
   if (img) {
     const box = 84 * s;
@@ -890,6 +1083,12 @@ export function drawDish(
     ctx.fillRect(x - 12 * s, y - 6 * s, 24 * s, 12 * s);
     ctx.fillStyle = LAYER_COLOR.cream;
     ctx.fillRect(x - 12 * s, y - 18 * s, 24 * s, 12 * s);
+  } else if (dish === 'black-toast') {
+    ctx.fillStyle = '#1A1410';
+    ctx.fillRect(x - 16 * s, y - 14 * s, 32 * s, 28 * s);
+    ctx.fillStyle = P.butter;
+    ellipse(ctx, x - 4 * s, y - 4 * s, 5 * s, 3 * s);
+    ellipse(ctx, x + 6 * s, y + 4 * s, 4 * s, 2.6 * s);
   } else {
     ctx.fillStyle = P.butter;
     for (let i = 0; i < 3; i++) circle(ctx, x - 16 * s + i * 16 * s, y, 10 * s);
