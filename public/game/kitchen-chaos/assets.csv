@@ -10,3 +10,24 @@ ing-potato-chopped,ingredient state,sprite,pile of chopped golden potato chunks,
 ing-fish-raw,ingredient,sprite,flat blue-grey wrackfish with chart markings,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
 ing-fish-chopped,ingredient state,sprite,three pale cream fillets,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
 dish-chowder,served dish,sprite,rustic bowl of thick cream chowder with butter dots and steam wisp,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-pan,pan station,sprite,cast-iron frying pan,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-glass,fogcutter vessel,sprite,tall empty glass tumbler,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+bottle-brine,pour source,sprite,glowing lightning-brine jug,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+bottle-tea,pour source,sprite,sea-smoke tea bottle,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+bottle-cream,pour source,sprite,ceramic cream jug,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-dough-ball,ingredient,sprite,flour-dusted dough ball,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-dough-folded,ingredient state,sprite,folded dough bundle,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+dish-rolls,served dish,sprite,three golden rolls on plate,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+dish-fogcutter,served dish,sprite,three-layer glass drink,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+gull-flying,chaos actor,sprite,gull mid-flight,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+gull-standing,chaos actor,sprite,gull standing greedy,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+bosun-gull,chaos boss,sprite,one-legged patriarch gull,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-dumbwaiter,keeper station,sprite,dumbwaiter hatch with crank,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-loaf,ingredient,sprite,rustic oval loaf,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+dish-black-toast,keeper dish,sprite,deliberately burnt toast with butter curls,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+portrait-alba,scene portrait,sprite,Captain Alba bust,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+portrait-moss,scene portrait,sprite,Moss the diver bust,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-picklejar,pickles station,sprite,charged pickle jar,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-wreckfish-whole,ingredient,sprite,whole chart-marked wreckfish,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+dish-pickles,served dish,sprite,bowl of shimmering pickles,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+dish-wreck-platter,served dish,sprite,fillet platter with pickles and roll,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
