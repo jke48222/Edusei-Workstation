@@ -125,7 +125,6 @@ export function KitchenChaosGame() {
         drawGalley(ctx, view, sim, {
           t: prefersReducedMotion ? 0 : (performance.now() - mountedAtRef.current) / 1000,
           reducedMotion: prefersReducedMotion,
-          weather: 'fair',
           assets: assetsRef.current,
         }),
       pointer: (ev) => {
