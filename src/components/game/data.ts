@@ -13,7 +13,8 @@ import type { WeatherState } from './palette';
 export type IngredientId =
   | 'grumbling-potato'
   | 'wrackfish'
-  | 'stormflour-dough';
+  | 'stormflour-dough'
+  | 'wreckfish-whole';
 
 export interface IngredientDef {
   id: IngredientId;
@@ -24,6 +25,8 @@ export interface IngredientDef {
   chopStrokes?: number;
   /** Slap-folds to work dough (board, downward rhythm). */
   foldSlaps?: number;
+  /** Filleted along the chart-line guide (board, one precise drag). */
+  fillet?: boolean;
 }
 
 export const INGREDIENTS: Record<IngredientId, IngredientDef> = {
@@ -45,11 +48,23 @@ export const INGREDIENTS: Record<IngredientId, IngredientDef> = {
     flavor: 'Rises only in bad weather. Jam-swirled by Aunt Pet’s standing order.',
     foldSlaps: 3,
   },
+  'wreckfish-whole': {
+    id: 'wreckfish-whole',
+    name: 'Whole Wreckfish',
+    flavor: 'The big catch. Its chart-markings are the cutting guide.',
+    fillet: true,
+  },
 };
 
 /* ── Dishes ──────────────────────────────────────────────────────────── */
 
-export type DishId = 'ninefathom-chowder' | 'fogcutter' | 'squall-rolls' | 'black-toast';
+export type DishId =
+  | 'ninefathom-chowder'
+  | 'fogcutter'
+  | 'squall-rolls'
+  | 'black-toast'
+  | 'lightning-pickles'
+  | 'wreck-platter';
 
 export type LayerSource = 'brine' | 'tea' | 'cream';
 
@@ -87,12 +102,25 @@ export interface ToastSpec {
   panicAt: number;
 }
 
+export interface JarSpec {
+  kind: 'jar';
+  /** The jar's charge pulse cycle — pop the lid on the glow peak. */
+  pulsePeriodMs: number;
+  windowMs: number;
+}
+
+export interface FilletSpec {
+  kind: 'fillet';
+  /** Mean distance from the chart-line guide that still scores full (virtual px). */
+  tolerance: number;
+}
+
 export interface DishDef {
   id: DishId;
   name: string;
   short: string;
   tagline: string;
-  spec: PotSpec | GlassSpec | PanSpec | ToastSpec;
+  spec: PotSpec | GlassSpec | PanSpec | ToastSpec | JarSpec | FilletSpec;
 }
 
 export const DISHES: Record<DishId, DishDef> = {
@@ -147,6 +175,20 @@ export const DISHES: Record<DishId, DishDef> = {
       charRate: 0.16,
       panicAt: 0.62,
     },
+  },
+  'lightning-pickles': {
+    id: 'lightning-pickles',
+    name: 'Lightning Pickles',
+    short: 'Pickles',
+    tagline: 'The only dish that improves during storms.',
+    spec: { kind: 'jar', pulsePeriodMs: 2400, windowMs: 520 },
+  },
+  'wreck-platter': {
+    id: 'wreck-platter',
+    name: 'Wreck Platter',
+    short: 'Platter',
+    tagline: 'Fillet along the chart lines. The fish knows the way.',
+    spec: { kind: 'fillet', tolerance: 30 },
   },
 };
 
@@ -276,6 +318,131 @@ export const MOSS_FINDS = [
   'a spoon that is definitely one of yours',
   'a tiny anchor from a very confident model ship',
 ];
+
+/* ── The season: seven shifts, Monday's drizzle to the Century Gale (§7.5) ── */
+
+export interface ShiftConfig {
+  day: string;
+  forecast: string;
+  menu: DishId[];
+  waves: WavePlan[];
+  cells: WeatherCell[];
+  keeperOrders: { at: number; note: string }[];
+  albaAt: number | null;
+  /** Century Gale only: the room itself misbehaves. */
+  tilts: { at: number; dur: number; dir: 1 | -1 }[];
+}
+
+const W = (at: number, tickets: DishId[], toast?: string): WavePlan => ({ at, tickets, toast });
+
+export const SEASON: ShiftConfig[] = [
+  {
+    day: 'Monday',
+    forecast: 'Drizzle',
+    menu: ['ninefathom-chowder'],
+    waves: [W(0, ['ninefathom-chowder']), W(40, ['ninefathom-chowder']), W(95, ['ninefathom-chowder', 'ninefathom-chowder'], 'Two at once — storm season begins.'), W(150, ['ninefathom-chowder'])],
+    cells: [{ at: 70, dur: 18, state: 'fresh', gusts: [8] }],
+    keeperOrders: [],
+    albaAt: 58,
+    tilts: [],
+  },
+  {
+    day: 'Tuesday',
+    forecast: 'Fresh breeze',
+    menu: ['ninefathom-chowder', 'fogcutter'],
+    waves: [W(0, ['ninefathom-chowder']), W(20, ['fogcutter']), W(60, ['fogcutter', 'ninefathom-chowder']), W(100, ['ninefathom-chowder', 'fogcutter'], 'The ferry’s in!'), W(155, ['fogcutter'])],
+    cells: [
+      { at: 44, dur: 20, state: 'fresh', gusts: [6] },
+      { at: 110, dur: 22, state: 'squall', gusts: [7], leakAt: 10 },
+    ],
+    keeperOrders: [],
+    albaAt: 52,
+    tilts: [],
+  },
+  {
+    day: 'Wednesday',
+    forecast: 'Squall',
+    menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast'],
+    waves: SHIFT_WAVES,
+    cells: WEATHER_CELLS,
+    keeperOrders: KEEPER_ORDERS,
+    albaAt: ALBA_AT,
+    tilts: [],
+  },
+  {
+    day: 'Thursday',
+    forecast: 'Chop',
+    menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles'],
+    waves: [W(0, ['ninefathom-chowder']), W(14, ['lightning-pickles']), W(46, ['fogcutter', 'squall-rolls']), W(90, ['lightning-pickles', 'ninefathom-chowder', 'fogcutter'], 'The ferry’s in — brace!'), W(140, ['squall-rolls', 'lightning-pickles']), W(172, ['fogcutter'])],
+    cells: [
+      { at: 30, dur: 24, state: 'squall', gusts: [6, 16], strikes: [10] },
+      { at: 96, dur: 30, state: 'gale', gusts: [5, 14, 23], strikes: [8, 20], leakAt: 12 },
+      { at: 160, dur: 22, state: 'squall', strikes: [9], gusts: [14] },
+    ],
+    keeperOrders: [{ at: 70, note: 'Darker. The fog listens. — K' }],
+    albaAt: 50,
+    tilts: [],
+  },
+  {
+    day: 'Friday',
+    forecast: 'Gale',
+    menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles', 'wreck-platter'],
+    waves: [W(0, ['wreck-platter'], 'The big catch came in. Fillet like she taught.'), W(30, ['ninefathom-chowder', 'fogcutter']), W(74, ['lightning-pickles', 'squall-rolls']), W(100, ['wreck-platter', 'fogcutter', 'ninefathom-chowder'], 'Double ferry — all hands!'), W(150, ['wreck-platter']), W(175, ['lightning-pickles'])],
+    cells: [
+      { at: 26, dur: 26, state: 'squall', gusts: [6, 17], leakAt: 9 },
+      { at: 92, dur: 34, state: 'gale', gusts: [4, 12, 24], strikes: [7, 18, 28], leakAt: 15 },
+      { at: 164, dur: 24, state: 'gale', gusts: [8, 18], strikes: [12] },
+    ],
+    keeperOrders: [{ at: 58, note: 'Two, tonight. The light is hungry. — K' }, { at: 132, note: 'No crusts. The sea counts them. — K' }],
+    albaAt: 46,
+    tilts: [],
+  },
+  {
+    day: 'Saturday',
+    forecast: 'Storm',
+    menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles', 'wreck-platter'],
+    waves: [W(0, ['fogcutter', 'ninefathom-chowder']), W(28, ['wreck-platter', 'lightning-pickles']), W(66, ['squall-rolls', 'fogcutter', 'ninefathom-chowder'], 'Ferry one!'), W(108, ['wreck-platter', 'fogcutter', 'lightning-pickles', 'squall-rolls'], 'Ferry two — Saturday doesn’t blink.'), W(154, ['ninefathom-chowder', 'lightning-pickles']), W(178, ['fogcutter'])],
+    cells: [
+      { at: 20, dur: 28, state: 'gale', gusts: [5, 15, 24], strikes: [9, 21], leakAt: 11 },
+      { at: 86, dur: 36, state: 'gale', gusts: [6, 16, 27], strikes: [10, 24], leakAt: 18 },
+      { at: 150, dur: 30, state: 'gale', gusts: [7, 19], strikes: [13, 25] },
+    ],
+    keeperOrders: [{ at: 48, note: 'The gulls talk about you. Toast. — K' }, { at: 124, note: 'Blacker. Tonight matters. — K' }],
+    albaAt: 44,
+    tilts: [],
+  },
+  {
+    day: 'Sunday',
+    forecast: 'THE CENTURY GALE',
+    menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles', 'wreck-platter'],
+    waves: [W(0, ['ninefathom-chowder'], 'The lifeboat crew is coming. Feed whoever knocks.'), W(24, ['fogcutter', 'lightning-pickles']), W(58, ['wreck-platter', 'squall-rolls']), W(96, ['ninefathom-chowder', 'fogcutter', 'wreck-platter'], 'The lifeboat crew, soaked to the bone!'), W(140, ['lightning-pickles', 'fogcutter']), W(168, ['ninefathom-chowder', 'squall-rolls'], 'Last knock before the eye passes.')],
+    cells: [
+      { at: 14, dur: 40, state: 'century', gusts: [5, 15, 26, 36], strikes: [8, 19, 31], leakAt: 10 },
+      { at: 74, dur: 44, state: 'century', gusts: [6, 17, 29, 40], strikes: [9, 22, 35], leakAt: 16 },
+      { at: 138, dur: 52, state: 'century', gusts: [7, 18, 30, 44], strikes: [11, 25, 39, 48] },
+    ],
+    keeperOrders: [{ at: 40, note: 'The lamp dims. One slice, perfect. — K' }, { at: 150, note: 'For the light itself. After the panic. Always. — K' }],
+    albaAt: 36,
+    tilts: [
+      { at: 66, dur: 4, dir: 1 },
+      { at: 156, dur: 4, dir: -1 },
+    ],
+  },
+];
+
+export const SEASON_KEYS = {
+  shift: 'kc2:seasonShift',
+  grades: 'kc2:seasonGrades',
+  favor: 'kc2:favor',
+  favorsUnlocked: 'kc2:favorsUnlocked',
+} as const;
+
+/** Favors — earned through the regulars, one equipped per shift (doc §8). */
+export const FAVORS: Record<string, { name: string; blurb: string }> = {
+  alba: { name: 'Alba radios the ferry', blurb: 'Ferry waves arrive split in two, a breath apart.' },
+  moss: { name: 'Moss’s second bucket', blurb: 'Puddles mop dry in a single stroke.' },
+  keeper: { name: 'Lamplight', blurb: 'Blackouts pass in half the time.' },
+};
 
 /** Alba's 5-beat leftover-special arc (doc §8) — one beat per shift close. */
 export const ALBA_ARC: string[][] = [

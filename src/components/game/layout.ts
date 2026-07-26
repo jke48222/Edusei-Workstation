@@ -38,6 +38,8 @@ export interface GalleyLayout {
   dumbwaiter: Rect;
   /** Toast rest by the stove flame — hold the loaf here to char it. */
   toastSpot: Rect;
+  /** Lightning Pickles jar — pop the lid on the glow peak. */
+  jar: Rect;
 }
 
 export const LANDSCAPE: GalleyLayout = {
@@ -48,6 +50,7 @@ export const LANDSCAPE: GalleyLayout = {
     'grumbling-potato': { x: 398, y: 556, w: 126, h: 112 },
     wrackfish: { x: 538, y: 556, w: 126, h: 112 },
     'stormflour-dough': { x: 678, y: 576, w: 126, h: 108 },
+    'wreckfish-whole': { x: 108, y: 644, w: 128, h: 88 },
   },
   board: { x: 96, y: 452, w: 250, h: 142 },
   butterstone: { x: 22, y: 468, w: 62, h: 58 },
@@ -55,6 +58,7 @@ export const LANDSCAPE: GalleyLayout = {
   kettle: { x: 1138, y: 428, w: 92, h: 132 },
   pan: { x: 830, y: 584, w: 118, h: 84 },
   glass: { x: 1040, y: 592, w: 56, h: 92 },
+  jar: { x: 956, y: 594, w: 58, h: 90 },
   bottles: {
     brine: { x: 1108, y: 596, w: 52, h: 88 },
     tea: { x: 1164, y: 596, w: 52, h: 88 },
@@ -62,7 +66,7 @@ export const LANDSCAPE: GalleyLayout = {
   },
   pass: { x: 1012, y: 298, w: 202, h: 176 },
   dumbwaiter: { x: 1216, y: 160, w: 58, h: 92 },
-  toastSpot: { x: 954, y: 596, w: 90, h: 66 },
+  toastSpot: { x: 742, y: 598, w: 84, h: 62 },
 };
 
 export const PORTRAIT: GalleyLayout = {
@@ -73,13 +77,15 @@ export const PORTRAIT: GalleyLayout = {
     'grumbling-potato': { x: 26, y: 1092, w: 122, h: 106 },
     wrackfish: { x: 160, y: 1092, w: 122, h: 106 },
     'stormflour-dough': { x: 294, y: 1108, w: 118, h: 100 },
+    'wreckfish-whole': { x: 424, y: 1124, w: 114, h: 92 },
   },
   board: { x: 40, y: 858, w: 242, h: 152 },
-  butterstone: { x: 332, y: 776, w: 58, h: 54 },
+  butterstone: { x: 388, y: 776, w: 56, h: 54 },
   pot: { x: 420, y: 828, w: 222, h: 188 },
   kettle: { x: 612, y: 752, w: 92, h: 136 },
   pan: { x: 560, y: 1044, w: 112, h: 80 },
   glass: { x: 262, y: 774, w: 52, h: 90 },
+  jar: { x: 322, y: 778, w: 48, h: 86 },
   bottles: {
     brine: { x: 48, y: 778, w: 50, h: 84 },
     tea: { x: 104, y: 778, w: 50, h: 84 },
@@ -87,7 +93,7 @@ export const PORTRAIT: GalleyLayout = {
   },
   pass: { x: 528, y: 248, w: 148, h: 136 },
   dumbwaiter: { x: 30, y: 250, w: 54, h: 84 },
-  toastSpot: { x: 466, y: 1128, w: 92, h: 62 },
+  toastSpot: { x: 580, y: 1136, w: 88, h: 58 },
 };
 
 export const layoutFor = (aspect: number): GalleyLayout =>

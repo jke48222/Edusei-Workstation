@@ -16,13 +16,53 @@ import { drawGalley } from './core/draw';
 import { loadGameAssets, type GameAssets } from './core/assets';
 import { gameAudio } from './core/audio';
 import { layoutFor } from './layout';
-import { ALBA_ARC, MOSS_FINDS } from './data';
+import { ALBA_ARC, DISHES, FAVORS, MOSS_FINDS, SEASON, SEASON_KEYS, type DishId, type ShiftConfig } from './data';
+import type { FavorId } from './core/sim';
 import { P } from './palette';
 
-type Phase = 'ident' | 'title' | 'service' | 'report' | 'scene';
+const dishName = (d: DishId): string => DISHES[d].name;
+const dishTagline = (d: DishId): string => DISHES[d].tagline;
+
+type Phase = 'ident' | 'title' | 'service' | 'report' | 'journal' | 'scene' | 'season-end';
 
 const ARC_KEY = 'kc2:arcAlba';
 const FINDS_KEY = 'kc2:mossFinds';
+const KEEPER_FAVOR_KEY = 'kc2:keeperFavor';
+
+/** Shift config for any index — 0–6 are the authored week; 7+ is Storm Season+. */
+function configFor(idx: number, favor: FavorId): ShiftConfig {
+  const base = idx < SEASON.length ? SEASON[idx] : SEASON[SEASON.length - 1];
+  let cfg: ShiftConfig = base;
+  if (idx >= SEASON.length) {
+    cfg = {
+      ...base,
+      day: `Storm Season+ · night ${idx - SEASON.length + 1}`,
+      forecast: 'It never really ended',
+      albaAt: null,
+    };
+  }
+  if (favor === 'alba') {
+    // Alba radios the ferry: big waves arrive split in two, a breath apart.
+    const waves = cfg.waves.flatMap((w) =>
+      w.tickets.length >= 3
+        ? [
+            { ...w, tickets: w.tickets.slice(0, Math.ceil(w.tickets.length / 2)) },
+            { at: w.at + 7, tickets: w.tickets.slice(Math.ceil(w.tickets.length / 2)) },
+          ]
+        : [w],
+    );
+    cfg = { ...cfg, waves };
+  }
+  return cfg;
+}
+
+function readGrades(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(SEASON_KEYS.grades) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+}
 
 const readInt = (key: string): number => {
   try {
@@ -55,7 +95,20 @@ export function KitchenChaosGame() {
   const [lastServed, setLastServed] = useState<DishResult | null>(null);
   const [muted, setMuted] = useState(gameAudio.isMuted);
   const [sceneLine, setSceneLine] = useState(0);
+  const [seasonIdx, setSeasonIdx] = useState(() => readInt(SEASON_KEYS.shift));
+  const [favor, setFavor] = useState<FavorId>(null);
   const arcBeat = readInt(ARC_KEY);
+  const favorsUnlocked: FavorId[] = [
+    ...(arcBeat >= ALBA_ARC.length ? (['alba'] as const) : []),
+    ...(readInt(FINDS_KEY) >= 3 ? (['moss'] as const) : []),
+    ...(readInt(KEEPER_FAVOR_KEY) > 0 ? (['keeper'] as const) : []),
+  ];
+  const shiftCfg = configFor(seasonIdx, favor);
+  /** Dishes tomorrow's shift adds — drives the journal interstitial. */
+  const nextUnlocks: DishId[] =
+    seasonIdx + 1 < SEASON.length
+      ? SEASON[seasonIdx + 1].menu.filter((d) => !SEASON[seasonIdx].menu.includes(d))
+      : [];
 
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasHostRef = useRef<HTMLDivElement>(null);
@@ -76,6 +129,12 @@ export function KitchenChaosGame() {
     loadGameAssets().then((a) => {
       if (alive) assetsRef.current = a;
     });
+    // The Unity-port's old high-score key retires with it.
+    try {
+      localStorage.removeItem('kitchen-chaos-best');
+    } catch {
+      /* fine */
+    }
     return () => {
       alive = false;
     };
@@ -126,7 +185,7 @@ export function KitchenChaosGame() {
     const host = canvasHostRef.current;
     if (!canvas || !host) return;
 
-    const sim = new Sim(layoutFor(host.clientWidth / Math.max(host.clientHeight, 1)), (e) => {
+    const sim = new Sim(layoutFor(host.clientWidth / Math.max(host.clientHeight, 1)), configFor(seasonIdx, favor), favor, (e) => {
       if (e.kind === 'toast') showToast(e.text);
       else if (e.kind === 'sfx') gameAudio.play(e.name);
       else if (e.kind === 'tickets') setTickets(e.tickets);
@@ -136,9 +195,19 @@ export function KitchenChaosGame() {
       } else if (e.kind === 'served') {
         setLastServed(e.result);
         setServedCount((n) => n + 1);
+        if (e.result.dishName.includes('Black Toast') && e.result.craft >= 0.8) {
+          writeInt(KEEPER_FAVOR_KEY, 1); // the Keeper remembers a perfect slice
+        }
         showToast(`${e.result.dishName} — ${e.result.score.toFixed(1)}/10`);
       } else if (e.kind === 'shift-complete') {
         setReport(e.report);
+        const grades = readGrades();
+        grades[Math.min(seasonIdx, SEASON.length - 1 + 99)] = e.report.grade;
+        try {
+          localStorage.setItem(SEASON_KEYS.grades, JSON.stringify(grades.slice(0, 40)));
+        } catch {
+          /* fine */
+        }
         window.setTimeout(() => setPhase('report'), 700);
       }
     });
@@ -191,7 +260,26 @@ export function KitchenChaosGame() {
       }
     };
     // Recreating the whole sim on reduced-motion flips is acceptable and rare.
-  }, [phase, prefersReducedMotion, showToast]);
+  }, [phase, prefersReducedMotion, showToast, seasonIdx, favor]);
+
+  /** Advance the calendar after a shift's interstitials are done. */
+  const advanceDay = useCallback(() => {
+    const next = seasonIdx + 1;
+    setSeasonIdx(next);
+    writeInt(SEASON_KEYS.shift, next);
+    setSceneLine(0);
+    setPhase(next === SEASON.length ? 'season-end' : 'title');
+  }, [seasonIdx]);
+
+  const afterReport = () => {
+    if (nextUnlocks.length > 0) setPhase('journal');
+    else if (arcBeat < ALBA_ARC.length && seasonIdx < SEASON.length) setPhase('scene');
+    else advanceDay();
+  };
+  const afterJournal = () => {
+    if (arcBeat < ALBA_ARC.length && seasonIdx < SEASON.length) setPhase('scene');
+    else advanceDay();
+  };
 
   useEffect(() => {
     stageRef.current?.setPaused(paused);
@@ -232,8 +320,8 @@ export function KitchenChaosGame() {
         `}</style>
       )}
 
-      {/* ── Menu backdrop: the galley plate behind title/report ── */}
-      {(phase === 'title' || phase === 'report') && (
+      {/* ── Menu backdrop: the galley plate behind the framing screens ── */}
+      {(phase === 'title' || phase === 'report' || phase === 'journal' || phase === 'season-end') && (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -290,20 +378,43 @@ export function KitchenChaosGame() {
             CHAOS
           </h1>
           <p className="text-sm font-semibold" style={{ color: P.amber }}>
-            The Gale · storm season
+            {shiftCfg.day} · forecast: {shiftCfg.forecast}
           </p>
           <p className="max-w-md text-[13px] leading-relaxed" style={{ color: P.fog }}>
-            One 3½-minute shift. Chowder wants the knife and the spoon, the Fogcutter wants
-            three patient layers, Squall Rolls want rhythm and a well-timed flick — and the
-            ferry crowd doesn’t care that you’re alone back there.
+            {seasonIdx === 0
+              ? 'First shift of storm season. One dish on the menu — Aunt Pet’s journal will give up the rest as the week worsens.'
+              : `Menu tonight: ${shiftCfg.menu.map((d) => d.split('-').join(' ')).length} dishes. The barometer is not your friend.`}
           </p>
+          {favorsUnlocked.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: P.fog }}>
+                favor
+              </span>
+              {favorsUnlocked.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFavor(favor === f ? null : f)}
+                  title={FAVORS[f as string].blurb}
+                  className="rounded-full px-3 py-1 text-xs font-bold"
+                  style={{
+                    background: favor === f ? P.tide : P.slate,
+                    color: P.cream,
+                    outline: favor === f ? `2px solid ${P.lightning}` : 'none',
+                  }}
+                >
+                  {FAVORS[f as string].name}
+                </button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             onClick={startShift}
             className="rounded-full px-10 py-4 text-lg font-extrabold transition-transform hover:scale-105 active:scale-95"
             style={{ background: P.ember, color: P.cream, boxShadow: `0 6px 0 ${P.charcoal}` }}
           >
-            ▶ First shift
+            ▶ {seasonIdx === 0 ? 'First shift' : seasonIdx >= SEASON.length ? 'Another night' : `Open for ${shiftCfg.day}`}
           </button>
           <button type="button" onClick={closeKitchenGame} className="text-xs underline opacity-60 hover:opacity-100">
             Back to the workstation
@@ -481,26 +592,13 @@ export function KitchenChaosGame() {
             </p>
           )}
           <div className="mt-2 flex flex-wrap justify-center gap-3">
-            {arcBeat < ALBA_ARC.length && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSceneLine(0);
-                  setPhase('scene');
-                }}
-                className="rounded-full px-8 py-3 text-base font-extrabold"
-                style={{ background: P.tide, color: P.cream }}
-              >
-                🕯 Close up — Alba stayed
-              </button>
-            )}
             <button
               type="button"
-              onClick={startShift}
+              onClick={afterReport}
               className="rounded-full px-8 py-3 text-base font-extrabold"
               style={{ background: P.ember, color: P.cream }}
             >
-              ↻ Another shift
+              {nextUnlocks.length > 0 ? '📖 Pet’s journal' : arcBeat < ALBA_ARC.length && seasonIdx < SEASON.length ? '🕯 Close up' : 'Lock up'}
             </button>
             <button
               type="button"
@@ -508,6 +606,90 @@ export function KitchenChaosGame() {
               className="rounded-full px-8 py-3 text-base font-bold"
               style={{ background: P.slate, color: P.cream }}
             >
+              Back out
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pet's journal: tomorrow's page dries out enough to read (doc §8) ── */}
+      {phase === 'journal' && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: P.fog }}>
+            aunt pet’s journal — a page dries out
+          </p>
+          {nextUnlocks.map((d) => (
+            <div
+              key={d}
+              className="w-full max-w-md rounded-xl px-6 py-5 text-left"
+              style={{ background: P.cream, color: P.charcoal, transform: 'rotate(-0.8deg)', boxShadow: '0 6px 18px rgba(0,0,0,0.45)' }}
+            >
+              <h3 className="text-xl font-extrabold">{dishName(d)}</h3>
+              <p className="mt-1 text-sm italic opacity-80">“{dishTagline(d)}”</p>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-widest opacity-60">
+                the method is water-damaged — cook it once and your hands will remember
+              </p>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={afterJournal}
+            className="rounded-full px-8 py-3 text-base font-extrabold"
+            style={{ background: P.ember, color: P.cream }}
+          >
+            Tuck it under the barometer
+          </button>
+        </div>
+      )}
+
+      {/* ── Season over: the week you cooked ── */}
+      {phase === 'season-end' && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: P.fog }}>
+            storm season — the week’s forecasts
+          </p>
+          <h2 className="text-4xl font-extrabold" style={{ color: P.amber }}>
+            The Gale held.
+          </h2>
+          <div className="w-full max-w-sm space-y-1 text-left">
+            {SEASON.map((s, i) => (
+              <div key={s.day} className="flex items-center justify-between rounded-lg px-4 py-1.5 text-sm" style={{ background: 'rgba(46,61,79,0.55)' }}>
+                <span className="font-semibold">{s.day}</span>
+                <span className="font-mono text-xs" style={{ color: P.butter }}>
+                  {readGrades()[i] ?? '—'}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="max-w-md text-xs italic" style={{ color: P.fog }}>
+            Alba took the window table through the Century Gale. The Keeper’s light never went out.
+            Somewhere on the roof, Bosun files a formal complaint.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPhase('title')}
+              className="rounded-full px-7 py-3 text-base font-extrabold"
+              style={{ background: P.ember, color: P.cream }}
+            >
+              ⛈ Storm Season+
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                writeInt(SEASON_KEYS.shift, 0);
+                try {
+                  localStorage.setItem(SEASON_KEYS.grades, '[]');
+                } catch { /* fine */ }
+                setSeasonIdx(0);
+                setPhase('title');
+              }}
+              className="rounded-full px-7 py-3 text-base font-bold"
+              style={{ background: P.slate, color: P.cream }}
+            >
+              Restart the week
+            </button>
+            <button type="button" onClick={closeKitchenGame} className="rounded-full px-7 py-3 text-base font-bold" style={{ background: P.slate, color: P.cream }}>
               Back out
             </button>
           </div>
@@ -560,7 +742,7 @@ export function KitchenChaosGame() {
                   const finds = readInt(FINDS_KEY);
                   writeInt(FINDS_KEY, finds + 1);
                   showToast(`Moss surfaces, leaves ${MOSS_FINDS[finds % MOSS_FINDS.length]}.`);
-                  setPhase('title');
+                  advanceDay();
                 }}
                 className="rounded-full px-7 py-2.5 text-sm font-extrabold"
                 style={{ background: P.ember, color: P.cream }}
@@ -570,7 +752,7 @@ export function KitchenChaosGame() {
             )}
             <button
               type="button"
-              onClick={() => setPhase('title')}
+              onClick={advanceDay}
               className="rounded-full px-5 py-2.5 text-sm font-bold opacity-70 hover:opacity-100"
               style={{ background: P.slate, color: P.cream }}
             >

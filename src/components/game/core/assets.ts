@@ -33,7 +33,11 @@ export type SpriteId =
   | 'ing-loaf'
   | 'dish-black-toast'
   | 'portrait-alba'
-  | 'portrait-moss';
+  | 'portrait-moss'
+  | 'prop-picklejar'
+  | 'ing-wreckfish-whole'
+  | 'dish-pickles'
+  | 'dish-wreck-platter';
 
 export interface GameAssets {
   bgLandscape: HTMLImageElement | null;
@@ -70,6 +74,10 @@ const SPRITE_IDS: SpriteId[] = [
   'dish-black-toast',
   'portrait-alba',
   'portrait-moss',
+  'prop-picklejar',
+  'ing-wreckfish-whole',
+  'dish-pickles',
+  'dish-wreck-platter',
 ];
 
 async function loadImage(src: string): Promise<HTMLImageElement | null> {
