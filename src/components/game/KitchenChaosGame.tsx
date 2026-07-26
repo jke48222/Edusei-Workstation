@@ -15,7 +15,6 @@ import { Sim, type DishResult, type ShiftReport, type TicketSnapshot } from './c
 import { drawGalley } from './core/draw';
 import { loadGameAssets, type GameAssets } from './core/assets';
 import { layoutFor } from './layout';
-import { M0_TICKETS } from './data';
 import { P } from './palette';
 
 type Phase = 'ident' | 'title' | 'service' | 'report';
@@ -30,6 +29,7 @@ export function KitchenChaosGame() {
   const [paused, setPaused] = useState(false);
   const [tickets, setTickets] = useState<TicketSnapshot[]>([]);
   const [servedCount, setServedCount] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [report, setReport] = useState<ShiftReport | null>(null);
   const [lastServed, setLastServed] = useState<DishResult | null>(null);
@@ -106,9 +106,10 @@ export function KitchenChaosGame() {
     const sim = new Sim(layoutFor(host.clientWidth / Math.max(host.clientHeight, 1)), (e) => {
       if (e.kind === 'toast') showToast(e.text);
       else if (e.kind === 'tickets') setTickets(e.tickets);
+      else if (e.kind === 'clock') setSecondsLeft(e.secondsLeft);
       else if (e.kind === 'served') {
         setLastServed(e.result);
-        setServedCount(M0_TICKETS - e.remaining);
+        setServedCount((n) => n + 1);
         showToast(`${e.result.dishName} — ${e.result.score.toFixed(1)}/10`);
       } else if (e.kind === 'shift-complete') {
         setReport(e.report);
@@ -178,6 +179,7 @@ export function KitchenChaosGame() {
   const startShift = () => {
     setTickets([]);
     setServedCount(0);
+    setSecondsLeft(0);
     setReport(null);
     setLastServed(null);
     setPaused(false);
@@ -186,7 +188,7 @@ export function KitchenChaosGame() {
 
   /* ── Render ─────────────────────────────────────────────────────────── */
 
-  const ticket = tickets[0];
+  const clock = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`;
 
   return (
     <div
@@ -265,8 +267,9 @@ export function KitchenChaosGame() {
             The Gale · storm season
           </p>
           <p className="max-w-md text-[13px] leading-relaxed" style={{ color: P.fog }}>
-            Dry Dock build (M0): one dish, every verb. Chop with rhythm, pour to the band,
-            stir until the spoon stands up — five bowls of Ninefathom Chowder out the pass.
+            One 3½-minute shift. Chowder wants the knife and the spoon, the Fogcutter wants
+            three patient layers, Squall Rolls want rhythm and a well-timed flick — and the
+            ferry crowd doesn’t care that you’re alone back there.
           </p>
           <button
             type="button"
@@ -286,34 +289,56 @@ export function KitchenChaosGame() {
       {phase === 'service' && (
         <>
           <header
-            className="flex items-center gap-3 px-3 py-2"
+            className="flex items-center gap-2 overflow-x-auto px-3 py-2"
             style={{ background: 'rgba(16,22,31,0.92)', borderBottom: `2px solid ${P.slate}` }}
           >
-            {ticket ? (
-              <div
-                className="flex min-w-0 items-center gap-3 rounded-lg px-3 py-1.5"
-                style={{ background: P.cream, color: P.charcoal, transform: 'rotate(-0.6deg)' }}
-              >
-                <span className="text-sm font-extrabold whitespace-nowrap">№{ticket.id} {ticket.dishName}</span>
-                <span className="hidden gap-2 sm:flex">
-                  {ticket.steps.map((s) => (
-                    <span
-                      key={s.label}
-                      className="text-[11px] font-semibold whitespace-nowrap"
-                      style={{ opacity: s.done ? 0.45 : 1, textDecoration: s.done ? 'line-through' : 'none' }}
-                    >
-                      {s.done ? '✓ ' : '· '}
-                      {s.label}
-                    </span>
-                  ))}
-                </span>
-              </div>
+            {tickets.length === 0 ? (
+              <span className="text-xs font-semibold whitespace-nowrap opacity-50">the line is quiet…</span>
             ) : (
-              <span className="text-sm font-semibold opacity-60">…</span>
+              tickets.map((tk, i) => (
+                <div
+                  key={tk.id}
+                  className="relative shrink-0 rounded-md px-2.5 pt-1.5 pb-2"
+                  style={{
+                    background: P.cream,
+                    color: P.charcoal,
+                    transform: `rotate(${i % 2 === 0 ? -1.2 : 0.9}deg)`,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.35)',
+                  }}
+                >
+                  {/* Clothespin */}
+                  <span
+                    aria-hidden
+                    className="absolute -top-1 left-1/2 h-2 w-3 -translate-x-1/2 rounded-sm"
+                    style={{ background: P.harbor }}
+                  />
+                  <span className="text-[12px] font-extrabold whitespace-nowrap">
+                    №{tk.id} {tk.short}
+                  </span>
+                  {/* Patience: the slip yellows and its edge burns down as it waits */}
+                  <span
+                    aria-hidden
+                    className="absolute bottom-0 left-0 h-1 rounded-b-md"
+                    style={{
+                      width: `${Math.max(4, (1 - tk.staleness) * 100)}%`,
+                      background: tk.staleness > 0.6 ? P.alert : tk.staleness > 0.25 ? P.amber : P.tide,
+                    }}
+                  />
+                </div>
+              ))
             )}
-            <div className="ml-auto flex items-center gap-2">
-              <span className="font-mono text-xs tabular-nums" style={{ color: P.fog }}>
-                {servedCount}/{M0_TICKETS} served
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+              <span
+                className="rounded-full px-3 py-1 font-mono text-sm font-bold tabular-nums"
+                style={{
+                  background: secondsLeft > 0 && secondsLeft <= 20 ? P.alert : P.charcoal,
+                  color: P.cream,
+                }}
+              >
+                {clock}
+              </span>
+              <span className="font-mono text-xs whitespace-nowrap tabular-nums" style={{ color: P.fog }}>
+                {servedCount} out
               </span>
               <button
                 type="button"
@@ -388,18 +413,20 @@ export function KitchenChaosGame() {
             {report.grade}
           </h2>
           <p className="font-mono text-sm tabular-nums" style={{ color: P.fog }}>
-            {report.total.toFixed(1)} / {report.maxTotal} across {report.served.length} bowls
+            {report.total.toFixed(1)} / {report.maxTotal} · {report.served.length} served
+            {report.missed > 0 ? ` · ${report.missed} still waiting at close` : ' · nobody left hungry'}
           </p>
-          <div className="w-full max-w-md space-y-1 text-left">
+          <div className="w-full max-w-md space-y-1 overflow-y-auto text-left" style={{ maxHeight: '38vh' }}>
             {report.served.map((r, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between rounded-lg px-4 py-2 text-sm"
+                className="flex items-center justify-between gap-3 rounded-lg px-4 py-2 text-sm"
                 style={{ background: 'rgba(46,61,79,0.55)' }}
               >
-                <span className="font-semibold">Bowl {i + 1}</span>
-                <span className="font-mono text-xs" style={{ color: P.fog }}>
-                  knife {Math.round(r.chopQ * 100)} · pour {Math.round(r.pourQ * 100)} · stir {Math.round(r.stirQ * 100)}
+                <span className="min-w-0 truncate font-semibold">{r.dishName}</span>
+                <span className="font-mono text-xs whitespace-nowrap" style={{ color: P.fog }}>
+                  craft {Math.round(r.craft * 100)}
+                  {r.lateMult < 0.995 ? ` · late ×${r.lateMult.toFixed(2)}` : ''}
                 </span>
                 <span className="font-extrabold tabular-nums" style={{ color: P.butter }}>
                   {r.score.toFixed(1)}
@@ -407,9 +434,9 @@ export function KitchenChaosGame() {
               </div>
             ))}
           </div>
-          {lastServed?.tip && (
+          {lastServed?.note && (
             <p className="max-w-sm text-xs italic" style={{ color: P.fog }}>
-              Aunt Pet’s margin note: “{lastServed.tip}”
+              Aunt Pet’s margin note: “{lastServed.note}”
             </p>
           )}
           <div className="mt-2 flex gap-3">
