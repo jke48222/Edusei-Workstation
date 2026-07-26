@@ -14,10 +14,30 @@ import { CanvasStage } from './core/engine';
 import { Sim, type DishResult, type ShiftReport, type TicketSnapshot } from './core/sim';
 import { drawGalley } from './core/draw';
 import { loadGameAssets, type GameAssets } from './core/assets';
+import { gameAudio } from './core/audio';
 import { layoutFor } from './layout';
+import { ALBA_ARC, MOSS_FINDS } from './data';
 import { P } from './palette';
 
-type Phase = 'ident' | 'title' | 'service' | 'report';
+type Phase = 'ident' | 'title' | 'service' | 'report' | 'scene';
+
+const ARC_KEY = 'kc2:arcAlba';
+const FINDS_KEY = 'kc2:mossFinds';
+
+const readInt = (key: string): number => {
+  try {
+    return Number(localStorage.getItem(key)) || 0;
+  } catch {
+    return 0;
+  }
+};
+const writeInt = (key: string, v: number): void => {
+  try {
+    localStorage.setItem(key, String(v));
+  } catch {
+    /* fine */
+  }
+};
 
 const IDENT_MS = 1600;
 
@@ -33,6 +53,9 @@ export function KitchenChaosGame() {
   const [toast, setToast] = useState<string | null>(null);
   const [report, setReport] = useState<ShiftReport | null>(null);
   const [lastServed, setLastServed] = useState<DishResult | null>(null);
+  const [muted, setMuted] = useState(gameAudio.isMuted);
+  const [sceneLine, setSceneLine] = useState(0);
+  const arcBeat = readInt(ARC_KEY);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasHostRef = useRef<HTMLDivElement>(null);
@@ -105,9 +128,12 @@ export function KitchenChaosGame() {
 
     const sim = new Sim(layoutFor(host.clientWidth / Math.max(host.clientHeight, 1)), (e) => {
       if (e.kind === 'toast') showToast(e.text);
+      else if (e.kind === 'sfx') gameAudio.play(e.name);
       else if (e.kind === 'tickets') setTickets(e.tickets);
-      else if (e.kind === 'clock') setSecondsLeft(e.secondsLeft);
-      else if (e.kind === 'served') {
+      else if (e.kind === 'clock') {
+        setSecondsLeft(e.secondsLeft);
+        gameAudio.setWeather(sim.weather);
+      } else if (e.kind === 'served') {
         setLastServed(e.result);
         setServedCount((n) => n + 1);
         showToast(`${e.result.dishName} — ${e.result.score.toFixed(1)}/10`);
@@ -197,6 +223,7 @@ export function KitchenChaosGame() {
       aria-label="Kitchen Chaos — The Gale"
       className="fixed inset-0 z-[120] flex flex-col overflow-hidden font-sans outline-none select-none"
       style={{ background: P.charcoal, color: P.cream, touchAction: 'none' }}
+      onPointerDown={() => gameAudio.unlock()}
     >
       {!prefersReducedMotion && (
         <style>{`
@@ -299,8 +326,10 @@ export function KitchenChaosGame() {
                   key={tk.id}
                   className="relative shrink-0 rounded-md px-2.5 pt-1.5 pb-2"
                   style={{
-                    background: P.cream,
-                    color: P.charcoal,
+                    background: tk.kind === 'keeper' ? P.charcoal : P.cream,
+                    color: tk.kind === 'keeper' ? P.cream : P.charcoal,
+                    border: tk.kind === 'keeper' ? `1px solid ${P.harbor}` : tk.kind === 'alba' ? `2px solid ${P.tide}` : 'none',
+                    opacity: tk.flying ? 0.35 : 1,
                     transform: `rotate(${i % 2 === 0 ? -1.2 : 0.9}deg)`,
                     boxShadow: '0 2px 4px rgba(0,0,0,0.35)',
                   }}
@@ -327,6 +356,19 @@ export function KitchenChaosGame() {
               ))
             )}
             <div className="ml-auto flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !muted;
+                  setMuted(next);
+                  gameAudio.setMuted(next);
+                }}
+                aria-label={muted ? 'Unmute game audio' : 'Mute game audio'}
+                className="rounded-full px-2.5 py-1 text-sm font-bold"
+                style={{ background: P.slate, color: P.cream, opacity: muted ? 0.55 : 1 }}
+              >
+                {muted ? '🔇' : '🔊'}
+              </button>
               <span
                 className="rounded-full px-3 py-1 font-mono text-sm font-bold tabular-nums"
                 style={{
@@ -438,7 +480,20 @@ export function KitchenChaosGame() {
               Aunt Pet’s margin note: “{lastServed.note}”
             </p>
           )}
-          <div className="mt-2 flex gap-3">
+          <div className="mt-2 flex flex-wrap justify-center gap-3">
+            {arcBeat < ALBA_ARC.length && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSceneLine(0);
+                  setPhase('scene');
+                }}
+                className="rounded-full px-8 py-3 text-base font-extrabold"
+                style={{ background: P.tide, color: P.cream }}
+              >
+                🕯 Close up — Alba stayed
+              </button>
+            )}
             <button
               type="button"
               onClick={startShift}
@@ -454,6 +509,72 @@ export function KitchenChaosGame() {
               style={{ background: P.slate, color: P.cream }}
             >
               Back out
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Between shifts: the cozy beat, quarantined from service (doc §5) ── */}
+      {phase === 'scene' && (
+        <div className="relative flex flex-1 flex-col items-center justify-end gap-4 px-6 pb-10 text-center">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: 'url(/game/kitchen-chaos/bg-landscape.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 0.3,
+            }}
+          />
+          <img
+            src="/game/kitchen-chaos/sprites/portrait-alba.png"
+            alt="Captain Alba at the counter, mug in hand"
+            className="relative w-40 sm:w-52"
+            style={{ filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.5))' }}
+          />
+          <div
+            className="relative max-w-lg rounded-2xl px-6 py-4 text-left"
+            style={{ background: 'rgba(16,22,31,0.92)', border: `1px solid ${P.harbor}` }}
+          >
+            <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: P.fog }}>
+              Captain Alba · beat {Math.min(arcBeat + 1, ALBA_ARC.length)} of {ALBA_ARC.length}
+            </p>
+            <p className="text-sm leading-relaxed">{ALBA_ARC[Math.min(arcBeat, ALBA_ARC.length - 1)][sceneLine]}</p>
+          </div>
+          <div className="relative flex gap-3">
+            {sceneLine < ALBA_ARC[Math.min(arcBeat, ALBA_ARC.length - 1)].length - 1 ? (
+              <button
+                type="button"
+                onClick={() => setSceneLine((n) => n + 1)}
+                className="rounded-full px-7 py-2.5 text-sm font-extrabold"
+                style={{ background: P.slate, color: P.cream }}
+              >
+                …
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  writeInt(ARC_KEY, arcBeat + 1);
+                  const finds = readInt(FINDS_KEY);
+                  writeInt(FINDS_KEY, finds + 1);
+                  showToast(`Moss surfaces, leaves ${MOSS_FINDS[finds % MOSS_FINDS.length]}.`);
+                  setPhase('title');
+                }}
+                className="rounded-full px-7 py-2.5 text-sm font-extrabold"
+                style={{ background: P.ember, color: P.cream }}
+              >
+                Give her the leftover special
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setPhase('title')}
+              className="rounded-full px-5 py-2.5 text-sm font-bold opacity-70 hover:opacity-100"
+              style={{ background: P.slate, color: P.cream }}
+            >
+              Lock up quietly
             </button>
           </div>
         </div>
