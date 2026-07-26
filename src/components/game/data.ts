@@ -6,6 +6,8 @@
  * plus the 3.5-minute shift timeline with the ferry wave. M2/M4 add entries, not fields.
  */
 
+import type { WeatherState } from './palette';
+
 /* ── Ingredients ─────────────────────────────────────────────────────── */
 
 export type IngredientId =
@@ -176,3 +178,46 @@ export const SHIFT_WAVES: WavePlan[] = [
   { at: 148, tickets: ['squall-rolls'] },
   { at: 170, tickets: ['ninefathom-chowder', 'fogcutter'] },
 ];
+
+/* ── Weather (doc §7): telegraphed, answerable, cascading, funny ─────── */
+
+export interface WeatherCell {
+  /** Cell arrives at this shift second and lasts `dur` seconds. */
+  at: number;
+  dur: number;
+  state: WeatherState;
+  /** Gust moments (offsets into the cell, seconds). */
+  gusts?: number[];
+  /** A leak opens this many seconds into the cell. */
+  leakAt?: number;
+  /** Lightning strikes (offsets into the cell, seconds). */
+  strikes?: number[];
+}
+
+/** One shift's weather script — the barometer forecasts each cell BAROMETER_LEAD_S early. */
+export const WEATHER_CELLS: WeatherCell[] = [
+  { at: 28, dur: 22, state: 'fresh', gusts: [6, 15] },
+  { at: 64, dur: 26, state: 'squall', gusts: [5, 17], leakAt: 9 },
+  { at: 104, dur: 30, state: 'gale', gusts: [4, 13, 22], strikes: [8, 19], leakAt: 14 },
+  { at: 158, dur: 20, state: 'squall', gusts: [7], strikes: [12] },
+];
+
+/** How far ahead the barometer needle moves before a cell lands. */
+export const BAROMETER_LEAD_S = 10;
+
+/** Seconds a gust telegraphs (line flutter + whistle icon) before it hits. */
+export const GUST_TELEGRAPH_S = 2.5;
+
+/** Flying tickets stay catchable this long before smudging into mystery slips. */
+export const TICKET_CATCH_S = 3.2;
+
+/** The shutter closes for this long once latched, then creaks back open. */
+export const SHUTTER_CLOSED_S = 14;
+
+/** Lightning charges the brine this long — pours in that window are perfect. */
+export const CHARGED_BRINE_S = 12;
+
+/** Puddles: drip growth per second, mop strokes to clear, slip drag through them. */
+export const PUDDLE_GROWTH = 0.09;
+export const MOP_STROKES = 3;
+

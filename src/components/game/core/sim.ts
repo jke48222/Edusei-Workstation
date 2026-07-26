@@ -21,9 +21,12 @@ import { angleDelta, clamp, dist, inflate, rectContains } from './geom';
 import type { GalleyLayout } from '../layout';
 import type { DishId, GlassSpec, IngredientId, LayerSource, PanSpec, PotSpec } from '../data';
 import {
-  CHOP_STROKE_PX, DISHES, FLIP_STROKE_PX, FOLD_STROKE_PX, INGREDIENTS, LAYER_LABEL,
-  POUR_RATE, SHIFT_SECONDS, SHIFT_WAVES, STIR_TEMPO, TICKET_FLOOR_MULT, TICKET_GRACE_S,
+  BAROMETER_LEAD_S, CHARGED_BRINE_S, CHOP_STROKE_PX, DISHES, FLIP_STROKE_PX, FOLD_STROKE_PX,
+  GUST_TELEGRAPH_S, INGREDIENTS, LAYER_LABEL, MOP_STROKES, POUR_RATE, PUDDLE_GROWTH,
+  SHIFT_SECONDS, SHIFT_WAVES, SHUTTER_CLOSED_S, STIR_TEMPO, TICKET_CATCH_S,
+  TICKET_FLOOR_MULT, TICKET_GRACE_S, WEATHER_CELLS,
 } from '../data';
+import type { WeatherState } from '../palette';
 import type { StagePointerEvent } from './engine';
 
 /* ── Specs (typed accessors) ─────────────────────────────────────────── */
@@ -40,6 +43,10 @@ export interface TicketSnapshot {
   short: string;
   /** 0 fresh → 1 fully stale (score floor). */
   staleness: number;
+  /** Smudged slip — the strip shows ??? instead of the dish. */
+  mystery: boolean;
+  /** Currently airborne (hidden from the strip, catchable on canvas). */
+  flying: boolean;
 }
 
 export interface DishResult {
@@ -134,6 +141,34 @@ interface TicketState {
   id: number;
   dishId: DishId;
   bornShiftT: number;
+  /** Smudged by a gust: the strip hides the dish; the player serves from memory. */
+  mystery: boolean;
+}
+
+/** A ticket torn off the line by a gust, mid-air and catchable. */
+export interface FlyingTicket {
+  ticketId: number;
+  p: Pt;
+  v: Pt;
+  born: number;
+}
+
+export interface Leak {
+  /** Drip target point (over the floor between stations). */
+  p: Pt;
+  /** Still dripping (grows the puddle) — stops when its cell passes. */
+  active: boolean;
+  /** 0..1 → puddle radius. */
+  puddle: number;
+  mopStrokes: number;
+}
+
+export interface FloorItem {
+  ing: IngredientId | null;
+  dish: DishId | null;
+  processed: boolean;
+  p: Pt;
+  despawnAt: number;
 }
 
 type PourSession =
@@ -141,11 +176,11 @@ type PourSession =
   | { target: 'glass'; source: LayerSource; startT: number; startFill: number };
 
 interface StrokeSession {
-  kind: 'chop' | 'fold' | 'flip' | 'shave';
+  kind: 'chop' | 'fold' | 'flip' | 'shave' | 'shutter' | 'mop';
   anchor: number;
   armed: boolean;
   disarmAt: number;
-  /** Shave only: the anchor point (flicks are direction-agnostic). */
+  /** Shave/mop only: the anchor point (flicks are direction-agnostic). */
   anchorPt?: Pt;
 }
 
@@ -177,6 +212,7 @@ export class Sim {
   private downAt: Pt = { x: 0, y: 0 };
   private downT = 0;
   private moved = false;
+  private lastMove: { p: Pt; t: number } | null = null;
   private emit: (e: SimEvent) => void;
   private ticketSeq = 0;
   private open: TicketState[] = [];
@@ -185,6 +221,22 @@ export class Sim {
   private lastClockEmit = -1;
   private lastFoldQ = 0.75;
   private lastChopQ = 0.75;
+
+  /* ── Weather state (doc §7) ── */
+  weather: WeatherState = 'fair';
+  /** What the barometer needle points at — it forecasts, the room follows. */
+  barometer: WeatherState = 'fair';
+  gustTelegraphUntil = 0;
+  shutterClosedUntilShiftT = 0;
+  flying: FlyingTicket[] = [];
+  leak: Leak | null = null;
+  floorItems: FloorItem[] = [];
+  chargedUntil = 0;
+  flashUntil = 0;
+  blackoutUntil = 0;
+  private firedGusts = new Set<string>();
+  private firedStrikes = new Set<string>();
+  private firedLeaks = new Set<number>();
 
   constructor(layout: GalleyLayout, emit: (e: SimEvent) => void) {
     this.layout = layout;
@@ -205,7 +257,7 @@ export class Sim {
       while (this.waveIdx < SHIFT_WAVES.length && SHIFT_WAVES[this.waveIdx].at <= this.shiftT) {
         const wave = SHIFT_WAVES[this.waveIdx++];
         for (const dishId of wave.tickets) {
-          this.open.push({ id: ++this.ticketSeq, dishId, bornShiftT: this.shiftT });
+          this.open.push({ id: ++this.ticketSeq, dishId, bornShiftT: this.shiftT, mystery: false });
         }
         if (wave.toast) this.toast(wave.toast);
         this.emitTickets();
@@ -217,6 +269,8 @@ export class Sim {
         this.emit({ kind: 'clock', secondsLeft });
         this.emitTickets(); // staleness bars tick alongside the clock
       }
+
+      this.updateWeather(dt, now);
 
       if (this.shiftT >= SHIFT_SECONDS) this.endShift();
     }
@@ -236,6 +290,147 @@ export class Sim {
     this.fx = this.fx.filter((f) => now - f.born < f.ttl);
   }
 
+  /* ── Weather engine: telegraphed, answerable, cascading (doc §7.0) ── */
+
+  private updateWeather(dt: number, now: number): void {
+    // Barometer forecasts; the room follows when the cell actually arrives.
+    const active = WEATHER_CELLS.find((c) => this.shiftT >= c.at && this.shiftT < c.at + c.dur);
+    const coming = WEATHER_CELLS.find(
+      (c) => this.shiftT >= c.at - BAROMETER_LEAD_S && this.shiftT < c.at,
+    );
+    this.weather = active?.state ?? 'fair';
+    this.barometer = (coming ?? active)?.state ?? 'fair';
+
+    if (active) {
+      const into = this.shiftT - active.at;
+      for (const g of active.gusts ?? []) {
+        const key = `${active.at}:${g}`;
+        if (into >= g - GUST_TELEGRAPH_S && into < g && !this.firedGusts.has(key)) {
+          this.gustTelegraphUntil = now + GUST_TELEGRAPH_S * 1000;
+        }
+        if (into >= g && !this.firedGusts.has(key)) {
+          this.firedGusts.add(key);
+          this.fireGust();
+        }
+      }
+      if (active.leakAt !== undefined && into >= active.leakAt && !this.firedLeaks.has(active.at)) {
+        this.firedLeaks.add(active.at);
+        this.openLeak();
+      }
+      for (const s of active.strikes ?? []) {
+        const key = `${active.at}:${s}`;
+        if (into >= s && !this.firedStrikes.has(key)) {
+          this.firedStrikes.add(key);
+          this.strike(now, active.state);
+        }
+      }
+      if (this.leak && !active.leakAt && this.leak.active) {
+        // A leak only drips while some cell is overhead; see below for closing.
+      }
+    } else if (this.leak?.active) {
+      this.leak.active = false; // the cell passed; the puddle remains until mopped
+    }
+
+    // Shutter re-opens on its own.
+    if (this.shutterClosedUntilShiftT > 0 && this.shiftT >= this.shutterClosedUntilShiftT) {
+      this.shutterClosedUntilShiftT = 0;
+      this.toast('The shutter creaks back open.');
+    }
+
+    // Leak drips grow the puddle.
+    if (this.leak?.active) {
+      this.leak.puddle = Math.min(this.leak.puddle + PUDDLE_GROWTH * dt, 1);
+    }
+
+    // Flying tickets drift; uncaught ones smudge into mystery slips.
+    if (this.flying.length) {
+      for (const f of this.flying) {
+        f.p.x += f.v.x * dt;
+        f.p.y += f.v.y * dt;
+        f.v.y += 26 * dt;
+        f.v.x *= 1 - 0.4 * dt;
+      }
+      const expired = this.flying.filter((f) => now - f.born >= TICKET_CATCH_S * 1000);
+      if (expired.length) {
+        for (const f of expired) {
+          const tk = this.open.find((t) => t.id === f.ticketId);
+          if (tk) tk.mystery = true;
+        }
+        this.flying = this.flying.filter((f) => now - f.born < TICKET_CATCH_S * 1000);
+        this.toast('The rain ate the ink — what was that order?');
+        this.emitTickets();
+      }
+    }
+
+    // Dropped food despawns (the floor keeps nothing warm).
+    if (this.floorItems.length) {
+      this.floorItems = this.floorItems.filter((f) => now < f.despawnAt);
+    }
+  }
+
+  private shutterClosed(): boolean {
+    return this.shiftT < this.shutterClosedUntilShiftT;
+  }
+
+  private fireGust(): void {
+    if (this.shutterClosed()) {
+      this.spawnFx('puff', { x: this.layout.porthole.x, y: this.layout.porthole.y });
+      this.toast('The shutter takes the gust on the chin.');
+      return;
+    }
+    // Tear slips off the line — one in lighter weather, two when it's truly blowing.
+    const tearCount = this.weather === 'gale' || this.weather === 'century' ? 2 : 1;
+    const candidates = this.open.filter(
+      (t) => !t.mystery && !this.flying.some((f) => f.ticketId === t.id),
+    );
+    const torn = candidates.slice(0, tearCount);
+    if (torn.length === 0) {
+      this.toast('A gust rattles the empty line.');
+      return;
+    }
+    const L = this.layout;
+    torn.forEach((tk, i) => {
+      this.flying.push({
+        ticketId: tk.id,
+        p: { x: L.size.w * (0.3 + i * 0.18), y: 60 },
+        v: { x: 60 + i * 50, y: 30 + i * 24 },
+        born: this.now,
+      });
+    });
+    this.toast('Gust! Catch those tickets!');
+    this.emitTickets();
+  }
+
+  private openLeak(): void {
+    if (this.leak) {
+      this.leak.active = true;
+      return;
+    }
+    const L = this.layout;
+    // The drip lands on open floor between the board and the stove — right where
+    // every carry route passes. That is the point.
+    const p =
+      L.size.w > L.size.h
+        ? { x: L.size.w * 0.49, y: L.size.h * 0.86 }
+        : { x: L.size.w * 0.5, y: L.size.h * 0.585 };
+    this.leak = { p, active: true, puddle: 0.18, mopStrokes: 0 };
+    this.toast('A drip finds the floor. It always finds the floor.');
+  }
+
+  private strike(now: number, state: WeatherState): void {
+    this.flashUntil = now + 320;
+    this.chargedUntil = now + CHARGED_BRINE_S * 1000;
+    if (state === 'gale' || state === 'century') {
+      this.blackoutUntil = now + 1500;
+    }
+    this.spawnFx('text', { x: this.layout.porthole.x, y: this.layout.porthole.y - 40 }, '⚡');
+    this.toast('Lightning! The brine hums — pour it while it glows.');
+  }
+
+  private puddleRadius(): number {
+    return this.leak ? 36 + this.leak.puddle * 74 : 0;
+  }
+
   private staleness(tk: TicketState): number {
     const age = this.shiftT - tk.bornShiftT;
     if (age <= TICKET_GRACE_S) return 0;
@@ -252,8 +447,10 @@ export class Sim {
       tickets: this.open.map((tk) => ({
         id: tk.id,
         dishId: tk.dishId,
-        short: DISHES[tk.dishId].short,
+        short: tk.mystery ? '???' : DISHES[tk.dishId].short,
         staleness: this.staleness(tk),
+        mystery: tk.mystery,
+        flying: this.flying.some((f) => f.ticketId === tk.id),
       })),
     });
   }
@@ -309,9 +506,41 @@ export class Sim {
   private onDown(p: Pt, t: number): void {
     const L = this.layout;
 
+    // Airborne tickets outrank everything — they are seconds from smudging.
+    for (const f of this.flying) {
+      if (dist(p, f.p) <= 52) {
+        this.flying = this.flying.filter((x) => x !== f);
+        this.spawnFx('text', f.p, 'caught!');
+        this.emitTickets();
+        return;
+      }
+    }
+
     if (this.carry) {
       this.carry.held = true;
       this.carry.pos = p;
+      return;
+    }
+
+    // Dropped food on the floor: grab it back before it despawns.
+    for (const item of this.floorItems) {
+      if (dist(p, item.p) <= 48) {
+        this.floorItems = this.floorItems.filter((x) => x !== item);
+        this.carry = { ing: item.ing, dish: item.dish, processed: item.processed, pos: p, held: true };
+        return;
+      }
+    }
+
+    // The shutter: pull down across the porthole to batten (doc §6).
+    const ph = L.porthole;
+    if (!this.shutterClosed() && dist(p, { x: ph.x, y: ph.y }) <= ph.r + 26) {
+      this.stroke = { kind: 'shutter', anchor: p.y, armed: true, disarmAt: p.y };
+      return;
+    }
+
+    // Mop a puddle (three scrub strokes clears it — the cascade breaker).
+    if (this.leak && this.leak.puddle > 0 && dist(p, this.leak.p) <= this.puddleRadius() + 14) {
+      this.stroke = { kind: 'mop', anchor: 0, armed: true, disarmAt: 0, anchorPt: p };
       return;
     }
 
@@ -420,9 +649,30 @@ export class Sim {
 
   private onMove(p: Pt, t: number): void {
     if (this.carry?.held) {
+      // Slip cascade: hurrying a carry through a puddle can dump it on the floor.
+      if (this.leak && this.leak.puddle > 0.12 && dist(p, this.leak.p) <= this.puddleRadius()) {
+        const lm = this.lastMove;
+        if (lm) {
+          const speed = dist(p, lm.p) / Math.max(t - lm.t, 1); // px per ms
+          if (speed > 1.5) {
+            const c = this.carry;
+            this.floorItems.push({
+              ing: c.ing, dish: c.dish, processed: c.processed,
+              p: { ...p }, despawnAt: t + 6000,
+            });
+            this.carry = null;
+            this.spawnFx('puff', p);
+            this.toast('The puddle takes its toll — grab it quick!');
+            this.lastMove = { p, t };
+            return;
+          }
+        }
+      }
       this.carry.pos = p;
+      this.lastMove = { p, t };
       return;
     }
+    this.lastMove = { p, t };
 
     const st = this.stroke;
     if (st && this.board && !this.board.done && (st.kind === 'chop' || st.kind === 'fold')) {
@@ -443,6 +693,38 @@ export class Sim {
           st.armed = true;
           st.anchor = p.y;
         }
+      }
+      return;
+    }
+
+    if (st && st.kind === 'shutter') {
+      if (p.y - st.anchor >= 64) {
+        this.stroke = null;
+        this.shutterClosedUntilShiftT = this.shiftT + SHUTTER_CLOSED_S;
+        this.spawnFx('text', { x: this.layout.porthole.x, y: this.layout.porthole.y }, 'battened!');
+        this.toast('Shutter down. The storm can knock all it likes.');
+      }
+      return;
+    }
+
+    if (st && st.kind === 'mop' && st.anchorPt && this.leak) {
+      if (st.armed && dist(p, st.anchorPt) >= 38) {
+        st.armed = false;
+        this.leak.mopStrokes++;
+        this.spawnFx('spark', { ...this.leak.p });
+        if (this.leak.mopStrokes >= MOP_STROKES) {
+          this.spawnFx('puff', { ...this.leak.p });
+          this.toast(this.leak.active ? 'Dry — for now. That drip has plans.' : 'Dry floor, safe footing.');
+          if (this.leak.active) {
+            this.leak.puddle = 0.05;
+            this.leak.mopStrokes = 0;
+          } else {
+            this.leak = null;
+          }
+          this.stroke = null;
+        }
+      } else if (!st.armed && dist(p, st.anchorPt) <= 16) {
+        st.armed = true;
       }
       return;
     }
@@ -675,6 +957,8 @@ export class Sim {
     const [lo] = spec.band;
     if (fill < lo) return; // under-poured: top it up with another press
     let q = bandQuality(fill, spec.band);
+    // Storm-charged brine pours perfectly while it glows (doc §7.2 — lightning gives).
+    if (pour.source === 'brine' && this.now < this.chargedUntil) q = 1;
     if (pour.source !== spec.source) {
       q *= 0.35;
       this.glass.murky = true;
@@ -708,6 +992,8 @@ export class Sim {
       return;
     }
     const tk = this.open.splice(tkIdx, 1)[0];
+    if (tk.mystery) this.toast('You remembered the smudged order. Aunt Pet would nod.');
+    this.flying = this.flying.filter((f) => f.ticketId !== tk.id);
 
     let craft = 0;
     let note: string | null = null;
