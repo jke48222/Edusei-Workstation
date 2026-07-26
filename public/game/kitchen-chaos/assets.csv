@@ -1,0 +1,12 @@
+id,role,type,description,size/ratio,style line ref,source
+bg-landscape,background plate landscape,background,lighthouse galley café interior at storm dusk with porthole + ticket rope + lantern + serving hatch + empty stove and counters,16:9 2048w,STYLE FORMULA v1 (docs/kitchen-chaos-2d.md §1.2),nano_banana_2 + moodboard-b-flat-moody-galley.jpg ref
+bg-portrait,background plate portrait,background,same galley recomposed 9:16 with stations in the thumb zone,9:16 2048h,STYLE FORMULA v1,nano_banana_2 + moodboard ref
+prop-pot,pot station,sprite,wide two-handled copper chowder pot,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-kettle,pour station,sprite,tall pale-silver fog kettle with curved spout,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-board,chop station,sprite,thick wooden cutting board with small knife,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+prop-crate,ingredient bin,sprite,small open wooden crate,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-potato-raw,ingredient,sprite,plump golden grumbling potato with grumpy mouth,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-potato-chopped,ingredient state,sprite,pile of chopped golden potato chunks,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-fish-raw,ingredient,sprite,flat blue-grey wrackfish with chart markings,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+ing-fish-chopped,ingredient state,sprite,three pale cream fillets,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
+dish-chowder,served dish,sprite,rustic bowl of thick cream chowder with butter dots and steam wisp,1:1 320px keyed,STYLE FORMULA v1,nano_banana_2 magenta-keyed
