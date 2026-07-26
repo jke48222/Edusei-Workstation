@@ -49,7 +49,7 @@ export const INGREDIENTS: Record<IngredientId, IngredientDef> = {
 
 /* ── Dishes ──────────────────────────────────────────────────────────── */
 
-export type DishId = 'ninefathom-chowder' | 'fogcutter' | 'squall-rolls';
+export type DishId = 'ninefathom-chowder' | 'fogcutter' | 'squall-rolls' | 'black-toast';
 
 export type LayerSource = 'brine' | 'tea' | 'cream';
 
@@ -77,12 +77,22 @@ export interface PanSpec {
   shimmerWindowMs: number;
 }
 
+export interface ToastSpec {
+  kind: 'toast';
+  /** Char meter release band — deliberately PAST the panic cue (doc §4/§6). */
+  releaseBand: [number, number];
+  /** Char climbs at this rate per second while held to the flame. */
+  charRate: number;
+  /** The safe-looking cue starts panicking here; the truth is later. */
+  panicAt: number;
+}
+
 export interface DishDef {
   id: DishId;
   name: string;
   short: string;
   tagline: string;
-  spec: PotSpec | GlassSpec | PanSpec;
+  spec: PotSpec | GlassSpec | PanSpec | ToastSpec;
 }
 
 export const DISHES: Record<DishId, DishDef> = {
@@ -124,6 +134,18 @@ export const DISHES: Record<DishId, DishDef> = {
       flips: 2,
       shimmerPeriodMs: 1700,
       shimmerWindowMs: 620,
+    },
+  },
+  'black-toast': {
+    id: 'black-toast',
+    name: 'The Keeper’s Black Toast',
+    short: 'Black Toast',
+    tagline: 'The correct moment to stop is after the panic.',
+    spec: {
+      kind: 'toast',
+      releaseBand: [0.78, 0.92],
+      charRate: 0.16,
+      panicAt: 0.62,
     },
   },
 };
@@ -220,4 +242,67 @@ export const CHARGED_BRINE_S = 12;
 /** Puddles: drip growth per second, mop strokes to clear, slip drag through them. */
 export const PUDDLE_GROWTH = 0.09;
 export const MOP_STROKES = 3;
+
+/* ── The regulars (doc §3, §7.3) ─────────────────────────────────────── */
+
+/** The Keeper orders by dumbwaiter; his notes track the barometer down. */
+export const KEEPER_ORDERS: { at: number; note: string }[] = [
+  { at: 44, note: 'Toast. Black as the ninth wave. — K' },
+  { at: 126, note: 'No crusts. The sea counts them. — K' },
+];
+
+/** Crank revolutions to send the dumbwaiter up. */
+export const CRANK_REVS = 1.5;
+
+/** Alba's slip arrives here; she is certain you already know what it means. */
+export const ALBA_AT = 58;
+export const ALBA_BONUS = 1.1;
+export const ALBA_WRONG_MULT = 0.75;
+
+/** Gull syndicate: exposure-driven raids (doc §7.3). */
+export const GULL_EXPOSURE_S = 7;
+export const GULL_TELEGRAPH_S = 1.4;
+export const GULL_PECK_S = 1.8;
+export const GULL_SHOO_TAPS = 2;
+export const GRUDGE_PER_SHOO = 18;
+export const BOSUN_GRUDGE = 60;
+export const BOSUN_BLOCK_S = 12;
+
+/** Moss surfaces between shifts and tips in what the seabed coughs up. */
+export const MOSS_FINDS = [
+  'a brass button, polished by the tide',
+  'half a chess knight, coral-crusted',
+  'a bottle with the cork still in (empty — he checked)',
+  'a spoon that is definitely one of yours',
+  'a tiny anchor from a very confident model ship',
+];
+
+/** Alba's 5-beat leftover-special arc (doc §8) — one beat per shift close. */
+export const ALBA_ARC: string[][] = [
+  [
+    'Alba turns her mug like a wheel. “First storm week, and you kept the pass moving.”',
+    '“Pet used to say the ferry crossing tastes of whatever she cooked that morning.”',
+    '“Tomorrow’s crossing tastes of chowder, then.” She almost smiles.',
+  ],
+  [
+    '“Held the nine o’clock for a man chasing his hat down the dock,” she says.',
+    '“Eleven minutes. Harbor master says I owe him a report. I say I owe the hat.”',
+    'She taps the leftover tin. “Pet fed the hat-chasers too. Same tin.”',
+  ],
+  [
+    '“You’ll hear it from someone: I’m the reason the old Gale closed a winter.”',
+    '“Ran her aground on Wrack Point in a century blow. Pet fed the whole rescue.”',
+    '“Never told her sorry. Told her tonnage. She understood tonnage.”',
+  ],
+  [
+    'Alba sets something on the counter: a ferry token, worn smooth. “Pet’s fare.”',
+    '“She rode free thirty years and paid every time. I kept them all.”',
+    '“You cook like the fare’s already paid. Good. Keep that.”',
+  ],
+  [
+    'She stands in the doorway with the storm behind her like a coat.',
+    '“Century Gale’s coming Sunday. My crossing’s cancelled. First time in years.”',
+    '“So I’ll be here at six. Table by the window. Cook like she’s watching.”',
+  ],
+];
 

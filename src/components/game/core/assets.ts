@@ -25,7 +25,15 @@ export type SpriteId =
   | 'ing-dough-folded'
   | 'dish-chowder'
   | 'dish-fogcutter'
-  | 'dish-rolls';
+  | 'dish-rolls'
+  | 'gull-flying'
+  | 'gull-standing'
+  | 'bosun-gull'
+  | 'prop-dumbwaiter'
+  | 'ing-loaf'
+  | 'dish-black-toast'
+  | 'portrait-alba'
+  | 'portrait-moss';
 
 export interface GameAssets {
   bgLandscape: HTMLImageElement | null;
@@ -54,6 +62,14 @@ const SPRITE_IDS: SpriteId[] = [
   'dish-chowder',
   'dish-fogcutter',
   'dish-rolls',
+  'gull-flying',
+  'gull-standing',
+  'bosun-gull',
+  'prop-dumbwaiter',
+  'ing-loaf',
+  'dish-black-toast',
+  'portrait-alba',
+  'portrait-moss',
 ];
 
 async function loadImage(src: string): Promise<HTMLImageElement | null> {

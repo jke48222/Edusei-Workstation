@@ -34,6 +34,10 @@ export interface GalleyLayout {
   bottles: Record<LayerSource, Rect>;
   /** The pass — the warm serving hatch; serve completed dishes here. */
   pass: Rect;
+  /** The Keeper's dumbwaiter hatch (crank verb sends Black Toast up). */
+  dumbwaiter: Rect;
+  /** Toast rest by the stove flame — hold the loaf here to char it. */
+  toastSpot: Rect;
 }
 
 export const LANDSCAPE: GalleyLayout = {
@@ -57,6 +61,8 @@ export const LANDSCAPE: GalleyLayout = {
     cream: { x: 1220, y: 596, w: 52, h: 88 },
   },
   pass: { x: 1012, y: 298, w: 202, h: 176 },
+  dumbwaiter: { x: 1216, y: 160, w: 58, h: 92 },
+  toastSpot: { x: 954, y: 596, w: 90, h: 66 },
 };
 
 export const PORTRAIT: GalleyLayout = {
@@ -80,6 +86,8 @@ export const PORTRAIT: GalleyLayout = {
     cream: { x: 160, y: 778, w: 50, h: 84 },
   },
   pass: { x: 528, y: 248, w: 148, h: 136 },
+  dumbwaiter: { x: 30, y: 250, w: 54, h: 84 },
+  toastSpot: { x: 466, y: 1128, w: 92, h: 62 },
 };
 
 export const layoutFor = (aspect: number): GalleyLayout =>

@@ -21,10 +21,12 @@ import { angleDelta, clamp, dist, inflate, rectContains } from './geom';
 import type { GalleyLayout } from '../layout';
 import type { DishId, GlassSpec, IngredientId, LayerSource, PanSpec, PotSpec } from '../data';
 import {
-  BAROMETER_LEAD_S, CHARGED_BRINE_S, CHOP_STROKE_PX, DISHES, FLIP_STROKE_PX, FOLD_STROKE_PX,
-  GUST_TELEGRAPH_S, INGREDIENTS, LAYER_LABEL, MOP_STROKES, POUR_RATE, PUDDLE_GROWTH,
-  SHIFT_SECONDS, SHIFT_WAVES, SHUTTER_CLOSED_S, STIR_TEMPO, TICKET_CATCH_S,
-  TICKET_FLOOR_MULT, TICKET_GRACE_S, WEATHER_CELLS,
+  ALBA_AT, ALBA_BONUS, ALBA_WRONG_MULT, BAROMETER_LEAD_S, BOSUN_BLOCK_S, BOSUN_GRUDGE,
+  CHARGED_BRINE_S, CHOP_STROKE_PX, CRANK_REVS, DISHES, FLIP_STROKE_PX, FOLD_STROKE_PX,
+  GRUDGE_PER_SHOO, GULL_EXPOSURE_S, GULL_PECK_S, GULL_SHOO_TAPS, GULL_TELEGRAPH_S,
+  GUST_TELEGRAPH_S, INGREDIENTS, KEEPER_ORDERS, LAYER_LABEL, MOP_STROKES, POUR_RATE,
+  PUDDLE_GROWTH, SHIFT_SECONDS, SHIFT_WAVES, SHUTTER_CLOSED_S, STIR_TEMPO, TICKET_CATCH_S,
+  TICKET_FLOOR_MULT, TICKET_GRACE_S, WEATHER_CELLS, type ToastSpec,
 } from '../data';
 import type { WeatherState } from '../palette';
 import type { StagePointerEvent } from './engine';
@@ -34,6 +36,9 @@ import type { StagePointerEvent } from './engine';
 const POT_SPEC = DISHES['ninefathom-chowder'].spec as PotSpec;
 const GLASS_SPEC = DISHES.fogcutter.spec as GlassSpec;
 const PAN_SPEC = DISHES['squall-rolls'].spec as PanSpec;
+const TOAST_SPEC = DISHES['black-toast'].spec as ToastSpec;
+
+const ALBA_USUAL_KEY = 'kc2:albaUsual';
 
 /* ── Events the React shell listens for ─────────────────────────────── */
 
@@ -47,6 +52,7 @@ export interface TicketSnapshot {
   mystery: boolean;
   /** Currently airborne (hidden from the strip, catchable on canvas). */
   flying: boolean;
+  kind: 'normal' | 'keeper' | 'alba';
 }
 
 export interface DishResult {
@@ -71,6 +77,7 @@ export type SimEvent =
   | { kind: 'tickets'; tickets: TicketSnapshot[] }
   | { kind: 'clock'; secondsLeft: number }
   | { kind: 'served'; result: DishResult; open: number }
+  | { kind: 'sfx'; name: import('./audio').SfxName }
   | { kind: 'shift-complete'; report: ShiftReport };
 
 /* ── Station state (renderer reads these) ───────────────────────────── */
@@ -143,6 +150,28 @@ interface TicketState {
   bornShiftT: number;
   /** Smudged by a gust: the strip hides the dish; the player serves from memory. */
   mystery: boolean;
+  /** Who it belongs to — keeper slips ride the dumbwaiter, Alba's says "the usual". */
+  kind: 'normal' | 'keeper' | 'alba';
+}
+
+/** One raiding gull. Bosun is a separate, worse problem. */
+export interface Gull {
+  id: number;
+  p: Pt;
+  state: 'incoming' | 'pecking' | 'fleeing';
+  target: { kind: 'pot' | 'glass' | 'pan' | 'floor'; p: Pt; floorIdx?: number };
+  taps: number;
+  peckStart: number;
+  /** Fleeing with something in the beak makes it funnier. */
+  prize: boolean;
+}
+
+export interface ToastState {
+  /** idle → resting (loaf waiting by the flame) → charred (sendable) → docked (in hatch). */
+  stage: 'idle' | 'resting' | 'charred' | 'docked';
+  char: number;
+  q: number;
+  crankAngle: number;
 }
 
 /** A ticket torn off the line by a gust, mid-air and catchable. */
@@ -222,6 +251,21 @@ export class Sim {
   private lastFoldQ = 0.75;
   private lastChopQ = 0.75;
 
+  /* ── The regulars (doc §3) ── */
+  toast_: ToastState = { stage: 'idle', char: 0, q: 0, crankAngle: 0 };
+  gulls: Gull[] = [];
+  gullShadowUntil = 0;
+  grudge = 0;
+  bosunHere = false;
+  bosunUntil = 0;
+  private bosunDone = false;
+  private gullSeq = 0;
+  private exposureS = 0;
+  private toastHold: { startT: number; startChar: number } | null = null;
+  private cranking: { lastAngle: number } | null = null;
+  private keeperFired = new Set<number>();
+  private albaFired = false;
+
   /* ── Weather state (doc §7) ── */
   weather: WeatherState = 'fair';
   /** What the barometer needle points at — it forecasts, the room follows. */
@@ -257,7 +301,7 @@ export class Sim {
       while (this.waveIdx < SHIFT_WAVES.length && SHIFT_WAVES[this.waveIdx].at <= this.shiftT) {
         const wave = SHIFT_WAVES[this.waveIdx++];
         for (const dishId of wave.tickets) {
-          this.open.push({ id: ++this.ticketSeq, dishId, bornShiftT: this.shiftT, mystery: false });
+          this.open.push({ id: ++this.ticketSeq, dishId, bornShiftT: this.shiftT, mystery: false, kind: 'normal' });
         }
         if (wave.toast) this.toast(wave.toast);
         this.emitTickets();
@@ -270,9 +314,44 @@ export class Sim {
         this.emitTickets(); // staleness bars tick alongside the clock
       }
 
+      // The Keeper's orders arrive by dumbwaiter; a loaf takes its place by the flame.
+      for (const order of KEEPER_ORDERS) {
+        if (this.shiftT >= order.at && !this.keeperFired.has(order.at)) {
+          this.keeperFired.add(order.at);
+          this.open.push({ id: ++this.ticketSeq, dishId: 'black-toast', bornShiftT: this.shiftT, mystery: false, kind: 'keeper' });
+          if (this.toast_.stage === 'idle') this.toast_ = { stage: 'resting', char: 0, q: 0, crankAngle: 0 };
+          this.toast(`The dumbwaiter rattles down a note: “${order.note}”`);
+          this.emit({ kind: 'sfx', name: 'flutter' });
+          this.emitTickets();
+        }
+      }
+      // Alba is chronically ten minutes early and orders from memory — yours.
+      if (!this.albaFired && this.shiftT >= ALBA_AT) {
+        this.albaFired = true;
+        const usual = readAlbaUsual();
+        this.open.push({ id: ++this.ticketSeq, dishId: usual, bornShiftT: this.shiftT, mystery: false, kind: 'alba' });
+        this.toast('Captain Alba, ten minutes early: “The usual.” She trusts you know.');
+        this.emitTickets();
+      }
+
       this.updateWeather(dt, now);
+      this.updateGulls(dt, now);
 
       if (this.shiftT >= SHIFT_SECONDS) this.endShift();
+    }
+
+    // Toast char climbs while the loaf is held to the flame (pointer-time based).
+    if (this.toastHold) {
+      this.toast_.char = Math.min(
+        this.toastHold.startChar + TOAST_SPEC.charRate * ((now - this.toastHold.startT) / 1000),
+        1,
+      );
+      if (this.toast_.char >= 1) {
+        this.toastHold = null;
+        this.toast_.q = 0.15; // a cinder — the Keeper will still take it, coldly
+        this.toast_.stage = 'charred';
+        this.toast('That is no longer toast. He may respect it anyway.');
+      }
     }
 
     // Pour gauge preview (pointer-time based; auto-overflow settles itself).
@@ -368,6 +447,118 @@ export class Sim {
     }
   }
 
+  /* ── The gull syndicate: raids keyed to exposed food (doc §7.3) ── */
+
+  private updateGulls(dt: number, now: number): void {
+    const exposure =
+      (this.pot.ready ? 1 : 0) + (this.glass.ready ? 1 : 0) + (this.pan.stage === 'done' ? 1 : 0) +
+      (this.floorItems.length > 0 ? 1 : 0);
+    if (exposure > 0 && this.gulls.length === 0 && !this.bosunHere) {
+      this.exposureS += dt * (1 + this.grudge / 90) * exposure;
+    } else {
+      this.exposureS = Math.max(0, this.exposureS - dt * 0.6);
+    }
+
+    if (this.exposureS >= GULL_EXPOSURE_S) {
+      this.exposureS = 0;
+      if (!this.bosunDone && this.grudge >= BOSUN_GRUDGE) {
+        this.bosunDone = true;
+        this.bosunHere = true;
+        this.bosunUntil = now + BOSUN_BLOCK_S * 1000;
+        this.toast('BOSUN lands on the pass. He wants the crumb tax — rolls, or patience.');
+        this.emit({ kind: 'sfx', name: 'gull' });
+      } else {
+        this.gullShadowUntil = now + GULL_TELEGRAPH_S * 1000;
+        this.emit({ kind: 'sfx', name: 'gull' });
+        window.setTimeout(() => this.spawnGulls(), GULL_TELEGRAPH_S * 1000);
+      }
+    }
+
+    if (this.bosunHere && now >= this.bosunUntil) {
+      this.bosunHere = false;
+      this.grudge = Math.max(0, this.grudge - 20);
+      this.toast('Bosun leaves, unpaid and unimpressed.');
+    }
+
+    for (const g of this.gulls) {
+      if (g.state === 'incoming') {
+        const dx = g.target.p.x - g.p.x;
+        const dy = g.target.p.y - g.p.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 14) {
+          g.state = 'pecking';
+          g.peckStart = now;
+        } else {
+          const sp = 330 * dt;
+          g.p.x += (dx / d) * sp;
+          g.p.y += (dy / d) * sp;
+        }
+      } else if (g.state === 'pecking' && now - g.peckStart >= GULL_PECK_S * 1000) {
+        this.gullSteal(g, now);
+      } else if (g.state === 'fleeing') {
+        g.p.x += 420 * dt * (g.p.x > this.layout.size.w / 2 ? 1 : -1);
+        g.p.y -= 300 * dt;
+      }
+    }
+    this.gulls = this.gulls.filter(
+      (g) => g.p.x > -80 && g.p.x < this.layout.size.w + 80 && g.p.y > -80,
+    );
+  }
+
+  private juiciestTarget(): Gull['target'] | null {
+    const L = this.layout;
+    if (this.pan.stage === 'done') return { kind: 'pan', p: { x: L.pan.x + L.pan.w / 2, y: L.pan.y + 8 } };
+    if (this.pot.ready) return { kind: 'pot', p: potMouthCenter(L) };
+    if (this.glass.ready) return { kind: 'glass', p: { x: L.glass.x + L.glass.w / 2, y: L.glass.y + 10 } };
+    if (this.floorItems.length) {
+      return { kind: 'floor', p: { ...this.floorItems[0].p }, floorIdx: 0 };
+    }
+    return null;
+  }
+
+  private spawnGulls(): void {
+    if (this.ended) return;
+    const target = this.juiciestTarget();
+    if (!target) return;
+    const L = this.layout;
+    const count = this.weather === 'gale' || this.weather === 'century' || this.grudge > 40 ? 2 : 1;
+    for (let i = 0; i < count; i++) {
+      this.gulls.push({
+        id: ++this.gullSeq,
+        p: { x: i % 2 ? -50 : L.size.w + 50, y: 90 + i * 40 },
+        state: 'incoming',
+        target,
+        taps: 0,
+        peckStart: 0,
+        prize: false,
+      });
+    }
+    this.toast(count > 1 ? 'Wingmen inbound — shoo them!' : 'A gull slips in — shoo it!');
+  }
+
+  private gullSteal(g: Gull, now: number): void {
+    const L = this.layout;
+    g.state = 'fleeing';
+    g.prize = true;
+    if (g.target.kind === 'pot' && this.pot.ready) {
+      this.pot = freshPot();
+      this.floorItems.push({ ing: null, dish: 'ninefathom-chowder', processed: false, p: { x: L.pot.x - 30, y: L.pot.y + L.pot.h + 10 }, despawnAt: now + 6000 });
+      this.toast('The chowder wears a seagull! It knocked the bowl to the floor!');
+    } else if (g.target.kind === 'glass' && this.glass.ready) {
+      this.glass = freshGlass();
+      this.floorItems.push({ ing: null, dish: 'fogcutter', processed: false, p: { x: L.glass.x - 26, y: L.glass.y + L.glass.h + 14 }, despawnAt: now + 6000 });
+      this.toast('The Fogcutter goes over! Grab it before the floor drinks it!');
+    } else if (g.target.kind === 'pan' && this.pan.stage === 'done') {
+      this.pan = freshPan();
+      this.floorItems.push({ ing: null, dish: 'squall-rolls', processed: false, p: { x: L.pan.x - 20, y: L.pan.y + L.pan.h + 16 }, despawnAt: now + 6000 });
+      this.toast('Rolls overboard — the gull only got one!');
+    } else if (g.target.kind === 'floor' && this.floorItems.length) {
+      this.floorItems.shift();
+      this.toast('The floor food is gone. The gull looks proud.');
+    }
+    this.emit({ kind: 'sfx', name: 'splat' });
+  }
+
   private shutterClosed(): boolean {
     return this.shiftT < this.shutterClosedUntilShiftT;
   }
@@ -397,6 +588,7 @@ export class Sim {
         born: this.now,
       });
     });
+    this.emit({ kind: 'sfx', name: 'gust' });
     this.toast('Gust! Catch those tickets!');
     this.emitTickets();
   }
@@ -424,6 +616,7 @@ export class Sim {
       this.blackoutUntil = now + 1500;
     }
     this.spawnFx('text', { x: this.layout.porthole.x, y: this.layout.porthole.y - 40 }, '⚡');
+    this.emit({ kind: 'sfx', name: 'thunder' });
     this.toast('Lightning! The brine hums — pour it while it glows.');
   }
 
@@ -447,10 +640,11 @@ export class Sim {
       tickets: this.open.map((tk) => ({
         id: tk.id,
         dishId: tk.dishId,
-        short: tk.mystery ? '???' : DISHES[tk.dishId].short,
+        short: tk.mystery ? '???' : tk.kind === 'alba' ? 'the usual???' : DISHES[tk.dishId].short,
         staleness: this.staleness(tk),
         mystery: tk.mystery,
         flying: this.flying.some((f) => f.ticketId === tk.id),
+        kind: tk.kind,
       })),
     });
   }
@@ -514,6 +708,56 @@ export class Sim {
         this.emitTickets();
         return;
       }
+    }
+
+    // Shoo gulls (two quick taps each; every shoo feeds the grudge ledger).
+    for (const g of this.gulls) {
+      if (g.state !== 'fleeing' && dist(p, g.p) <= 46) {
+        g.taps++;
+        this.spawnFx('spark', { ...g.p });
+        if (g.taps >= GULL_SHOO_TAPS) {
+          g.state = 'fleeing';
+          this.grudge = Math.min(100, this.grudge + GRUDGE_PER_SHOO);
+          this.emit({ kind: 'sfx', name: 'gull' });
+          this.spawnFx('text', g.p, 'shoo!');
+        }
+        return;
+      }
+    }
+
+    // Bosun: pay the crumb tax with finished rolls, or wait him out.
+    if (this.bosunHere && rectContains(inflate(L.pass, 20), p)) {
+      if (this.pan.stage === 'done') {
+        this.pan = freshPan();
+        this.bosunHere = false;
+        this.grudge = 0;
+        this.toast('Bosun takes the rolls with terrible dignity. The tax is paid.');
+        this.emit({ kind: 'sfx', name: 'gull' });
+      } else {
+        this.toast('Bosun wants rolls. He can smell that you have none.');
+      }
+      return;
+    }
+
+    // The Keeper's toast: hold the loaf to the flame…
+    if (this.toast_.stage === 'resting' && rectContains(inflate(L.toastSpot, 12), p)) {
+      this.toastHold = { startT: t, startChar: this.toast_.char };
+      return;
+    }
+    // …pick up the charred slice…
+    if (this.toast_.stage === 'charred' && rectContains(inflate(L.toastSpot, 12), p)) {
+      this.carry = { ing: null, dish: 'black-toast', processed: false, pos: p, held: true };
+      this.toast_.stage = 'idle';
+      return;
+    }
+    // …and crank the docked slice upstairs.
+    if (rectContains(inflate(L.dumbwaiter, 14), p)) {
+      if (this.toast_.stage === 'docked') {
+        this.cranking = { lastAngle: this.hatchAngle(p) };
+      } else {
+        this.toast('The dumbwaiter waits for Black Toast.');
+      }
+      return;
     }
 
     if (this.carry) {
@@ -756,6 +1000,22 @@ export class Sim {
       return;
     }
 
+    if (this.cranking && this.toast_.stage === 'docked') {
+      const angle = this.hatchAngle(p);
+      const d = angleDelta(this.cranking.lastAngle, angle);
+      if (Math.abs(d) < 1.2) {
+        this.toast_.crankAngle += Math.abs(d);
+        if (this.toast_.crankAngle >= CRANK_REVS * Math.PI * 2) {
+          this.cranking = null;
+          this.sendDumbwaiter();
+        } else if (Math.floor(this.toast_.crankAngle / 1.6) !== Math.floor((this.toast_.crankAngle - Math.abs(d)) / 1.6)) {
+          this.emit({ kind: 'sfx', name: 'crank' });
+        }
+      }
+      this.cranking = this.cranking ? { lastAngle: angle } : null;
+      return;
+    }
+
     if (this.stirring) {
       const angle = this.potAngle(p);
       const d = angleDelta(this.stirring.lastAngle, angle);
@@ -783,8 +1043,10 @@ export class Sim {
 
   private onUp(p: Pt, t: number): void {
     if (this.pouring) this.settlePour(t);
+    if (this.toastHold) this.settleToast(t);
     this.stroke = null;
     this.stirring = null;
+    this.cranking = null;
 
     if (this.carry?.held) {
       const isTap = !this.moved && t - this.downT <= TAP_MAX_MS;
@@ -804,8 +1066,29 @@ export class Sim {
     const L = this.layout;
 
     if (c.dish) {
-      if (rectContains(inflate(L.pass, 16), p)) this.serve(c.dish);
-      else {
+      // Black Toast rides the dumbwaiter, never the pass.
+      if (c.dish === 'black-toast') {
+        if (rectContains(inflate(L.dumbwaiter, 16), p)) {
+          this.toast_.stage = 'docked';
+          this.toast_.crankAngle = 0;
+          this.toast('Docked. Crank it up to the lamp room.');
+        } else if (rectContains(inflate(L.pass, 16), p)) {
+          this.toast('He eats upstairs. The dumbwaiter, always.');
+          this.toast_.stage = 'charred';
+        } else {
+          this.toast_.stage = 'charred';
+        }
+        this.carry = null;
+        return;
+      }
+      if (rectContains(inflate(L.pass, 16), p)) {
+        if (this.bosunHere) {
+          this.toast('Bosun blocks the pass, wing out. Tax first.');
+          this.returnDish(c.dish);
+        } else {
+          this.serve(c.dish);
+        }
+      } else {
         this.toast('The pass is the warm window.');
         this.returnDish(c.dish);
       }
@@ -886,6 +1169,7 @@ export class Sim {
     b.strokesDone = b.strokes.length;
     const L = this.layout;
     this.spawnFx('spark', { x: L.board.x + L.board.w / 2, y: L.board.y + 26 });
+    this.emit({ kind: 'sfx', name: 'chop' });
     if (b.strokesDone >= b.strokesNeeded) {
       b.done = true;
       const q = strokeQuality(b.strokes);
@@ -917,6 +1201,59 @@ export class Sim {
   private potAngle(p: Pt): number {
     const c = potMouthCenter(this.layout);
     return Math.atan2(p.y - c.y, p.x - c.x);
+  }
+
+  private hatchAngle(p: Pt): number {
+    const h = this.layout.dumbwaiter;
+    return Math.atan2(p.y - (h.y + h.h / 2), p.x - (h.x + h.w / 2));
+  }
+
+  /** Release the loaf: the correct moment is after the panic cue (doc §4). */
+  private settleToast(t: number): void {
+    if (!this.toastHold) return;
+    this.toast_.char = Math.min(
+      this.toastHold.startChar + TOAST_SPEC.charRate * ((t - this.toastHold.startT) / 1000),
+      1,
+    );
+    this.toastHold = null;
+    const [lo] = TOAST_SPEC.releaseBand;
+    if (this.toast_.char >= 1) return; // cinder path already handled in update
+    if (this.toast_.char >= lo) {
+      this.toast_.q = bandQuality(this.toast_.char, TOAST_SPEC.releaseBand);
+      this.toast_.stage = 'charred';
+      this.spawnFx('text', { x: this.layout.toastSpot.x + 40, y: this.layout.toastSpot.y }, 'past the panic!');
+      this.emit({ kind: 'sfx', name: 'ding' });
+    }
+    // Under the band: keep holding next press — char is banked.
+  }
+
+  private sendDumbwaiter(): void {
+    const tkIdx = this.open.findIndex((t) => t.kind === 'keeper');
+    this.toast_.stage = 'idle';
+    if (tkIdx === -1) {
+      this.toast('The rope hums. Nothing comes back. He wasn’t waiting?');
+      return;
+    }
+    const tk = this.open.splice(tkIdx, 1)[0];
+    const craft = this.toast_.q;
+    const lateMult = this.lateMult(tk);
+    const score = Math.round(clamp(craft, 0, 1) * lateMult * 100) / 10;
+    const result: DishResult = {
+      dishName: DISHES['black-toast'].name,
+      craft,
+      lateMult,
+      score,
+      note: craft >= 0.8 ? null : 'Trust the note, not the panic — release later.',
+    };
+    this.served.push(result);
+    this.emit({ kind: 'sfx', name: 'ding' });
+    this.toast(craft >= 0.8 ? 'The dumbwaiter returns with a tip: one perfect whelk shell.' : 'The dumbwaiter returns. Slowly. Judgmentally.');
+    this.emit({ kind: 'served', result, open: this.open.length });
+    this.emitTickets();
+    // Another keeper order still open → another loaf appears.
+    if (this.open.some((t) => t.kind === 'keeper')) {
+      this.toast_ = { stage: 'resting', char: 0, q: 0, crankAngle: 0 };
+    }
   }
 
   private potNeedsMet(): boolean {
@@ -981,18 +1318,34 @@ export class Sim {
     // Bounced serve: the dish goes back where it was built.
     if (dish === 'ninefathom-chowder') this.pot.ready = true;
     else if (dish === 'fogcutter') this.glass.ready = true;
-    else this.pan.stage = 'done';
+    else if (dish === 'squall-rolls') this.pan.stage = 'done';
+    else this.toast_.stage = 'charred';
   }
 
   private serve(dish: DishId): void {
-    const tkIdx = this.open.findIndex((t) => t.dishId === dish);
+    // Keeper slips never match the pass; Alba takes anything, reluctantly.
+    let tkIdx = this.open.findIndex((t) => t.kind !== 'keeper' && t.dishId === dish);
+    let albaWrong = false;
     if (tkIdx === -1) {
-      this.toast(`No ticket wants ${DISHES[dish].short.toLowerCase()} right now.`);
-      this.returnDish(dish);
-      return;
+      tkIdx = this.open.findIndex((t) => t.kind === 'alba');
+      if (tkIdx !== -1) {
+        albaWrong = true;
+      } else {
+        this.toast(`No ticket wants ${DISHES[dish].short.toLowerCase()} right now.`);
+        this.returnDish(dish);
+        return;
+      }
     }
     const tk = this.open.splice(tkIdx, 1)[0];
     if (tk.mystery) this.toast('You remembered the smudged order. Aunt Pet would nod.');
+    if (tk.kind === 'alba') {
+      if (albaWrong) {
+        this.toast(`Alba blinks once. “…This is the usual now.” She means it.`);
+        writeAlbaUsual(dish);
+      } else {
+        this.toast('Alba nods like a lighthouse: once, slowly. Exactly the usual.');
+      }
+    }
     this.flying = this.flying.filter((f) => f.ticketId !== tk.id);
 
     let craft = 0;
@@ -1022,11 +1375,13 @@ export class Sim {
       this.pan = freshPan();
     }
 
-    const lateMult = this.lateMult(tk);
-    const score = Math.round(clamp(craft, 0, 1) * lateMult * 100) / 10;
+    let lateMult = this.lateMult(tk);
+    if (tk.kind === 'alba') lateMult *= albaWrong ? ALBA_WRONG_MULT : ALBA_BONUS;
+    const score = Math.round(clamp(clamp(craft, 0, 1) * lateMult, 0, 1.1) * 100) / 10;
     const result: DishResult = { dishName: DISHES[dish].name, craft, lateMult, score, note };
     this.served.push(result);
     this.spawnFx('text', { x: this.layout.pass.x + this.layout.pass.w / 2, y: this.layout.pass.y + 40 }, '🔔');
+    this.emit({ kind: 'sfx', name: 'bell' });
     this.emit({ kind: 'served', result, open: this.open.length });
     this.emitTickets();
   }
@@ -1100,6 +1455,25 @@ export function strokeQuality(strokes: { dir: 1 | -1; t: number }[]): number {
 function qualityLabel(q: number, mode: 'chop' | 'fold'): string {
   if (mode === 'chop') return q >= 0.85 ? 'clean cut!' : q >= 0.6 ? 'decent dice' : 'ragged…';
   return q >= 0.85 ? 'supple fold!' : q >= 0.6 ? 'workable' : 'overworked…';
+}
+
+function readAlbaUsual(): DishId {
+  try {
+    const v = localStorage.getItem(ALBA_USUAL_KEY) as DishId | null;
+    if (v && v in DISHES && v !== 'black-toast') return v;
+  } catch {
+    /* storage blocked */
+  }
+  return 'ninefathom-chowder';
+}
+
+function writeAlbaUsual(dish: DishId): void {
+  if (dish === 'black-toast') return;
+  try {
+    localStorage.setItem(ALBA_USUAL_KEY, dish);
+  } catch {
+    /* fine */
+  }
 }
 
 /** Shift grade in forecast language (doc §8): the weather you leave behind. */
