@@ -5,7 +5,7 @@ import { Home, LayoutGrid } from 'lucide-react';
 // Lazy-loaded: keeps three.js / R3F out of the initial bundle for the default
 // landing + professional views; only fetched when the user enters the 3D workstation.
 const Experience = lazy(() => import('../components/Experience').then((m) => ({ default: m.Experience })));
-const KitchenChaosGame = lazy(() => import('../components/minigame/KitchenChaosGame').then((m) => ({ default: m.KitchenChaosGame })));
+const KitchenChaosGame = lazy(() => import('../components/game/KitchenChaosGame').then((m) => ({ default: m.KitchenChaosGame })));
 import { Overlay } from '../components/Overlay';
 import { useKonamiCode } from '../hooks/useKonamiCode';
 import { usePrefersReducedMotion } from '../hooks/useIsMobile';
