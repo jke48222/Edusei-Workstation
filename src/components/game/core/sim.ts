@@ -21,12 +21,13 @@ import { angleDelta, clamp, dist, inflate, rectContains } from './geom';
 import type { GalleyLayout } from '../layout';
 import type { DishId, GlassSpec, IngredientId, LayerSource, PanSpec, PotSpec } from '../data';
 import {
-  ALBA_AT, ALBA_BONUS, ALBA_WRONG_MULT, BAROMETER_LEAD_S, BOSUN_BLOCK_S, BOSUN_GRUDGE,
+  ALBA_BONUS, ALBA_WRONG_MULT, BAROMETER_LEAD_S, BOSUN_BLOCK_S, BOSUN_GRUDGE,
   CHARGED_BRINE_S, CHOP_STROKE_PX, CRANK_REVS, DISHES, FLIP_STROKE_PX, FOLD_STROKE_PX,
   GRUDGE_PER_SHOO, GULL_EXPOSURE_S, GULL_PECK_S, GULL_SHOO_TAPS, GULL_TELEGRAPH_S,
-  GUST_TELEGRAPH_S, INGREDIENTS, KEEPER_ORDERS, LAYER_LABEL, MOP_STROKES, POUR_RATE,
-  PUDDLE_GROWTH, SHIFT_SECONDS, SHIFT_WAVES, SHUTTER_CLOSED_S, STIR_TEMPO, TICKET_CATCH_S,
-  TICKET_FLOOR_MULT, TICKET_GRACE_S, WEATHER_CELLS, type ToastSpec,
+  GUST_TELEGRAPH_S, INGREDIENTS, LAYER_LABEL, MOP_STROKES, POUR_RATE,
+  PUDDLE_GROWTH, SHIFT_SECONDS, SHUTTER_CLOSED_S, STIR_TEMPO, TICKET_CATCH_S,
+  TICKET_FLOOR_MULT, TICKET_GRACE_S, type FilletSpec, type JarSpec, type ShiftConfig,
+  type ToastSpec,
 } from '../data';
 import type { WeatherState } from '../palette';
 import type { StagePointerEvent } from './engine';
@@ -37,8 +38,12 @@ const POT_SPEC = DISHES['ninefathom-chowder'].spec as PotSpec;
 const GLASS_SPEC = DISHES.fogcutter.spec as GlassSpec;
 const PAN_SPEC = DISHES['squall-rolls'].spec as PanSpec;
 const TOAST_SPEC = DISHES['black-toast'].spec as ToastSpec;
+const JAR_SPEC = DISHES['lightning-pickles'].spec as JarSpec;
+const FILLET_SPEC = DISHES['wreck-platter'].spec as FilletSpec;
 
 const ALBA_USUAL_KEY = 'kc2:albaUsual';
+
+export type FavorId = 'alba' | 'moss' | 'keeper' | null;
 
 /* ── Events the React shell listens for ─────────────────────────────── */
 
@@ -92,7 +97,7 @@ export interface Carry {
 
 export interface BoardState {
   ing: IngredientId;
-  mode: 'chop' | 'fold';
+  mode: 'chop' | 'fold' | 'fillet';
   strokesNeeded: number;
   strokesDone: number;
   strokes: { dir: 1 | -1; t: number }[];
@@ -205,7 +210,7 @@ type PourSession =
   | { target: 'glass'; source: LayerSource; startT: number; startFill: number };
 
 interface StrokeSession {
-  kind: 'chop' | 'fold' | 'flip' | 'shave' | 'shutter' | 'mop';
+  kind: 'chop' | 'fold' | 'flip' | 'shave' | 'shutter' | 'mop' | 'fillet';
   anchor: number;
   armed: boolean;
   disarmAt: number;
@@ -250,6 +255,7 @@ export class Sim {
   private lastClockEmit = -1;
   private lastFoldQ = 0.75;
   private lastChopQ = 0.75;
+  private lastPlatterQ = 0.75;
 
   /* ── The regulars (doc §3) ── */
   toast_: ToastState = { stage: 'idle', char: 0, q: 0, crankAngle: 0 };
@@ -282,10 +288,25 @@ export class Sim {
   private firedStrikes = new Set<string>();
   private firedLeaks = new Set<number>();
 
-  constructor(layout: GalleyLayout, emit: (e: SimEvent) => void) {
+  constructor(layout: GalleyLayout, config: ShiftConfig, favor: FavorId, emit: (e: SimEvent) => void) {
     this.layout = layout;
+    this.config = config;
+    this.favor = favor;
     this.emit = emit;
   }
+
+  readonly config: ShiftConfig;
+  readonly favor: FavorId;
+  /** Lightning Pickles jar (menu-gated). */
+  jarReady = false;
+  jarQ = 0;
+  /** Wreck Platter waiting on the board after a fillet cut. */
+  boardDish: { q: number } | null = null;
+  /** Century Gale only: the room tilts. */
+  tiltUntil = 0;
+  tiltDir: 1 | -1 = 1;
+  private filletSamples: number[] = [];
+  private firedTilts = new Set<number>();
 
   setLayout(layout: GalleyLayout): void {
     this.layout = layout;
@@ -298,8 +319,8 @@ export class Sim {
     if (!this.ended) {
       this.shiftT += dt;
 
-      while (this.waveIdx < SHIFT_WAVES.length && SHIFT_WAVES[this.waveIdx].at <= this.shiftT) {
-        const wave = SHIFT_WAVES[this.waveIdx++];
+      while (this.waveIdx < this.config.waves.length && this.config.waves[this.waveIdx].at <= this.shiftT) {
+        const wave = this.config.waves[this.waveIdx++];
         for (const dishId of wave.tickets) {
           this.open.push({ id: ++this.ticketSeq, dishId, bornShiftT: this.shiftT, mystery: false, kind: 'normal' });
         }
@@ -315,7 +336,7 @@ export class Sim {
       }
 
       // The Keeper's orders arrive by dumbwaiter; a loaf takes its place by the flame.
-      for (const order of KEEPER_ORDERS) {
+      for (const order of this.config.keeperOrders) {
         if (this.shiftT >= order.at && !this.keeperFired.has(order.at)) {
           this.keeperFired.add(order.at);
           this.open.push({ id: ++this.ticketSeq, dishId: 'black-toast', bornShiftT: this.shiftT, mystery: false, kind: 'keeper' });
@@ -326,7 +347,7 @@ export class Sim {
         }
       }
       // Alba is chronically ten minutes early and orders from memory — yours.
-      if (!this.albaFired && this.shiftT >= ALBA_AT) {
+      if (!this.albaFired && this.config.albaAt !== null && this.shiftT >= this.config.albaAt) {
         this.albaFired = true;
         const usual = readAlbaUsual();
         this.open.push({ id: ++this.ticketSeq, dishId: usual, bornShiftT: this.shiftT, mystery: false, kind: 'alba' });
@@ -373,10 +394,26 @@ export class Sim {
 
   private updateWeather(dt: number, now: number): void {
     // Barometer forecasts; the room follows when the cell actually arrives.
-    const active = WEATHER_CELLS.find((c) => this.shiftT >= c.at && this.shiftT < c.at + c.dur);
-    const coming = WEATHER_CELLS.find(
+    const cells = this.config.cells;
+    const active = cells.find((c) => this.shiftT >= c.at && this.shiftT < c.at + c.dur);
+    const coming = cells.find(
       (c) => this.shiftT >= c.at - BAROMETER_LEAD_S && this.shiftT < c.at,
     );
+
+    // Century Gale: the room itself tilts (the one earned physics beat, §7.5).
+    for (const tilt of this.config.tilts) {
+      if (this.shiftT >= tilt.at && !this.firedTilts.has(tilt.at)) {
+        this.firedTilts.add(tilt.at);
+        this.tiltUntil = now + tilt.dur * 1000;
+        this.tiltDir = tilt.dir;
+        this.toast('The whole rock leans on the swell — hold on!');
+      }
+    }
+    if (now < this.tiltUntil) {
+      for (const item of this.floorItems) {
+        item.p.x += this.tiltDir * 34 * dt;
+      }
+    }
     this.weather = active?.state ?? 'fair';
     this.barometer = (coming ?? active)?.state ?? 'fair';
 
@@ -613,7 +650,8 @@ export class Sim {
     this.flashUntil = now + 320;
     this.chargedUntil = now + CHARGED_BRINE_S * 1000;
     if (state === 'gale' || state === 'century') {
-      this.blackoutUntil = now + 1500;
+      // The Keeper's Lamplight favor keeps the dark short.
+      this.blackoutUntil = now + (this.favor === 'keeper' ? 750 : 1500);
     }
     this.spawnFx('text', { x: this.layout.porthole.x, y: this.layout.porthole.y - 40 }, '⚡');
     this.emit({ kind: 'sfx', name: 'thunder' });
@@ -740,7 +778,9 @@ export class Sim {
     }
 
     // The Keeper's toast: hold the loaf to the flame…
-    if (this.toast_.stage === 'resting' && rectContains(inflate(L.toastSpot, 12), p)) {
+    if (!this.config.menu.includes('black-toast')) {
+      // The dumbwaiter sleeps until Wednesday.
+    } else if (this.toast_.stage === 'resting' && rectContains(inflate(L.toastSpot, 12), p)) {
       this.toastHold = { startT: t, startChar: this.toast_.char };
       return;
     }
@@ -751,7 +791,7 @@ export class Sim {
       return;
     }
     // …and crank the docked slice upstairs.
-    if (rectContains(inflate(L.dumbwaiter, 14), p)) {
+    if (this.config.menu.includes('black-toast') && rectContains(inflate(L.dumbwaiter, 14), p)) {
       if (this.toast_.stage === 'docked') {
         this.cranking = { lastAngle: this.hatchAngle(p) };
       } else {
@@ -788,6 +828,34 @@ export class Sim {
       return;
     }
 
+    // Lightning Pickles: pop the jar lid on the glow peak (menu-gated).
+    if (this.config.menu.includes('lightning-pickles') && rectContains(inflate(L.jar, 12), p)) {
+      if (this.jarReady) {
+        this.carry = { ing: null, dish: 'lightning-pickles', processed: false, pos: p, held: true };
+        this.jarReady = false;
+        return;
+      }
+      const phase = this.now % JAR_SPEC.pulsePeriodMs;
+      const charged = this.now < this.chargedUntil;
+      if (charged || phase <= JAR_SPEC.windowMs) {
+        this.jarReady = true;
+        this.jarQ = charged ? 1 : 1 - (phase / JAR_SPEC.windowMs) * 0.35;
+        this.spawnFx('ring', { x: L.jar.x + L.jar.w / 2, y: L.jar.y + 8 });
+        this.emit({ kind: 'sfx', name: 'ding' });
+        this.toast('POP — the jar sighs a little storm. Serve it.');
+      } else {
+        this.spawnFx('text', { x: L.jar.x + L.jar.w / 2, y: L.jar.y }, 'wait for the glow…');
+      }
+      return;
+    }
+
+    // Wreck Platter waiting on the board after the fillet cut.
+    if (this.boardDish && rectContains(inflate(L.board, 10), p)) {
+      this.carry = { ing: null, dish: 'wreck-platter', processed: false, pos: p, held: true };
+      this.boardDish = null;
+      return;
+    }
+
     // Finished dishes get picked up first.
     if (this.pot.ready && rectContains(inflate(L.pot, 10), p)) {
       this.carry = { ing: null, dish: 'ninefathom-chowder', processed: false, pos: p, held: true };
@@ -811,6 +879,9 @@ export class Sim {
     }
 
     // Bottles → glass layer pours (order matters; early pours muddy the drink).
+    if (!this.config.menu.includes('fogcutter')) {
+      // Drinks shelf not unlocked yet — nothing to press there.
+    } else
     for (const source of Object.keys(L.bottles) as LayerSource[]) {
       if (!rectContains(inflate(L.bottles[source], 10), p)) continue;
       if (this.glass.ready) return this.toast('The Fogcutter is built — serve it.');
@@ -826,7 +897,7 @@ export class Sim {
     }
 
     // Glass hint.
-    if (rectContains(inflate(L.glass, 12), p)) {
+    if (this.config.menu.includes('fogcutter') && rectContains(inflate(L.glass, 12), p)) {
       const idx = this.glass.layers.length;
       if (idx < GLASS_SPEC.layers.length) {
         this.toast(`Next: ${LAYER_LABEL[GLASS_SPEC.layers[idx].source]}.`);
@@ -859,7 +930,7 @@ export class Sim {
     }
 
     // Pan → flip session while cooking.
-    if (rectContains(inflate(L.pan, 12), p)) {
+    if (this.config.menu.includes('squall-rolls') && rectContains(inflate(L.pan, 12), p)) {
       if (this.pan.stage === 'cooking') {
         this.stroke = { kind: 'flip', anchor: p.y, armed: true, disarmAt: p.y };
       } else if (this.pan.stage === 'empty') {
@@ -868,13 +939,18 @@ export class Sim {
       return;
     }
 
-    // Board → chop/fold strokes, or pick the processed item back up.
+    // Board → chop/fold/fillet strokes, or pick the processed item back up.
     if (rectContains(inflate(L.board, 10), p)) {
       if (this.board && !this.board.done) {
-        this.stroke =
-          this.board.mode === 'chop'
-            ? { kind: 'chop', anchor: p.x, armed: true, disarmAt: p.x }
-            : { kind: 'fold', anchor: p.y, armed: true, disarmAt: p.y };
+        if (this.board.mode === 'fillet') {
+          this.stroke = { kind: 'fillet', anchor: p.x, armed: true, disarmAt: p.x };
+          this.filletSamples = [];
+        } else {
+          this.stroke =
+            this.board.mode === 'chop'
+              ? { kind: 'chop', anchor: p.x, armed: true, disarmAt: p.x }
+              : { kind: 'fold', anchor: p.y, armed: true, disarmAt: p.y };
+        }
       } else if (this.board?.done) {
         this.carry = { ing: this.board.ing, dish: null, processed: true, pos: p, held: true };
         this.board = null;
@@ -919,6 +995,24 @@ export class Sim {
     this.lastMove = { p, t };
 
     const st = this.stroke;
+    if (st && st.kind === 'fillet' && this.board && !this.board.done) {
+      // One steady drag along the chart lines; the fish grades your hand.
+      const path = filletGuide(this.layout);
+      this.filletSamples.push(distToPolyline(p, path));
+      const L = this.layout;
+      if (p.x >= L.board.x + L.board.w * 0.88) {
+        const avg = this.filletSamples.reduce((s, v) => s + v, 0) / Math.max(this.filletSamples.length, 1);
+        const q = clamp(1.15 - avg / FILLET_SPEC.tolerance, 0.1, 1);
+        this.lastPlatterQ = q;
+        this.boardDish = { q };
+        this.board = null;
+        this.stroke = null;
+        this.spawnFx('text', { x: L.board.x + L.board.w / 2, y: L.board.y + 10 }, q >= 0.8 ? 'clean fillet!' : q >= 0.5 ? 'serviceable' : 'the fish objects');
+        this.emit({ kind: 'sfx', name: 'chop' });
+      }
+      return;
+    }
+
     if (st && this.board && !this.board.done && (st.kind === 'chop' || st.kind === 'fold')) {
       if (st.kind === 'chop') {
         const dx = p.x - st.anchor;
@@ -956,7 +1050,7 @@ export class Sim {
         st.armed = false;
         this.leak.mopStrokes++;
         this.spawnFx('spark', { ...this.leak.p });
-        if (this.leak.mopStrokes >= MOP_STROKES) {
+        if (this.leak.mopStrokes >= (this.favor === 'moss' ? 1 : MOP_STROKES)) {
           this.spawnFx('puff', { ...this.leak.p });
           this.toast(this.leak.active ? 'Dry — for now. That drip has plans.' : 'Dry floor, safe footing.');
           if (this.leak.active) {
@@ -1137,11 +1231,11 @@ export class Sim {
 
     // Raw ingredients belong on the board.
     if (rectContains(inflate(L.board, 10), p)) {
-      if (this.board) {
+      if (this.board || this.boardDish) {
         this.toast('The board is busy — finish that first.');
       } else {
-        const mode: BoardState['mode'] = def.chopStrokes ? 'chop' : 'fold';
-        const needed = def.chopStrokes ?? def.foldSlaps ?? 0;
+        const mode: BoardState['mode'] = def.fillet ? 'fillet' : def.chopStrokes ? 'chop' : 'fold';
+        const needed = def.chopStrokes ?? def.foldSlaps ?? 1;
         this.board = { ing: c.ing, mode, strokesNeeded: needed, strokesDone: 0, strokes: [], done: false };
       }
       this.carry = null;
@@ -1319,6 +1413,8 @@ export class Sim {
     if (dish === 'ninefathom-chowder') this.pot.ready = true;
     else if (dish === 'fogcutter') this.glass.ready = true;
     else if (dish === 'squall-rolls') this.pan.stage = 'done';
+    else if (dish === 'lightning-pickles') this.jarReady = true;
+    else if (dish === 'wreck-platter') this.boardDish = { q: this.lastPlatterQ };
     else this.toast_.stage = 'charred';
   }
 
@@ -1368,11 +1464,17 @@ export class Sim {
       craft = this.glass.layers.reduce((s, l) => s + l.q, 0) / GLASS_SPEC.layers.length;
       note = craft >= 0.8 ? null : this.glass.murky ? 'Let each layer settle, in order: brine, tea, cream.' : 'Watch each layer’s band.';
       this.glass = freshGlass();
-    } else {
+    } else if (dish === 'squall-rolls') {
       const flipQ = this.pan.flips.length ? this.pan.flips.reduce((s, f) => s + f.q, 0) / this.pan.flips.length : 0;
       craft = this.pan.foldQ * 0.5 + flipQ * 0.5;
       note = craft >= 0.8 ? null : 'Fold in rhythm, flip on the first breath of shimmer.';
       this.pan = freshPan();
+    } else if (dish === 'lightning-pickles') {
+      craft = this.jarQ;
+      note = craft >= 0.8 ? null : 'Pop the lid on the first blink of the glow — or after lightning.';
+    } else {
+      craft = this.lastPlatterQ;
+      note = craft >= 0.8 ? null : 'One steady drag along the chart lines. Trust the fish.';
     }
 
     let lateMult = this.lateMult(tk);
@@ -1452,9 +1554,38 @@ export function strokeQuality(strokes: { dir: 1 | -1; t: number }[]): number {
   return clamp(altQ * 0.55 + tempoQ * 0.45, 0, 1);
 }
 
-function qualityLabel(q: number, mode: 'chop' | 'fold'): string {
+function qualityLabel(q: number, mode: 'chop' | 'fold' | 'fillet'): string {
   if (mode === 'chop') return q >= 0.85 ? 'clean cut!' : q >= 0.6 ? 'decent dice' : 'ragged…';
+  if (mode === 'fillet') return q >= 0.85 ? 'clean fillet!' : q >= 0.6 ? 'serviceable' : 'the fish objects';
   return q >= 0.85 ? 'supple fold!' : q >= 0.6 ? 'workable' : 'overworked…';
+}
+
+/** The chart-line guide the fillet follows, derived from the board rect. */
+export function filletGuide(L: GalleyLayout): Pt[] {
+  const b = L.board;
+  const cy = b.y + b.h * 0.42;
+  return [
+    { x: b.x + b.w * 0.08, y: cy - 4 },
+    { x: b.x + b.w * 0.34, y: cy - 20 },
+    { x: b.x + b.w * 0.62, y: cy + 14 },
+    { x: b.x + b.w * 0.92, y: cy - 2 },
+  ];
+}
+
+function distToPolyline(p: Pt, path: Pt[]): number {
+  let best = Infinity;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i];
+    const b = path[i + 1];
+    const abx = b.x - a.x;
+    const aby = b.y - a.y;
+    const len2 = abx * abx + aby * aby;
+    const t = len2 > 0 ? clamp(((p.x - a.x) * abx + (p.y - a.y) * aby) / len2, 0, 1) : 0;
+    const dx = p.x - (a.x + abx * t);
+    const dy = p.y - (a.y + aby * t);
+    best = Math.min(best, Math.hypot(dx, dy));
+  }
+  return best;
 }
 
 function readAlbaUsual(): DishId {

@@ -15,6 +15,7 @@ import { P, rgba, WEATHER_TINT, type WeatherState } from '../palette';
 import type { GalleyLayout } from '../layout';
 import type { Rect } from './geom';
 import type { Sim } from './sim';
+import { filletGuide } from './sim';
 import type { StageView } from './engine';
 import {
   DISHES, INGREDIENTS, STIR_TEMPO,
@@ -53,6 +54,15 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
   const { t, reducedMotion, assets } = opts;
   const bg = view.aspect >= 1 ? assets?.bgLandscape : assets?.bgPortrait;
 
+  // Century Gale tilt: the one earned physics beat — the whole room leans.
+  const tilting = !reducedMotion && sim.now < sim.tiltUntil;
+  if (tilting) {
+    ctx.save();
+    ctx.translate(vw / 2, vh / 2);
+    ctx.rotate(sim.tiltDir * 0.045);
+    ctx.translate(-vw / 2, -vh / 2);
+  }
+
   if (bg) {
     ctx.drawImage(bg, 0, 0, vw, vh);
   } else {
@@ -74,18 +84,28 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
     ctx.stroke();
   }
 
-  /* ── Stations ── */
+  /* ── Stations (gated by the shift's unlocked menu — the galley grows) ── */
+  const menu = sim.config.menu;
+  const binVisible = (ing: IngredientId): boolean =>
+    ing === 'grumbling-potato' || ing === 'wrackfish'
+      ? true
+      : ing === 'stormflour-dough'
+        ? menu.includes('squall-rolls')
+        : menu.includes('wreck-platter');
   for (const [ing, rect] of Object.entries(L.bins)) {
-    drawBin(ctx, rect, ing as IngredientId, assets);
+    if (binVisible(ing as IngredientId)) drawBin(ctx, rect, ing as IngredientId, assets);
   }
   drawBoard(ctx, L, sim, t, reducedMotion, assets);
   drawButterstone(ctx, L, sim, t, reducedMotion);
   drawStovePot(ctx, L, sim, t, reducedMotion, assets);
   drawKettle(ctx, L, sim, assets);
-  drawPan(ctx, L, sim, t, reducedMotion, assets);
-  drawDrinks(ctx, L, sim, t, reducedMotion, assets);
-  drawDumbwaiter(ctx, L, sim, t, reducedMotion, assets);
-  drawToastSpot(ctx, L, sim, t, reducedMotion, assets);
+  if (menu.includes('squall-rolls')) drawPan(ctx, L, sim, t, reducedMotion, assets);
+  if (menu.includes('fogcutter')) drawDrinks(ctx, L, sim, t, reducedMotion, assets);
+  if (menu.includes('lightning-pickles')) drawJar(ctx, L, sim, t, reducedMotion, assets);
+  if (menu.includes('black-toast')) {
+    drawDumbwaiter(ctx, L, sim, t, reducedMotion, assets);
+    drawToastSpot(ctx, L, sim, t, reducedMotion, assets);
+  }
   drawPass(ctx, L, sim, t, reducedMotion, !bg);
 
   // The puddle lies on the open floor IN FRONT of the stations — it must read.
@@ -216,6 +236,8 @@ export function drawGalley(ctx: CanvasRenderingContext2D, view: StageView, sim: 
     ctx.fillRect(0, 0, vw, vh);
     ctx.restore();
   }
+
+  if (tilting) ctx.restore();
 }
 
 /* ── Room pieces ────────────────────────────────────────────────────── */
@@ -445,10 +467,33 @@ function drawBoard(
   }
   label(ctx, 'BOARD', r.x + r.w / 2, r.y + r.h + 16);
 
+  // A finished Wreck Platter waits on the board for pickup.
+  if (sim.boardDish) {
+    drawDish(ctx, 'wreck-platter', r.x + r.w / 2, r.y + r.h * 0.4, 1.1, assets);
+    readyPulse(ctx, r, t, rm);
+    return;
+  }
+
   const b = sim.board;
   if (!b) return;
   const c = { x: r.x + r.w / 2, y: r.y + r.h * 0.42 };
-  drawIngredient(ctx, b.ing, b.done, c.x, c.y, 1.02, assets);
+  drawIngredient(ctx, b.ing, b.done, c.x, c.y, b.mode === 'fillet' ? 1.35 : 1.02, assets);
+  if (b.mode === 'fillet' && !b.done) {
+    // The chart-line guide: cut along it in one steady drag.
+    const path = filletGuide(L);
+    ctx.strokeStyle = rgba(P.lightning, rm ? 0.8 : 0.55 + 0.3 * Math.sin(t * 4));
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = rgba(P.cream, 0.9);
+    circle(ctx, path[0].x, path[0].y, 5);
+    label(ctx, 'CUT ALONG THE CHART', r.x + r.w / 2, r.y - 10);
+    return;
+  }
   if (!b.done) {
     for (let i = 0; i < b.strokesNeeded; i++) {
       ctx.fillStyle = i < b.strokesDone ? P.lightning : rgba(P.charcoal, 0.55);
@@ -783,6 +828,39 @@ function drawPass(ctx: CanvasRenderingContext2D, L: GalleyLayout, sim: Sim, t: n
   label(ctx, 'THE PASS', r.x + r.w / 2, r.y + r.h + 18);
 }
 
+function drawJar(
+  ctx: CanvasRenderingContext2D,
+  L: GalleyLayout,
+  sim: Sim,
+  t: number,
+  rm: boolean,
+  assets: GameAssets | null,
+): void {
+  const r = L.jar;
+  const sprite = assets?.sprites['prop-picklejar'];
+  // The charge pulse — pop on the peak. Storm charge makes it sing.
+  const period = 2.4;
+  const phase = rm ? 0.1 : (t % period) / period;
+  const charged = sim.now < sim.chargedUntil;
+  const glow = charged ? 0.85 : phase < 0.22 ? 0.75 * (1 - phase / 0.22) : 0;
+  if (glow > 0.05) {
+    ctx.fillStyle = rgba(P.lightning, glow * 0.4);
+    ellipse(ctx, r.x + r.w / 2, r.y + r.h / 2, r.w * 0.85, r.h * 0.62);
+  }
+  if (sprite) blitContain(ctx, sprite, r.x, r.y, r.w, r.h);
+  else {
+    ctx.fillStyle = rgba(P.lightning, 0.35);
+    ctx.fillRect(r.x + 6, r.y + 14, r.w - 12, r.h - 20);
+    ctx.fillStyle = P.fog;
+    ctx.fillRect(r.x + 4, r.y + 6, r.w - 8, 10);
+  }
+  if (sim.jarReady) {
+    readyPulse(ctx, r, t, rm);
+    drawDish(ctx, 'lightning-pickles', r.x + r.w / 2, r.y - 20, 0.8, assets);
+  }
+  label(ctx, 'PICKLES', r.x + r.w / 2, r.y + r.h + 14);
+}
+
 function drawDumbwaiter(
   ctx: CanvasRenderingContext2D,
   L: GalleyLayout,
@@ -1008,6 +1086,7 @@ const ING_SPRITE: Record<IngredientId, { raw: keyof GameAssets['sprites']; done:
   'grumbling-potato': { raw: 'ing-potato-raw', done: 'ing-potato-chopped' },
   wrackfish: { raw: 'ing-fish-raw', done: 'ing-fish-chopped' },
   'stormflour-dough': { raw: 'ing-dough-ball', done: 'ing-dough-folded' },
+  'wreckfish-whole': { raw: 'ing-wreckfish-whole', done: 'ing-fish-chopped' },
 };
 
 export function drawIngredient(
@@ -1062,6 +1141,8 @@ export function drawDish(
     dish === 'ninefathom-chowder' ? 'dish-chowder'
     : dish === 'fogcutter' ? 'dish-fogcutter'
     : dish === 'black-toast' ? 'dish-black-toast'
+    : dish === 'lightning-pickles' ? 'dish-pickles'
+    : dish === 'wreck-platter' ? 'dish-wreck-platter'
     : 'dish-rolls';
   const img = assets?.sprites[spriteId];
   if (img) {
@@ -1089,6 +1170,21 @@ export function drawDish(
     ctx.fillStyle = P.butter;
     ellipse(ctx, x - 4 * s, y - 4 * s, 5 * s, 3 * s);
     ellipse(ctx, x + 6 * s, y + 4 * s, 4 * s, 2.6 * s);
+  } else if (dish === 'lightning-pickles') {
+    ctx.fillStyle = P.harbor;
+    ctx.beginPath();
+    ctx.arc(x, y + 4 * s, 20 * s, 0, Math.PI);
+    ctx.fill();
+    ctx.fillStyle = rgba(P.lightning, 0.85);
+    ellipse(ctx, x, y + 2 * s, 18 * s, 6 * s);
+    ctx.fillStyle = P.ember;
+    circle(ctx, x - 6 * s, y, 2.6 * s);
+    circle(ctx, x + 7 * s, y + 2 * s, 2.4 * s);
+  } else if (dish === 'wreck-platter') {
+    ctx.fillStyle = P.tide;
+    ellipse(ctx, x, y + 4 * s, 26 * s, 12 * s);
+    ctx.fillStyle = P.cream;
+    for (let i = 0; i < 3; i++) ctx.fillRect(x - 18 * s + i * 12 * s, y - 8 * s, 9 * s, 14 * s);
   } else {
     ctx.fillStyle = P.butter;
     for (let i = 0; i < 3; i++) circle(ctx, x - 16 * s + i * 16 * s, y, 10 * s);
