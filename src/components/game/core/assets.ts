@@ -12,11 +12,20 @@ export type SpriteId =
   | 'prop-kettle'
   | 'prop-board'
   | 'prop-crate'
+  | 'prop-pan'
+  | 'prop-glass'
+  | 'bottle-brine'
+  | 'bottle-tea'
+  | 'bottle-cream'
   | 'ing-potato-raw'
   | 'ing-potato-chopped'
   | 'ing-fish-raw'
   | 'ing-fish-chopped'
-  | 'dish-chowder';
+  | 'ing-dough-ball'
+  | 'ing-dough-folded'
+  | 'dish-chowder'
+  | 'dish-fogcutter'
+  | 'dish-rolls';
 
 export interface GameAssets {
   bgLandscape: HTMLImageElement | null;
@@ -31,11 +40,20 @@ const SPRITE_IDS: SpriteId[] = [
   'prop-kettle',
   'prop-board',
   'prop-crate',
+  'prop-pan',
+  'prop-glass',
+  'bottle-brine',
+  'bottle-tea',
+  'bottle-cream',
   'ing-potato-raw',
   'ing-potato-chopped',
   'ing-fish-raw',
   'ing-fish-chopped',
+  'ing-dough-ball',
+  'ing-dough-folded',
   'dish-chowder',
+  'dish-fogcutter',
+  'dish-rolls',
 ];
 
 async function loadImage(src: string): Promise<HTMLImageElement | null> {
