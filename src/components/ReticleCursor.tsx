@@ -7,6 +7,27 @@ const INTERACTIVE = 'a, button, [role="button"], [data-cursor="hover"]';
 /** The terminal input — yield to the native caret here. */
 const TEXT_FIELD = 'input, textarea, [contenteditable="true"], [data-cursor="text"]';
 
+/**
+ * True when a theme accent is near-black and achromatic (the ink themes).
+ * Those reticles disappear over dark surfaces (pedestal discs, dark floor), so
+ * they are drawn in white under `mix-blend-mode: difference` instead — per
+ * pixel the blend inverts the backdrop, giving ink over light surfaces and
+ * white over black ones with a seamless crossover. Chromatic accents (CRT
+ * green, Bulldog red, …) keep normal blending: difference would swap their hue
+ * for its complement on light backgrounds, and they already read on black.
+ */
+function isInkAccent(color: string): boolean {
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim());
+  if (!m) return false;
+  const hex = m[1].length === 3 ? m[1].replace(/./g, (c) => c + c) : m[1];
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const chroma = Math.max(r, g, b) - Math.min(r, g, b);
+  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return chroma < 32 && luma < 96;
+}
+
 export interface ReticleCursorProps {
   /** Reticle + glow color (defaults to phosphor green). */
   color?: string;
@@ -53,8 +74,11 @@ export default function ReticleCursor({
   const shownRef = useRef(false);
   const rafRef = useRef<number>();
 
-  const cfg = useRef({ smooth, color, reducedMotion });
-  cfg.current = { smooth, color, reducedMotion };
+  const invert = isInkAccent(color);
+  const drawColor = invert ? '#ffffff' : color;
+
+  const cfg = useRef({ smooth, color: drawColor, reducedMotion });
+  cfg.current = { smooth, color: drawColor, reducedMotion };
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -134,7 +158,14 @@ export default function ReticleCursor({
     <div
       ref={rootRef}
       className="pointer-events-none fixed left-0 top-0"
-      style={{ zIndex, transform: 'translate(-100px, -100px)', opacity: 0, willChange: 'transform', transition: 'opacity 0.15s ease' }}
+      style={{
+        zIndex,
+        transform: 'translate(-100px, -100px)',
+        opacity: 0,
+        willChange: 'transform',
+        transition: 'opacity 0.15s ease',
+        mixBlendMode: invert ? 'difference' : 'normal',
+      }}
       aria-hidden
     >
       <svg
@@ -144,7 +175,7 @@ export default function ReticleCursor({
         viewBox="0 0 40 40"
         style={{
           transform: 'translate(-50%, -50%) scale(1)',
-          filter: `drop-shadow(0 0 3px ${color})`,
+          filter: `drop-shadow(0 0 3px ${drawColor})`,
           transition: 'transform 0.18s ease, filter 0.18s ease',
           overflow: 'visible',
         }}
@@ -152,7 +183,7 @@ export default function ReticleCursor({
         {/* Rotating corner brackets — the "scanning" frame. */}
         <g
           ref={gRef}
-          stroke={color}
+          stroke={drawColor}
           strokeWidth={1.6}
           fill="none"
           strokeLinecap="round"
@@ -167,7 +198,7 @@ export default function ReticleCursor({
         </g>
 
         {/* Static crosshair ticks. */}
-        <g stroke={color} strokeWidth={1.3} strokeLinecap="round">
+        <g stroke={drawColor} strokeWidth={1.3} strokeLinecap="round">
           <line x1="20" y1="2" x2="20" y2="9" />
           <line x1="20" y1="31" x2="20" y2="38" />
           <line x1="2" y1="20" x2="9" y2="20" />
@@ -175,7 +206,7 @@ export default function ReticleCursor({
         </g>
 
         {/* Center pip — fills when locked onto a target. */}
-        <circle ref={pipRef} cx="20" cy="20" r="1.5" fill={color} />
+        <circle ref={pipRef} cx="20" cy="20" r="1.5" fill={drawColor} />
       </svg>
     </div>
   );
