@@ -65,12 +65,13 @@ function SiteCursor() {
     return <ReticleCursor color={theme.accent} reducedMotion={reducedMotion} />;
   }
 
+  // White ink + difference blending: renders as dark ink on the bone
+  // background and flips to white over black surfaces, per pixel.
   return (
     <DotRingCursor
-      dark={false}
-      ringColor="rgba(10,10,10,0.5)"
-      dotColor="#0a0a0a"
-      hoverColor="#0a0a0a"
+      ringColor="rgba(255,255,255,0.5)"
+      dotColor="#ffffff"
+      hoverColor="#ffffff"
       smooth={reducedMotion ? 1 : 0.18}
     />
   );

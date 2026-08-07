@@ -23,12 +23,15 @@ export interface DotRingCursorProps {
   /** Smooth follow speed (0–1, higher = snappier). */
   smooth?: number;
   zIndex?: number;
-  /** Use dark-mode colors (light ring/dot on dark bg). */
-  dark?: boolean;
 }
 
 /**
  * A minimal "dot + trailing ring" cursor for the professional portfolio.
+ *
+ * Painted in WHITE under `mix-blend-mode: difference`, so each pixel inverts
+ * whatever sits beneath it: near-black ink over the bone background, white over
+ * black pills/sections, transitioning seamlessly across edges. Pass light
+ * (white-based) colors — the blend does the inverting.
  *
  * Fully imperative: the component renders its structure once and then never
  * re-renders. `mousemove` only records the pointer target (cheap), and the rAF
@@ -46,7 +49,6 @@ export default function DotRingCursor({
   hoverColor,
   smooth = 0.18,
   zIndex = 9999,
-  dark = false,
 }: DotRingCursorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
@@ -61,8 +63,8 @@ export default function DotRingCursor({
   const shownRef = useRef(false);
   const rafRef = useRef<number>();
 
-  const ring = ringColor ?? (dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)');
-  const dot = dotColor ?? (dark ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.9)');
+  const ring = ringColor ?? 'rgba(255,255,255,0.7)';
+  const dot = dotColor ?? 'rgba(255,255,255,0.95)';
   const accent = hoverColor ?? ring;
 
   // Latest tuning in a ref so the rAF loop never has to restart on prop changes.
@@ -156,6 +158,7 @@ export default function DotRingCursor({
         opacity: 0,
         willChange: 'transform',
         transition: 'opacity 0.15s ease',
+        mixBlendMode: 'difference',
       }}
       aria-hidden
     >
