@@ -262,7 +262,6 @@ function SleepingDog() {
 function VRHeadset() {
   const { scene } = useGLTF('/models/quest3.glb');
   const currentView = useWorkstationStore((s) => s.currentView);
-  const openKitchenGame = useWorkstationStore((s) => s.openKitchenGame);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
   const pos = OBJECT_POSITIONS['kitchen-chaos-vr'];
   const isActive = currentView === 'kitchen-chaos-vr';
@@ -272,28 +271,6 @@ function VRHeadset() {
       <Center>
         <primitive object={clonedScene} scale={6} rotation={[0, 0, 0]} />
       </Center>
-      {isActive && (
-        <Html position={[0, 2.1, 0]} center distanceFactor={9} zIndexRange={[10, 0]}>
-          <button
-            onClick={(e) => { e.stopPropagation(); openKitchenGame(); }}
-            style={{
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              fontFamily: "ui-rounded, 'Segoe UI', system-ui, sans-serif",
-              fontWeight: 800,
-              fontSize: '15px',
-              color: '#fff',
-              padding: '10px 22px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'linear-gradient(#e8896b,#d36c4f)',
-              boxShadow: '0 5px 0 #b4543a, 0 8px 16px rgba(120,60,30,.35)',
-            }}
-          >
-            ▶ Enter Kitchen Chaos
-          </button>
-        </Html>
-      )}
     </ClickableObject>
   );
 }
