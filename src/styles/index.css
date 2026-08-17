@@ -666,9 +666,9 @@ html.cursor-hidden [contenteditable="true"] {
   will-change: auto;
 }
 
-/* The scrubbed video is BRIGHT through the top of the page (the face) and DARK lower
-   down. So text over the top uses ink (`over-bright`); text over the dark lower video
-   uses white (`over-video`). Flat, clean type — no halo/glow. */
+/* The scrubbed video is DARK through the top of the page (the orb) and BRIGHT lower
+   down (the face). So text over the dark upper video uses white (`over-video`); text
+   over the bright lower video uses ink (`over-bright`). Flat, clean type — no halo/glow. */
 .landing .over-video {
   color: var(--dark-ink);
 }
@@ -682,34 +682,27 @@ html.cursor-hidden [contenteditable="true"] {
   color: var(--ink-dim);
 }
 
-/* Reduced motion swaps the scrubbed video for its BRIGHT static poster, so the white
-   over-video text lower on the page loses the dark footage it was designed against.
-   A soft dark halo keeps it readable without changing the motion experience. */
+/* Reduced motion swaps the scrubbed video for its DARK static poster (the orb), so the
+   ink over-bright text lower on the page loses the bright footage it was designed
+   against. A soft light halo keeps it readable without changing the motion experience. */
 @media (prefers-reduced-motion: reduce) {
-  .landing .over-video,
-  .landing .over-video-dim {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65), 0 2px 16px rgba(0, 0, 0, 0.5);
+  .landing .over-bright,
+  .landing .over-bright-dim {
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7), 0 2px 16px rgba(255, 255, 255, 0.55);
   }
 }
 
-/* Light liquid-glass chip — frosted, refractive surface behind the hero's
+/* Dark liquid-glass chip — frosted, refractive surface behind the hero's
    supporting lines. Self-contained sheen (inset highlights) so it reads as glass
-   even over the bright video; blurs whatever it overlaps. */
+   over the dark video; blurs whatever it overlaps. (One recipe for both themes —
+   the dark footage behind it doesn't change with the site theme.) */
 .landing .hero-glass {
   position: relative;
   isolation: isolate;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.12) 60%, rgba(255, 255, 255, 0.08));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.03));
   -webkit-backdrop-filter: blur(14px) saturate(1.5);
   backdrop-filter: blur(14px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 10px 30px -18px rgba(0, 0, 0, 0.45);
-}
-.dark .landing .hero-glass {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.03));
   border: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.25),

@@ -544,6 +544,7 @@ const extraProjects: WorkProject[] = [
     ],
     relatedProjects: [
       { title: 'Musical Artist Website and Storefront', slug: 'musical-artist-site', period: 'May 2026 – Present' },
+      { title: 'Freight Carrier Website', slug: 'freight-carrier-website', period: 'July 2026 – Present' },
       { title: 'Live Election Platform', slug: 'live-election-platform', period: 'March 2026 – April 2026' },
     ],
   },
@@ -563,7 +564,28 @@ const extraProjects: WorkProject[] = [
       'I also handled the unglamorous but important parts like email capture with rate limiting, error monitoring, and analytics, then shipped the whole thing on Vercel.',
     ],
     relatedProjects: [
+      { title: 'Freight Carrier Website', slug: 'freight-carrier-website', period: 'July 2026 – Present' },
       { title: 'Live Election Platform', slug: 'live-election-platform', period: 'March 2026 – April 2026' },
+      { title: 'Personal Portfolio Website', slug: 'personal-portfolio', period: 'January 2026 – Present' },
+    ],
+  },
+  {
+    id: 'freight-carrier-website',
+    title: 'Freight Carrier Website',
+    shortTitle: 'Freight Carrier Site',
+    tagline: 'Production Next.js site with git-backed TinaCMS and a token design system for an independent freight carrier.',
+    period: 'July 2026 – Present',
+    location: 'Athens, GA',
+    category: 'web',
+    liveUrl: 'https://www.kulenterprises.com',
+    techStack: ['Next.js 15', 'React 19', 'TypeScript', 'TinaCMS', 'Tailwind CSS', 'Framer Motion', 'Resend', 'Blender', 'Vercel'],
+    description: [
+      'A production website for an independent freight carrier, with me as the whole team: design, engineering, and shipping. The client and I iterated through twelve candidate design directions before landing the one that fit, and I built it out as fifteen statically generated routes across services, driver recruiting, safety, quoting, and legal pages in Next.js 15, React 19, and TypeScript, unified by a token-based design system, self-hosted type, and Framer Motion.',
+      "The rule underneath it all: no readable sentence ships hardcoded. Every page, service, FAQ, form, and legal document lives in a typed, git-backed TinaCMS collection, a token system fills shared business facts into any sentence, and centralized Copy and Prose renderers put it on screen — so the client can rewrite the entire site from a hosted editor without touching code.",
+      "The motion starts with an opening brand film I produced in Blender, Higgsfield, and Final Cut Pro (VP9/WebM with an H.264 fallback for Safari) and carries through a fullscreen documentary player, a looping dashcam hero, an interactive service-area map, and digitally restored archival photography, with scroll reveals in pure CSS that honor prefers-reduced-motion. Site search scores the CMS content directly so results never go stale, four forms submit through rate-limited, honeypot-protected API routes that forward via Resend, and the interface meets WCAG AA.",
+    ],
+    relatedProjects: [
+      { title: 'Musical Artist Website and Storefront', slug: 'musical-artist-site', period: 'May 2026 – Present' },
       { title: 'Personal Portfolio Website', slug: 'personal-portfolio', period: 'January 2026 – Present' },
     ],
   },
@@ -697,6 +719,7 @@ const extraProjects: WorkProject[] = [
 export const FEATURED_IDS = [
   'animaldot',
   'personal-portfolio',
+  'freight-carrier-website',
   'musical-artist-site',
   'atlas-job-search',
   'live-election-platform',
@@ -915,6 +938,7 @@ const PROJECT_CATEGORY: Record<string, ProjectCategory> = {
   'vr-portfolio-1': 'vr',
   'vr-portfolio-2': 'vr',
   'personal-portfolio': 'web',
+  'freight-carrier-website': 'web',
   'musical-artist-site': 'web',
   'live-election-platform': 'web',
   'ubersicht-widgets': 'web',
@@ -949,6 +973,7 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
   'live-election-platform': { kind: 'site', url: 'https://nsbe-election.vercel.app/', embed: true },
   // Self-framing (this site) would render the embedded splash, so use a screenshot of the live site.
   'personal-portfolio': { kind: 'image', src: '/media/portfolio-preview.jpg', alt: 'jalenedusei.com home page' },
+  'freight-carrier-website': { kind: 'site', url: 'https://www.kulenterprises.com', embed: true },
   'musical-artist-site': { kind: 'site', url: 'https://www.akilahmali.com/', embed: true },
   'parmco-ble-motor': { kind: 'site', url: 'https://jke48222.github.io/parmco/', embed: true },
   'website-development': { kind: 'site', url: 'https://nsbe.uga.edu/', embed: true },

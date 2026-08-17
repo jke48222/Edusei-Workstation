@@ -10,7 +10,7 @@ export default function WhatIMake() {
         <div className="grid grid-cols-1 items-end gap-8 md:grid-cols-[1.4fr_1fr]">
           <Reveal>
             <EyebrowPill className="mb-6">{s.eyebrow}</EyebrowPill>
-            <h2 className="over-bright font-display text-[40px] leading-[0.98] md:text-[64px]">
+            <h2 className="over-video font-display text-[40px] leading-[0.98] md:text-[64px]">
               {s.title[0]} <span className="italic-accent">{s.title[1]}</span> {s.title[2]}
             </h2>
           </Reveal>
