@@ -19,26 +19,26 @@ type BentoSize = "lg" | "wide" | "tall" | "sm";
  * Source order + per-tile size is tuned so the tiles pack with no gaps on both the
  * 2-col (md) and 4-col (xl) grids, and each project's medium sits in a shape that
  * flatters it: models/videos fill the large squares, the CubeSat model stands in the
- * tall tile, and the landscape live-site iframes take the small/wide cells.
+ * tall tile, and the landscape live-site tiles take the small/wide cells.
  *
  *   xl (4 cols)          md (2 cols)
  *   ┌─────┬──┬──┐        ┌─────┐
  *   │ ani │me│ms│        │ ani │
- *   │ mal │me│le│        │ mal │
+ *   │ mal │me│fc│        │ mal │
  *   ├──┴──┼──┴──┤        ├──┬──┤
  *   │ kit │ pri │        │me│ms│
- *   ├──┬──┤ me  │        │me│le│
- *   │pp│pa│ for │        ├──┴──┤   … (kitchen, primeforge, pp, parmco follow)
+ *   ├──┬──┤ me  │        │me│fc│
+ *   │le│pa│ for │        ├──┴──┤   … (kitchen, primeforge, le, parmco follow)
  *   └──┴──┴─────┘        └─────┘
  */
 const BENTO_LAYOUT: { id: string; size: BentoSize }[] = [
   { id: "animaldot", size: "lg" },
   { id: "memesat", size: "tall" },
   { id: "musical-artist-site", size: "sm" },
-  { id: "live-election-platform", size: "sm" },
+  { id: "freight-carrier-website", size: "sm" },
   { id: "kitchen-chaos-vr", size: "wide" },
   { id: "primeforge-fpga", size: "lg" },
-  { id: "personal-portfolio", size: "sm" },
+  { id: "live-election-platform", size: "sm" },
   { id: "parmco-ble-motor", size: "sm" },
 ];
 
@@ -223,7 +223,7 @@ export default function SelectedWork() {
           <div className="mb-5">
             <EyebrowPill>SELECTED WORK</EyebrowPill>
           </div>
-          <Link to="/work" className="over-bright group flex w-fit items-baseline gap-2 font-display text-[36px] leading-[0.98] md:text-[56px]">
+          <Link to="/work" className="over-video group flex w-fit items-baseline gap-2 font-display text-[36px] leading-[0.98] md:text-[56px]">
             View all work
             <ArrowUpRight className="h-6 w-6 self-center transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 md:h-8 md:w-8" />
           </Link>

@@ -26,10 +26,10 @@ export default function Hero() {
   if (isMobile) {
     return (
       <section id="top" ref={zoneRef} className="relative">
-        {/* Initial starting view — one screen, headline over the bright video */}
+        {/* Initial starting view — one screen, headline over the dark video */}
         <div className="relative flex h-screen flex-col justify-end px-5 pb-[16vh]">
           <EyebrowPill className="mb-5">{hero.eyebrow}</EyebrowPill>
-          <h1 className="over-bright font-display text-[34px] leading-[1.02] sm:text-[48px]">
+          <h1 className="over-video font-display text-[34px] leading-[1.02] sm:text-[48px]">
             {hero.headline.line1}<br />
             {hero.headline.line2} <span className="italic-accent">{hero.headline.accent}</span>
           </h1>
@@ -40,7 +40,7 @@ export default function Hero() {
           {hero.reveals.map((line, i) => (
             <p
               key={i}
-              className="hero-glass over-bright max-w-[440px] rounded-2xl px-4 py-3 text-[14px] leading-[1.55]"
+              className="hero-glass over-video max-w-[440px] rounded-2xl px-4 py-3 text-[14px] leading-[1.55]"
             >
               {line}
             </p>
@@ -55,10 +55,10 @@ export default function Hero() {
     <section id="top" ref={zoneRef} className="relative" style={{ height: "300vh" }}>
       <div id="hero-zone" className="sticky top-0 h-screen overflow-hidden">
         <div className="relative mx-auto h-full max-w-container px-5 md:px-8">
-          {/* ── Left: headline + additive supporting lines (ink, over the bright video) ── */}
+          {/* ── Left: headline + additive supporting lines (white, over the dark video) ── */}
           <div className="absolute bottom-[15%] left-5 right-5 md:left-8 md:max-w-[680px]">
             <EyebrowPill className="mb-5">{hero.eyebrow}</EyebrowPill>
-            <h1 className="over-bright font-display text-[34px] leading-[1.02] sm:text-[48px] md:text-[64px]">
+            <h1 className="over-video font-display text-[34px] leading-[1.02] sm:text-[48px] md:text-[64px]">
               {hero.headline.line1}<br />
               {hero.headline.line2} <span className="italic-accent">{hero.headline.accent}</span>
             </h1>
@@ -66,7 +66,7 @@ export default function Hero() {
               {hero.reveals.map((line, i) => (
                 <p
                   key={i}
-                  className="hero-glass over-bright max-w-[420px] rounded-2xl px-4 py-2.5 text-[14px] leading-[1.55] md:text-[15px]"
+                  className="hero-glass over-video max-w-[420px] rounded-2xl px-4 py-2.5 text-[14px] leading-[1.55] md:text-[15px]"
                   style={appear(p, 0.16 + i * 0.22)}
                 >
                   {line}
@@ -77,8 +77,8 @@ export default function Hero() {
 
           {/* ── Right: tagline + recent projects revealed additively, each linked ── */}
           <div className="absolute right-5 top-1/2 hidden w-[230px] -translate-y-1/2 text-right md:block">
-            <p className="over-bright font-display text-[11px] leading-[1.6] tracking-[0.04em]">{hero.tagline}</p>
-            <p className="over-bright-dim mt-7 font-display text-[10px] tracking-[0.14em]">{hero.recentLabel}</p>
+            <p className="over-video font-display text-[11px] leading-[1.6] tracking-[0.04em]">{hero.tagline}</p>
+            <p className="over-video-dim mt-7 font-display text-[10px] tracking-[0.14em]">{hero.recentLabel}</p>
             <div className="mt-2.5 space-y-2.5">
               {projects.map((proj, i) => {
                 const reveal = appear(p, 0.1 + i * 0.18);
@@ -94,10 +94,10 @@ export default function Hero() {
                   tabIndex={shown ? 0 : -1}
                   aria-hidden={!shown}
                 >
-                  <span className="over-bright block font-display text-[15px] leading-[1.2] tracking-[-0.03em] transition-opacity group-hover:opacity-60">
+                  <span className="over-video block font-display text-[15px] leading-[1.2] tracking-[-0.03em] transition-opacity group-hover:opacity-60">
                     {proj.shortTitle ?? proj.title}
                   </span>
-                  <span className="over-bright-dim block font-mono text-[9px] uppercase tracking-[0.1em]">{proj.period}</span>
+                  <span className="over-video-dim block font-mono text-[9px] uppercase tracking-[0.1em]">{proj.period}</span>
                 </Link>
                 );
               })}
@@ -106,7 +106,7 @@ export default function Hero() {
 
           {/* ── Scroll cue: fades out as the page scrolls ── */}
           <div
-            className="over-bright-dim absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 md:flex"
+            className="over-video-dim absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 md:flex"
             style={{ opacity: Math.max(0, 1 - p * 3.2) }}
           >
             <span className="font-display text-[11px] tracking-[0.08em]">{hero.scrollCue}</span>
