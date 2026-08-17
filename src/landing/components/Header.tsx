@@ -13,7 +13,7 @@ export default function Header() {
         {/* Left: search + wordmark */}
         <div className="flex items-center gap-2.5 text-ink">
           <LandingSearch />
-          <a href="#top" className="over-bright hidden flex-col leading-none sm:flex">
+          <a href="#top" className="over-video hidden flex-col leading-none sm:flex">
             <span className="font-display text-[17px] tracking-[-0.04em]">{site.name}</span>
             <span className="font-display text-[9px] tracking-[0.18em] opacity-70">{site.role}</span>
           </a>

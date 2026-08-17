@@ -4,11 +4,11 @@ import { EyebrowPill, Reveal, ArrowRight } from "../ui";
 export default function StartHere() {
   const { startHere: s } = site;
   return (
-    <section id="contact" className="on-dark relative z-10 overflow-hidden">
+    <section id="contact" className="relative z-10 overflow-hidden">
       <div className="relative mx-auto max-w-container px-5 py-24 text-center md:px-8 md:py-32">
         <Reveal>
           <EyebrowPill className="mb-7">{s.eyebrow}</EyebrowPill>
-          <h2 className="over-video mx-auto max-w-[16ch] font-display text-[40px] leading-[1.0] md:text-[80px]">
+          <h2 className="over-bright mx-auto max-w-[16ch] font-display text-[40px] leading-[1.0] md:text-[80px]">
             {s.title[0]} <span className="italic-accent">{s.title[1]}</span>
           </h2>
           <div className="glass mx-auto mt-7 max-w-[58ch] rounded-2xl px-6 py-5">
@@ -26,7 +26,7 @@ export default function StartHere() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {socialRow.map((soc) => (
               <a key={soc.label} href={soc.href} target="_blank" rel="noreferrer"
-                className="over-video link-underline font-display text-[12px] tracking-[0.08em] text-white">
+                className="over-bright link-underline font-display text-[12px] tracking-[0.08em]">
                 {soc.short}
               </a>
             ))}

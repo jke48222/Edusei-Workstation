@@ -47,7 +47,7 @@ export const site = {
     tagline: "EMBEDDED · VR · FULL-STACK · DATA",
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
-    recentProjectIds: ["animaldot", "parmco-ble-motor", "primeforge-fpga", "atlas-job-search"],
+    recentProjectIds: ["freight-carrier-website", "animaldot", "parmco-ble-motor", "primeforge-fpga"],
     scrollCue: "SCROLL TO EXPLORE",
   },
 
