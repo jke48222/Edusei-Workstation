@@ -11,8 +11,6 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import DotRingCursor from '../components/DotRingCursor';
-import ReticleCursor from '../components/ReticleCursor';
-import { useActiveTheme } from '../store/themeStore';
 import { usePrefersReducedMotion } from '../hooks/useIsMobile';
 import { EmbeddedSplash } from '../components/EmbeddedSplash';
 import { Landing } from '../landing/Landing';
@@ -41,13 +39,13 @@ function isEmbedded(): boolean {
 }
 
 /**
- * Picks the right custom cursor: the reticle for the immersive Workstation
- * (`/workstation`), an ink dot+ring on the bone portfolio + work pages.
- * Renders nothing on touch / coarse-pointer devices.
+ * Picks the right custom cursor: an ink dot+ring on the bone portfolio + work
+ * pages. The IDE workstation uses the platform's native cursors (arrow over
+ * chrome, I-beam over text), exactly like a real editor, so it renders none.
+ * Renders nothing on touch / coarse-pointer devices either.
  */
 function SiteCursor() {
   const location = useLocation();
-  const theme = useActiveTheme();
   const reducedMotion = usePrefersReducedMotion();
   const [finePointer, setFinePointer] = useState(false);
 
@@ -62,7 +60,7 @@ function SiteCursor() {
   if (!finePointer) return null;
 
   if (location.pathname.startsWith('/workstation')) {
-    return <ReticleCursor color={theme.accent} reducedMotion={reducedMotion} />;
+    return null;
   }
 
   // White ink + difference blending: renders as dark ink on the bone

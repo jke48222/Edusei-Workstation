@@ -118,7 +118,7 @@ function TerminalBody() {
     >
       <div
         ref={scrollRef}
-        className="terminal-scroll min-h-0 flex-1 overflow-y-auto px-3 py-1.5"
+        className="terminal-scroll min-h-0 flex-1 cursor-text select-text overflow-y-auto px-3 py-1.5"
         style={{
           WebkitOverflowScrolling: 'touch',
           touchAction: 'pan-y',
@@ -237,7 +237,7 @@ function OutputBody() {
   return (
     <div
       ref={scrollRef}
-      className="terminal-scroll h-full overflow-y-auto px-3 py-1.5"
+      className="terminal-scroll h-full cursor-text select-text overflow-y-auto px-3 py-1.5"
       style={{ '--scrollbar-color': `${tokens.scrollbar}55`, '--scrollbar-color-hover': `${tokens.scrollbar}88` } as React.CSSProperties}
     >
       {api.outputLines.map((line, i) => (

@@ -207,15 +207,11 @@ function MobileDrawer({ api }: { api: IdeApi }) {
 /* ------------------------------------------------------------------ */
 
 export function Ide() {
-  const currentView = useWorkstationStore((s) => s.currentView);
-  const isAnimating = useWorkstationStore((s) => s.isAnimating);
   const terminalBooted = useWorkstationStore((s) => s.terminalBooted);
   const setTerminalBooted = useWorkstationStore((s) => s.setTerminalBooted);
   const reducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
   const soundMuted = useWorkstationStore((s) => s.soundMuted);
   const setSoundMuted = useWorkstationStore((s) => s.setSoundMuted);
-  const setView = useWorkstationStore((s) => s.setView);
-  const returnToMonitor = useWorkstationStore((s) => s.returnToMonitor);
   const openKitchenGame = useWorkstationStore((s) => s.openKitchenGame);
 
   const activeThemeId = useThemeStore((s) => s.activeTheme);
@@ -306,72 +302,32 @@ export function Ide() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ----- launch sequencing ----- */
-  const [launching, setLaunching] = useState(false);
-  const launchTimersRef = useRef<number[]>([]);
-  useEffect(() => {
-    const timers = launchTimersRef.current;
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
-  const startLaunchSequence = useCallback(
-    (viewId: ViewState, echoLine: string) => {
-      const meta = PROJECT_FILES[viewId];
-      const teaser = PROJECT_TEASERS[viewId];
-      const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
-      const lineDelayMs = 400;
-      setLaunching(true);
-      setProjectTab(viewId);
-      setActiveTabState('project');
-      setPanelOpenState(true);
-      setPanelTab('terminal');
-      setTermLines((prev) => [...prev, echoLine]);
-      setOutputLines((prev) => [...prev, `[launch] ${meta?.file ?? viewId}`]);
-      teaserLines.forEach((line, i) => {
-        launchTimersRef.current.push(
-          window.setTimeout(() => setTermLines((prev) => [...prev, line]), (i + 1) * lineDelayMs)
-        );
-      });
-      launchTimersRef.current.push(
-        window.setTimeout(() => {
-          setTermLines((prev) => [...prev, `Opening ${meta?.file ?? viewId}...`]);
-          launchTimersRef.current.push(
-            window.setTimeout(() => {
-              launchTimersRef.current.length = 0;
-              setLaunching(false);
-              setView(viewId);
-            }, 500)
-          );
-        }, (teaserLines.length + 1) * lineDelayMs)
-      );
-    },
-    [setView]
-  );
+  /* ----- opening project files ----- */
+  const [viewerLoading, setViewerLoading] = useState(false);
+  const projectTabRef = useRef(projectTab);
+  projectTabRef.current = projectTab;
 
   const openProject = useCallback(
-    (id: ViewState) => {
-      if (isAnimating || launching) return;
+    (id: ViewState, echoLine?: string) => {
       setMobileDrawerOpen(false);
-      if (currentView === id) {
+      if (projectTabRef.current !== id) {
+        const meta = PROJECT_FILES[id];
+        const teaser = PROJECT_TEASERS[id];
+        const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
+        setTermLines((lines) => [
+          ...lines,
+          echoLine ?? `$ open projects/${projectFileName(id)}`,
+          ...teaserLines,
+          `Opening ${meta?.file ?? id}...`,
+        ]);
+        setOutputLines((lines) => [...lines, `[open] ${meta?.file ?? id}`]);
+        setViewerLoading(true);
         setProjectTab(id);
-        setActiveTabState('project');
-        return;
       }
-      startLaunchSequence(id, `$ open projects/${projectFileName(id)}`);
-    },
-    [isAnimating, launching, currentView, startLaunchSequence]
-  );
-
-  /* Keep the tab model in sync with the 3D scene. */
-  useEffect(() => {
-    if (currentView !== 'monitor') {
-      setProjectTab(currentView);
       setActiveTabState('project');
-    } else if (!isAnimating && !launching) {
-      setProjectTab(null);
-      setActiveTabState((t) => (t === 'project' ? lastDocRef.current : t));
-    }
-  }, [currentView, isAnimating, launching]);
+    },
+    []
+  );
 
   /* ----- tab ops ----- */
   const setActiveTab = useCallback((tab: TabKind) => setActiveTabState(tab), []);
@@ -399,22 +355,10 @@ export function Ide() {
   );
 
   const closeProjectTab = useCallback(() => {
-    if (launching) {
-      launchTimersRef.current.forEach(clearTimeout);
-      launchTimersRef.current.length = 0;
-      setLaunching(false);
-      setTermLines((prev) => [...prev, 'Canceled.']);
-      setProjectTab(null);
-      setActiveTabState(lastDocRef.current);
-      return;
-    }
-    if (currentView !== 'monitor') {
-      if (!isAnimating) returnToMonitor();
-      return;
-    }
     setProjectTab(null);
-    setActiveTabState(lastDocRef.current);
-  }, [launching, currentView, isAnimating, returnToMonitor]);
+    setViewerLoading(false);
+    setActiveTabState((t) => (t === 'project' ? lastDocRef.current : t));
+  }, []);
 
   const openFileByName = useCallback(
     (name: string): boolean => {
@@ -562,11 +506,12 @@ export function Ide() {
             PROJECT_FILES[p.id]?.file.toLowerCase() === normalized
         );
         if (project) {
-          if (launching || isAnimating) {
-            setTermLines((prev) => [...prev, `$ ${cmd}`, 'A file is already opening. Hold on.']);
+          if (projectTabRef.current === project.id) {
+            setTermLines((prev) => [...prev, `$ ${cmd}`, `${PROJECT_FILES[project.id]?.file ?? project.executable} is already open.`]);
+            setActiveTabState('project');
             return;
           }
-          startLaunchSequence(project.id, `$ ${cmd}`);
+          openProject(project.id, `$ ${cmd}`);
           return;
         }
         const doc = DOC_FILES.find((d) => d.file.toLowerCase() === normalized);
@@ -590,7 +535,7 @@ export function Ide() {
 
       setTermLines((prev) => [...prev, `$ ${cmd}`, ...response]);
     },
-    [setTheme, openKitchenGame, openDocTab, launching, isAnimating, startLaunchSequence]
+    [setTheme, openKitchenGame, openDocTab, openProject]
   );
 
   /* ----- global keybindings ----- */
@@ -628,21 +573,29 @@ export function Ide() {
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
         toggleTerminal();
+        return;
+      }
+      // The palette, menus, and drawer handle their own Escape (with
+      // stopPropagation), so reaching here means: close the open 3D file.
+      if (e.key === 'Escape') {
+        if (mobileDrawerOpen) {
+          setMobileDrawerOpen(false);
+          return;
+        }
+        closeProjectTab();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [openPalette, selectSidebarView, toggleSidebar, togglePanel, toggleTerminal]);
+  }, [openPalette, selectSidebarView, toggleSidebar, togglePanel, toggleTerminal, mobileDrawerOpen, closeProjectTab]);
 
   /* ----- derived ----- */
-  const busy = launching || isAnimating || booting;
+  const busy = booting || viewerLoading;
   const statusMessage = booting
     ? 'Restoring workspace...'
-    : launching || (isAnimating && currentView !== 'monitor')
-      ? `Opening ${projectTab ? projectFileName(projectTab) : 'file'}...`
-      : isAnimating
-        ? 'Closing file...'
-        : null;
+    : viewerLoading && projectTab
+      ? `Loading ${projectFileName(projectTab)}...`
+      : null;
   const themeName = activeThemeId === SYSTEM_THEME_ID ? 'System' : themePresets[activeThemeId]?.name ?? 'System';
 
   const setThemeId = useCallback((id: string) => setTheme(id), [setTheme]);
@@ -681,6 +634,8 @@ export function Ide() {
     openPalette,
     busy,
     statusMessage,
+    viewerLoading,
+    setViewerLoading,
     cursorLine,
     setCursorLine,
     themeName,
@@ -688,18 +643,16 @@ export function Ide() {
     setThemeId,
     soundMuted,
     setSoundMuted,
-    currentView,
-    isAnimating,
-    returnToMonitor,
     openKitchenGame,
   };
 
   return (
     <IdeContext.Provider value={api}>
       <div
-        className="fixed inset-0 z-10 flex flex-col"
+        className="fixed inset-0 z-10 flex select-none flex-col"
         style={{
           pointerEvents: 'none',
+          cursor: 'default',
           fontFamily: UI_FONT,
           colorScheme: tokens.isDark ? 'dark' : 'light',
         }}
