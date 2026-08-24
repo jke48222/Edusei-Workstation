@@ -1,6 +1,6 @@
 /**
  * @file KitchenChaosGame.tsx
- * @description Kitchen Chaos — The Gale. Fullscreen overlay game (design:
+ * @description Kitchen Chaos: The Gale. Fullscreen overlay game (design:
  * docs/kitchen-chaos-2d.md). This is the M0 "Dry Dock" build: boot ident → title →
  * one-ticket chowder service on canvas → shift report. Mounts on the existing contract:
  * `kitchenGameOpen` renders it, `closeKitchenGame` unmounts it; ESC is owned here while
@@ -198,7 +198,7 @@ export function KitchenChaosGame() {
         if (e.result.dishName.includes('Black Toast') && e.result.craft >= 0.8) {
           writeInt(KEEPER_FAVOR_KEY, 1); // the Keeper remembers a perfect slice
         }
-        showToast(`${e.result.dishName} — ${e.result.score.toFixed(1)}/10`);
+        showToast(`${e.result.dishName}: ${e.result.score.toFixed(1)}/10`);
       } else if (e.kind === 'shift-complete') {
         setReport(e.report);
         const grades = readGrades();
@@ -308,7 +308,7 @@ export function KitchenChaosGame() {
       ref={rootRef}
       tabIndex={-1}
       role="application"
-      aria-label="Kitchen Chaos — The Gale"
+      aria-label="Kitchen Chaos: The Gale"
       className="fixed inset-0 z-[120] flex flex-col overflow-hidden font-sans outline-none select-none"
       style={{ background: P.charcoal, color: P.cream, touchAction: 'none' }}
       onPointerDown={() => gameAudio.unlock()}
@@ -382,7 +382,7 @@ export function KitchenChaosGame() {
           </p>
           <p className="max-w-md text-[13px] leading-relaxed" style={{ color: P.fog }}>
             {seasonIdx === 0
-              ? 'First shift of storm season. One dish on the menu — Aunt Pet’s journal will give up the rest as the week worsens.'
+              ? 'First shift of storm season. One dish on the menu. Aunt Pet’s journal will give up the rest as the week worsens.'
               : `Menu tonight: ${shiftCfg.menu.map((d) => d.split('-').join(' ')).length} dishes. The barometer is not your friend.`}
           </p>
           {favorsUnlocked.length > 0 && (
@@ -656,7 +656,7 @@ export function KitchenChaosGame() {
               <div key={s.day} className="flex items-center justify-between rounded-lg px-4 py-1.5 text-sm" style={{ background: 'rgba(46,61,79,0.55)' }}>
                 <span className="font-semibold">{s.day}</span>
                 <span className="font-mono text-xs" style={{ color: P.butter }}>
-                  {readGrades()[i] ?? '—'}
+                  {readGrades()[i] ?? '-'}
                 </span>
               </div>
             ))}

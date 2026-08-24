@@ -1020,7 +1020,7 @@ function drawGulls(
       ellipse(ctx, bx, by, 44, 30);
     }
     const left = Math.max(0, (sim.bosunUntil - sim.now) / 1000);
-    label(ctx, `BOSUN — rolls or ${Math.ceil(left)}s`, bx, r.y - 10);
+    label(ctx, `BOSUN: rolls or ${Math.ceil(left)}s`, bx, r.y - 10);
   }
 
   // Grudge ledger: chalk tallies by the pass. The gulls keep count. So should you.

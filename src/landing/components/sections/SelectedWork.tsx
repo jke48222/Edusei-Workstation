@@ -59,7 +59,6 @@ function ModelMedia({ src, rotation }: { src: string; rotation?: [number, number
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.1 });
   return (
     <div ref={ref} className="absolute inset-0 overflow-hidden bg-[#14151b]">
-      <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: "radial-gradient(#ffffff 1px, transparent 1.4px)", backgroundSize: "22px 22px" }} aria-hidden />
       {inView && (
         <Suspense fallback={null}>
           <TileModel src={src} interactive={false} rotation={rotation} />

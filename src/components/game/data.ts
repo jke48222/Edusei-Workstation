@@ -237,7 +237,7 @@ export const SHIFT_WAVES: WavePlan[] = [
   {
     at: 92,
     tickets: ['fogcutter', 'ninefathom-chowder', 'squall-rolls', 'fogcutter'],
-    toast: 'The ferry’s in — all six stools at once!',
+    toast: 'The ferry’s in. All six stools at once!',
   },
   { at: 148, tickets: ['squall-rolls'] },
   { at: 170, tickets: ['ninefathom-chowder', 'fogcutter'] },
@@ -289,8 +289,8 @@ export const MOP_STROKES = 3;
 
 /** The Keeper orders by dumbwaiter; his notes track the barometer down. */
 export const KEEPER_ORDERS: { at: number; note: string }[] = [
-  { at: 44, note: 'Toast. Black as the ninth wave. — K' },
-  { at: 126, note: 'No crusts. The sea counts them. — K' },
+  { at: 44, note: 'Toast. Black as the ninth wave. -K' },
+  { at: 126, note: 'No crusts. The sea counts them. -K' },
 ];
 
 /** Crank revolutions to send the dumbwaiter up. */
@@ -314,7 +314,7 @@ export const BOSUN_BLOCK_S = 12;
 export const MOSS_FINDS = [
   'a brass button, polished by the tide',
   'half a chess knight, coral-crusted',
-  'a bottle with the cork still in (empty — he checked)',
+  'a bottle with the cork still in (empty, he checked)',
   'a spoon that is definitely one of yours',
   'a tiny anchor from a very confident model ship',
 ];
@@ -340,7 +340,7 @@ export const SEASON: ShiftConfig[] = [
     day: 'Monday',
     forecast: 'Drizzle',
     menu: ['ninefathom-chowder'],
-    waves: [W(0, ['ninefathom-chowder']), W(40, ['ninefathom-chowder']), W(95, ['ninefathom-chowder', 'ninefathom-chowder'], 'Two at once — storm season begins.'), W(150, ['ninefathom-chowder'])],
+    waves: [W(0, ['ninefathom-chowder']), W(40, ['ninefathom-chowder']), W(95, ['ninefathom-chowder', 'ninefathom-chowder'], 'Two at once. Storm season begins.'), W(150, ['ninefathom-chowder'])],
     cells: [{ at: 70, dur: 18, state: 'fresh', gusts: [8] }],
     keeperOrders: [],
     albaAt: 58,
@@ -373,13 +373,13 @@ export const SEASON: ShiftConfig[] = [
     day: 'Thursday',
     forecast: 'Chop',
     menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles'],
-    waves: [W(0, ['ninefathom-chowder']), W(14, ['lightning-pickles']), W(46, ['fogcutter', 'squall-rolls']), W(90, ['lightning-pickles', 'ninefathom-chowder', 'fogcutter'], 'The ferry’s in — brace!'), W(140, ['squall-rolls', 'lightning-pickles']), W(172, ['fogcutter'])],
+    waves: [W(0, ['ninefathom-chowder']), W(14, ['lightning-pickles']), W(46, ['fogcutter', 'squall-rolls']), W(90, ['lightning-pickles', 'ninefathom-chowder', 'fogcutter'], 'The ferry’s in. Brace!'), W(140, ['squall-rolls', 'lightning-pickles']), W(172, ['fogcutter'])],
     cells: [
       { at: 30, dur: 24, state: 'squall', gusts: [6, 16], strikes: [10] },
       { at: 96, dur: 30, state: 'gale', gusts: [5, 14, 23], strikes: [8, 20], leakAt: 12 },
       { at: 160, dur: 22, state: 'squall', strikes: [9], gusts: [14] },
     ],
-    keeperOrders: [{ at: 70, note: 'Darker. The fog listens. — K' }],
+    keeperOrders: [{ at: 70, note: 'Darker. The fog listens. -K' }],
     albaAt: 50,
     tilts: [],
   },
@@ -387,13 +387,13 @@ export const SEASON: ShiftConfig[] = [
     day: 'Friday',
     forecast: 'Gale',
     menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles', 'wreck-platter'],
-    waves: [W(0, ['wreck-platter'], 'The big catch came in. Fillet like she taught.'), W(30, ['ninefathom-chowder', 'fogcutter']), W(74, ['lightning-pickles', 'squall-rolls']), W(100, ['wreck-platter', 'fogcutter', 'ninefathom-chowder'], 'Double ferry — all hands!'), W(150, ['wreck-platter']), W(175, ['lightning-pickles'])],
+    waves: [W(0, ['wreck-platter'], 'The big catch came in. Fillet like she taught.'), W(30, ['ninefathom-chowder', 'fogcutter']), W(74, ['lightning-pickles', 'squall-rolls']), W(100, ['wreck-platter', 'fogcutter', 'ninefathom-chowder'], 'Double ferry. All hands!'), W(150, ['wreck-platter']), W(175, ['lightning-pickles'])],
     cells: [
       { at: 26, dur: 26, state: 'squall', gusts: [6, 17], leakAt: 9 },
       { at: 92, dur: 34, state: 'gale', gusts: [4, 12, 24], strikes: [7, 18, 28], leakAt: 15 },
       { at: 164, dur: 24, state: 'gale', gusts: [8, 18], strikes: [12] },
     ],
-    keeperOrders: [{ at: 58, note: 'Two, tonight. The light is hungry. — K' }, { at: 132, note: 'No crusts. The sea counts them. — K' }],
+    keeperOrders: [{ at: 58, note: 'Two, tonight. The light is hungry. -K' }, { at: 132, note: 'No crusts. The sea counts them. -K' }],
     albaAt: 46,
     tilts: [],
   },
@@ -401,13 +401,13 @@ export const SEASON: ShiftConfig[] = [
     day: 'Saturday',
     forecast: 'Storm',
     menu: ['ninefathom-chowder', 'fogcutter', 'squall-rolls', 'black-toast', 'lightning-pickles', 'wreck-platter'],
-    waves: [W(0, ['fogcutter', 'ninefathom-chowder']), W(28, ['wreck-platter', 'lightning-pickles']), W(66, ['squall-rolls', 'fogcutter', 'ninefathom-chowder'], 'Ferry one!'), W(108, ['wreck-platter', 'fogcutter', 'lightning-pickles', 'squall-rolls'], 'Ferry two — Saturday doesn’t blink.'), W(154, ['ninefathom-chowder', 'lightning-pickles']), W(178, ['fogcutter'])],
+    waves: [W(0, ['fogcutter', 'ninefathom-chowder']), W(28, ['wreck-platter', 'lightning-pickles']), W(66, ['squall-rolls', 'fogcutter', 'ninefathom-chowder'], 'Ferry one!'), W(108, ['wreck-platter', 'fogcutter', 'lightning-pickles', 'squall-rolls'], 'Ferry two. Saturday doesn’t blink.'), W(154, ['ninefathom-chowder', 'lightning-pickles']), W(178, ['fogcutter'])],
     cells: [
       { at: 20, dur: 28, state: 'gale', gusts: [5, 15, 24], strikes: [9, 21], leakAt: 11 },
       { at: 86, dur: 36, state: 'gale', gusts: [6, 16, 27], strikes: [10, 24], leakAt: 18 },
       { at: 150, dur: 30, state: 'gale', gusts: [7, 19], strikes: [13, 25] },
     ],
-    keeperOrders: [{ at: 48, note: 'The gulls talk about you. Toast. — K' }, { at: 124, note: 'Blacker. Tonight matters. — K' }],
+    keeperOrders: [{ at: 48, note: 'The gulls talk about you. Toast. -K' }, { at: 124, note: 'Blacker. Tonight matters. -K' }],
     albaAt: 44,
     tilts: [],
   },
@@ -421,7 +421,7 @@ export const SEASON: ShiftConfig[] = [
       { at: 74, dur: 44, state: 'century', gusts: [6, 17, 29, 40], strikes: [9, 22, 35], leakAt: 16 },
       { at: 138, dur: 52, state: 'century', gusts: [7, 18, 30, 44], strikes: [11, 25, 39, 48] },
     ],
-    keeperOrders: [{ at: 40, note: 'The lamp dims. One slice, perfect. — K' }, { at: 150, note: 'For the light itself. After the panic. Always. — K' }],
+    keeperOrders: [{ at: 40, note: 'The lamp dims. One slice, perfect. -K' }, { at: 150, note: 'For the light itself. After the panic. Always. -K' }],
     albaAt: 36,
     tilts: [
       { at: 66, dur: 4, dir: 1 },
