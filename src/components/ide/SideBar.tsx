@@ -9,7 +9,7 @@ import {
   themeChoices,
   toThemeCommand,
 } from './registryData';
-import { themePresets, themePreviewColors, SYSTEM_THEME_ID } from '../../store/themeStore';
+import { themePresets, SYSTEM_THEME_ID } from '../../store/themeStore';
 import { DOC_FILES, PDF_FILES, PROJECT_FILES, getDocLines, getFileLang } from './files';
 import type { DocId } from './files';
 import {
@@ -269,7 +269,6 @@ function ExplorerView() {
                         label={meta.file}
                         hint={p.title}
                         active={api.activeTab === 'project' && api.projectTab === p.id}
-                        disabled={api.isAnimating}
                         onClick={() => api.openProject(p.id)}
                       />
                     );
@@ -502,7 +501,6 @@ function RunView() {
               }
               label={meta.file}
               hint={p.title}
-              disabled={api.isAnimating}
               onClick={() => api.openProject(p.id)}
             />
           );
@@ -525,6 +523,131 @@ function RunView() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Extension icons: marketplace-style square tiles                     */
+/* ------------------------------------------------------------------ */
+
+/** Rows of mock "code" inside a theme tile. */
+function ThemeTileLines({ x, colors, widths }: { x: number; colors: string[]; widths: number[] }) {
+  return (
+    <>
+      {widths.map((w, i) => (
+        <rect key={i} x={x} y={9.5 + i * 3.4} width={w} height={1.9} rx={0.95} fill={colors[i % colors.length]} />
+      ))}
+    </>
+  );
+}
+
+/** A miniature editor screenshot in the theme's own palette. */
+function ThemeExtIcon({ themeId, size = 32 }: { themeId: string; size?: number }) {
+  if (themeId === SYSTEM_THEME_ID) {
+    const light = themePresets.clean;
+    const dark = themePresets.dark;
+    return (
+      <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+        <defs>
+          <clipPath id="ext-sys-l">
+            <rect x="0" y="0" width="16" height="32" />
+          </clipPath>
+          <clipPath id="ext-sys-r">
+            <rect x="16" y="0" width="16" height="32" />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#ext-sys-l)">
+          <rect width="32" height="32" rx="7" fill={light.terminalBg} />
+          <ThemeTileLines x={5} colors={[light.accent, light.text, 'rgba(10,10,10,0.35)']} widths={[9, 6.5, 8, 5.5]} />
+        </g>
+        <g clipPath="url(#ext-sys-r)">
+          <rect width="32" height="32" rx="7" fill={dark.terminalBg} />
+          <ThemeTileLines x={18} colors={['#569CD6', dark.text, 'rgba(250,250,250,0.35)']} widths={[9, 6.5, 8, 5.5]} />
+        </g>
+        <rect width="32" height="32" rx="7" fill="none" stroke="rgba(128,128,128,0.4)" strokeWidth="1" />
+      </svg>
+    );
+  }
+  const p = themePresets[themeId];
+  if (!p) return null;
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+      <rect width="32" height="32" rx="7" fill={p.bg} />
+      <rect x="4" y="5" width="24" height="22" rx="2.5" fill={p.terminalBg} stroke={p.terminalBorder} strokeWidth="1" />
+      <rect x="6.5" y="9" width="3.4" height="14.5" rx="1" fill={p.textDim} opacity="0.55" />
+      <ThemeTileLines x={12.5} colors={[p.accent, p.text, p.textDim]} widths={[12, 8.5, 13, 7, 10.5]} />
+      <rect width="32" height="32" rx="7" fill="none" stroke="rgba(128,128,128,0.35)" strokeWidth="1" />
+    </svg>
+  );
+}
+
+/** Solid-color marketplace tile with a white glyph. */
+function ExtTile({ bg, size = 32, children }: { bg: string; size?: number; children: React.ReactNode }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+      <rect width="32" height="32" rx="7" fill={bg} />
+      {children}
+    </svg>
+  );
+}
+
+function SoundExtIcon({ muted, size = 32 }: { muted: boolean; size?: number }) {
+  return (
+    <ExtTile bg={muted ? '#6B7280' : '#16825D'} size={size}>
+      <path d="M9 13.5h4l5-4v13l-5-4H9v-5z" fill="#FFFFFF" />
+      {muted ? (
+        <path d="M21 13l6 6M27 13l-6 6" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      ) : (
+        <>
+          <path d="M21.5 12.5a5 5 0 0 1 0 7" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+          <path d="M24.2 10.2a8.4 8.4 0 0 1 0 11.6" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.75" />
+        </>
+      )}
+    </ExtTile>
+  );
+}
+
+function GitHubExtIcon({ size = 32 }: { size?: number }) {
+  return (
+    <ExtTile bg="#24292F" size={size}>
+      <g transform="translate(6,6) scale(1.25)">
+        <path
+          fill="#FFFFFF"
+          d="M8 .8a7.2 7.2 0 0 0-2.28 14.03c.36.07.5-.15.5-.35v-1.22c-2 .43-2.43-.97-2.43-.97-.32-.83-.8-1.05-.8-1.05-.65-.45.05-.44.05-.44.73.05 1.11.75 1.11.75.64 1.1 1.68.78 2.1.6.06-.47.25-.79.45-.97-1.6-.18-3.28-.8-3.28-3.56 0-.79.28-1.43.74-1.94-.07-.18-.32-.91.07-1.9 0 0 .6-.2 1.98.74a6.9 6.9 0 0 1 3.6 0c1.37-.93 1.97-.74 1.97-.74.4.99.15 1.72.07 1.9.46.5.74 1.15.74 1.94 0 2.77-1.69 3.38-3.3 3.56.26.22.49.66.49 1.33v1.97c0 .2.13.42.5.35A7.2 7.2 0 0 0 8 .8z"
+        />
+      </g>
+    </ExtTile>
+  );
+}
+
+function LinkedInExtIcon({ size = 32 }: { size?: number }) {
+  return (
+    <ExtTile bg="#0A66C2" size={size}>
+      <text
+        x="16"
+        y="17.5"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="#FFFFFF"
+        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        fontWeight={700}
+        fontSize="15"
+      >
+        in
+      </text>
+    </ExtTile>
+  );
+}
+
+function ResumeExtIcon({ size = 32 }: { size?: number }) {
+  return (
+    <ExtTile bg="#C0392B" size={size}>
+      <path d="M11 7h7.5L23 11.5V25H11V7z" fill="#FFFFFF" />
+      <path d="M18.5 7v4.5H23" fill="none" stroke="#C0392B" strokeWidth="1.2" />
+      <g stroke="#C0392B" strokeWidth="1.4" strokeLinecap="round">
+        <path d="M13.5 15h7M13.5 18h7M13.5 21h4.5" />
+      </g>
+    </ExtTile>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Extensions (theme gallery + links)                                  */
 /* ------------------------------------------------------------------ */
 
@@ -537,8 +660,7 @@ function ExtensionsView() {
 
   const card = (opts: {
     key: string;
-    swatch?: string;
-    icon?: React.ReactNode;
+    icon: React.ReactNode;
     name: string;
     desc: string;
     active?: boolean;
@@ -547,10 +669,7 @@ function ExtensionsView() {
   }) => {
     const inner = (
       <>
-        <span
-          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded"
-          style={{ backgroundColor: opts.swatch ?? tokens.inputBg, color: tokens.chromeFg }}
-        >
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center">
           {opts.icon}
         </span>
         <span className="min-w-0 flex-1">
@@ -605,7 +724,7 @@ function ExtensionsView() {
         {themes.map((t) =>
           card({
             key: t.id,
-            swatch: themePreviewColors[t.id] ?? tokens.inputBg,
+            icon: <ThemeExtIcon themeId={t.id} />,
             name: t.id === SYSTEM_THEME_ID ? 'System Theme' : `${t.name} Theme`,
             desc: t.id === SYSTEM_THEME_ID ? 'Follows the OS appearance' : `Color theme: theme ${toThemeCommand(themePresets[t.id]?.name ?? t.name)}`,
             active: api.activeThemeId === t.id,
@@ -614,7 +733,7 @@ function ExtensionsView() {
         )}
         {card({
           key: 'sounds',
-          icon: <span className="text-[13px] font-bold">S</span>,
+          icon: <SoundExtIcon muted={api.soundMuted} />,
           name: 'Terminal Sounds',
           desc: api.soundMuted ? 'Disabled. Click to enable keystroke sound.' : 'Enabled. Click to disable keystroke sound.',
           active: !api.soundMuted,
@@ -623,9 +742,9 @@ function ExtensionsView() {
         <p className="px-3 pb-1 pt-3 text-[11px] font-bold uppercase tracking-wide" style={{ color: tokens.chromeFgDim }}>
           Recommended
         </p>
-        {card({ key: 'gh', icon: <GitHubIcon size={16} />, name: 'GitHub Profile', desc: profileData.github, href: `https://${profileData.github}` })}
-        {card({ key: 'li', icon: <AccountIcon size={16} />, name: 'LinkedIn', desc: profileData.linkedin, href: `https://${profileData.linkedin}` })}
-        {card({ key: 'cv', icon: <FileTypeIcon lang="pdf" size={16} />, name: 'Resume + CV', desc: 'resume.pdf and cv.pdf', href: '/resume.pdf' })}
+        {card({ key: 'gh', icon: <GitHubExtIcon />, name: 'GitHub Profile', desc: profileData.github, href: `https://${profileData.github}` })}
+        {card({ key: 'li', icon: <LinkedInExtIcon />, name: 'LinkedIn', desc: profileData.linkedin, href: `https://${profileData.linkedin}` })}
+        {card({ key: 'cv', icon: <ResumeExtIcon />, name: 'Resume + CV', desc: 'resume.pdf and cv.pdf', href: '/resume.pdf' })}
       </div>
     </>
   );
