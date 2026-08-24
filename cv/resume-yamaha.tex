@@ -1,0 +1,102 @@
+% ============================================================
+% One-Page Resume - Jalen Edusei
+% Target: 2026 new-grad Software / Embedded / Full-Stack Engineering
+% Build: tectonic resume.tex
+% ============================================================
+\documentclass[letterpaper,10pt]{article}
+\usepackage[empty]{fullpage}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=.98]{XCharter}
+\usepackage{microtype}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\addtolength{\oddsidemargin}{-0.55in}
+\addtolength{\evensidemargin}{-0.55in}
+\addtolength{\textwidth}{1.10in}
+\addtolength{\topmargin}{-0.70in}
+\addtolength{\textheight}{1.55in}
+\renewcommand{\baselinestretch}{0.97}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\raggedright
+\setlength{\emergencystretch}{2em}
+\setlist[itemize]{leftmargin=1.3em,itemsep=0.5pt,topsep=0.5pt,parsep=0pt,partopsep=0pt}
+\newcommand{\IfEmpty}[3]{\if\relax\detokenize{#1}\relax#2\else#3\fi}
+\newcommand{\sectiontitle}[1]{\vspace{4pt}{\textbf{\large #1}}\par\vspace{-6pt}\rule{\textwidth}{0.4pt}\par\vspace{1pt}}
+\newcommand{\experienceheading}[4]{\begin{tabularx}{\textwidth}{@{}X r@{}}\textbf{#1}\IfEmpty{#2}{}{, \textit{#2}}\IfEmpty{#3}{}{, #3} & #4 \\ \end{tabularx}\par\vspace{1pt}}
+\newcommand{\projectheading}[3]{\begin{tabularx}{\textwidth}{@{}X r@{}}\textbf{#1} \;|\; \textit{#2} & #3 \\ \end{tabularx}\par\vspace{1pt}}
+\begin{document}
+\begin{center}
+{\LARGE \textbf{Jalen Edusei}}\par
+\vspace{2pt}
+{\small \href{mailto:jalen.edusei@gmail.com}{jalen.edusei@gmail.com} \,|\,
+770-714-0190 \,|\,
+Atlanta, GA \,|\,
+\href{https://www.jalenedusei.com}{jalenedusei.com} \,|\,
+\href{https://www.linkedin.com/in/jalenedusei}{linkedin.com/in/jalenedusei} \,|\,
+\href{https://github.com/jke48222}{github.com/jke48222}}
+\end{center}
+
+\vspace{3pt}
+{\small Full-stack software engineer shipping customer-facing web and commerce applications for paying clients: React/TypeScript frontends, Node and REST/GraphQL services on PostgreSQL, CMS content modeling, and CI/CD on GitHub Actions.}\par
+
+\sectiontitle{EDUCATION}
+\begin{tabularx}{\textwidth}{@{}X r@{}}
+\textbf{University of Georgia}, Morehead Honors College, Athens, GA & May 2026 \\
+\textit{Bachelor of Science in Computer Systems Engineering, cum laude} & GPA: 3.61 / 4.00 \\
+\end{tabularx}
+\vspace{1pt}\par
+{\small \textbf{Relevant Coursework:} Data Structures, Systems Programming, Software Development, Discrete Mathematics, Embedded Systems I \& II, Advanced Digital Design, Human-Computer Interaction}
+
+\sectiontitle{TECHNICAL SKILLS}
+\textbf{Languages:} TypeScript, JavaScript (ES6+), Python, Swift, Java, SQL, Elixir, C, C++\par
+\textbf{Frontend:} React 19, Next.js (App Router, ISR), Tailwind CSS, three.js / React Three Fiber, Framer Motion, WCAG AA accessibility\par
+\textbf{Backend \& APIs:} Node.js, Express, REST and GraphQL API design and integration (Shopify Storefront, Laylo), PostgreSQL (row-level security, transactional outbox), Supabase, WebSockets, event-driven pipelines (MQTT, outbox)\par
+\textbf{CMS \& Commerce:} TinaCMS content modeling (typed collections, editorial workflows), Shopify Storefront API and hosted storefront, order-lifecycle and inventory systems\par
+\textbf{DevOps \& AI:} GitHub Actions, Git-based workflows, Docker, Kubernetes, Vercel, AI-paired development (Claude Code, Cursor), Anthropic Claude API, code review, automated testing (Vitest, ExUnit, XCTest)
+
+\sectiontitle{EXPERIENCE}
+\experienceheading{Freelance Software Engineer}{Self-Employed}{Atlanta, GA}{May 2026 -- Present}
+\begin{itemize}
+\item Designed, built, and shipped \href{https://www.kulenterprises.com}{kulenterprises.com} for a Georgia freight carrier, running the engagement from discovery through go-live and post-launch support: 22 statically generated Next.js / React / TypeScript pages on a git-backed TinaCMS content model so the client edits every word without code, four rate-limited forms through Resend, and WCAG AA-audited contrast.
+\item Built and shipped \href{https://www.akilahmali.com}{akilahmali.com} for a recording artist and integrated its commerce: a headless Shopify Storefront (GraphQL) cart with httpOnly cookie sessions and a server-side mutation boundary, consolidated onto Shopify's hosted storefront after a security review, alongside a real-time 3D scene in three.js / React Three Fiber.
+\item Extended the freight-carrier engagement with a broker credit-vetting portal on Supabase: a 12-question screening workflow, risk ratings with an admin-only do-not-load block, and compliance rules held in Postgres (row-level security, audit log, atomic SQL functions) behind invite-only auth with four staff roles.
+\end{itemize}
+\experienceheading{Capital One}{Business Analyst Intern}{McLean, VA}{Jun 2025 -- Aug 2025}
+\begin{itemize}
+\item Built the business case for a CreditWise Notifications Preferences Center projected to centralize communication management for 60M+ customer accounts; presented the recommendation to senior leadership.
+\item Analyzed email-campaign performance in SQL, Python, and Excel, creating a valuation framework that quantified engagement and retention impact and informed product-roadmap decisions.
+\end{itemize}
+\experienceheading{UGA Small Satellite Research Lab}{Flight Software Developer (MEMESat-1)}{Athens, GA}{Mar 2024 -- Dec 2024}
+\begin{itemize}
+\item Developed embedded C/C++ flight software on STM32 microcontrollers for the MEMESat-1 CubeSat, hardening it with unit and integration tests and reviewing teammates' code in the shared codebase.
+\end{itemize}
+
+\sectiontitle{PROJECTS}
+\projectheading{Relay: eCommerce Order Management \& Fulfillment}{Elixir, Phoenix, PostgreSQL, React, TypeScript, CI/CD}{Jul 2026}
+\begin{itemize}
+\item Built an event-driven order-management system covering checkout to delivery: a 13-route JSON API, a Kafka-style transactional outbox, an 8-state order machine enforced under row locks, inventory allocation across four fulfillment centers, and a live React dashboard over WebSockets.
+\item Prevented oversell with \texttt{SELECT \ldots FOR UPDATE} allocation plus a \texttt{CHECK} constraint and \texttt{Idempotency-Key} replay; 52 failure-mode tests (ExUnit, Vitest) run in GitHub Actions; Docker and Kubernetes manifests.
+\end{itemize}
+\projectheading{Live Election Platform}{Next.js 14, JavaScript, Supabase (Postgres, Realtime, RLS)}{Mar 2026 -- Jun 2026}
+\begin{itemize}
+\item Shipped a customer-facing realtime election system (14 roles, 39 candidates): three-state election machine, SHA-256 device fingerprinting with a \texttt{UNIQUE(role\_id, device\_hash)} constraint and row-level security, and a 29-finding security audit verified by 42 HTTP-level tests.
+\end{itemize}
+\projectheading{AnimalDot Smart Bed (Senior Capstone)}{ESP32, C++, Express, PostgreSQL, MQTT, React Native}{Aug 2025 -- May 2026}
+\begin{itemize}
+\item Led all software (36 of 37 commits) on a six-person team: device telemetry flows over a binary MQTT protocol into a JWT-authenticated Express/PostgreSQL backend and out to React Native and SwiftUI apps over WebSockets, with about 53 tests and two CI pipelines.
+\end{itemize}
+\projectheading{Exocortex: Local-First Personal Memory System}{Swift, SQLite/FTS5, MLX, Foundation Models, MCP}{Aug 2026}
+\begin{itemize}
+\item Built a local-first memory system that gives AI tools one private, shared memory: 14 data streams ingested into a 100,000-event SQLite/FTS5 store, hybrid BM25-plus-vector search measuring 0.95 Recall@1 against a 0.55 keyword baseline, and an MCP server with per-client trust tiers.
+\end{itemize}
+
+\sectiontitle{LEADERSHIP \& HONORS}
+{\small Vice President, NSBE UGA Chapter (100+ members) \,|\, Tau Beta Pi \,|\, Extraordinary Engineer Award \,|\, 2x Presidential Scholar \,|\, Dean's List}
+\end{document}

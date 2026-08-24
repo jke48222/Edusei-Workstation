@@ -32,14 +32,14 @@ type BentoSize = "lg" | "wide" | "tall" | "sm";
  *   └──┴──┴─────┘        └─────┘
  */
 const BENTO_LAYOUT: { id: string; size: BentoSize }[] = [
-  { id: "animaldot", size: "lg" },
+  { id: "freight-carrier-website", size: "lg" },
   { id: "memesat", size: "tall" },
-  { id: "musical-artist-site", size: "sm" },
-  { id: "freight-carrier-website", size: "sm" },
+  { id: "exocortex", size: "sm" },
+  { id: "windowpet", size: "sm" },
   { id: "kitchen-chaos-vr", size: "wide" },
-  { id: "primeforge-fpga", size: "lg" },
-  { id: "live-election-platform", size: "sm" },
-  { id: "parmco-ble-motor", size: "sm" },
+  { id: "animaldot", size: "lg" },
+  { id: "musical-artist-site", size: "sm" },
+  { id: "relay-oms", size: "sm" },
 ];
 
 /** Column/row spans per size — `md:` prefixes persist up into the xl grid unchanged. */
@@ -70,7 +70,7 @@ function ModelMedia({ src, rotation }: { src: string; rotation?: [number, number
 }
 const CAT_LABEL: Record<ProjectCategory, string> = {
   web: "Web & Product", embedded: "Embedded", hardware: "Hardware",
-  vr: "VR / XR", research: "Research", ai: "AI Application",
+  vr: "XR & Games", research: "Research", ai: "AI Application",
 };
 
 /** A live, width-filling iframe preview of a real site — mounted only once scrolled into view. */

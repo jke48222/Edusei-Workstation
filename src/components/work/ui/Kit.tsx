@@ -31,7 +31,7 @@ export const CATEGORY_LABEL: Record<ProjectCategory, string> = {
   web: 'Web & Product',
   embedded: 'Embedded',
   hardware: 'Hardware',
-  vr: 'VR / XR',
+  vr: 'XR & Games',
   research: 'Research',
   ai: 'AI Application',
 };
