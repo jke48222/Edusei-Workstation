@@ -1,6 +1,4 @@
 import { Suspense, lazy, useCallback, useEffect, useLayoutEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Home, LayoutGrid } from 'lucide-react';
 
 // Lazy-loaded: keeps three.js / R3F out of the initial bundle for the default
 // landing + professional views; only fetched when the user enters the 3D workstation.
@@ -10,8 +8,7 @@ import { Overlay } from '../components/Overlay';
 import { useKonamiCode } from '../hooks/useKonamiCode';
 import { usePrefersReducedMotion } from '../hooks/useIsMobile';
 import { useWorkstationStore } from '../store/store';
-import { useActiveTheme, useThemeStore, useResolvedThemeId, setDarkClass, themePreviewColors as previewColors } from '../store/themeStore';
-import { ThemeSelector } from '../components/ThemeSelector';
+import { useActiveTheme, useThemeStore, setDarkClass } from '../store/themeStore';
 
 /**
  * Shared, route-agnostic chrome: Konami easter egg + reduced-motion sync.
@@ -36,31 +33,7 @@ function useGlobalChrome() {
   }, [prefersReducedMotion, setPrefersReducedMotion]);
 }
 
-/** Themed pill on the workstation that routes back to the landing / DOM portfolio. */
-function WorkstationNav() {
-  const theme = useActiveTheme();
-  const linkCls =
-    'flex h-9 items-center gap-1.5 rounded-full px-3 text-[11px] font-mono backdrop-blur-xl transition-all duration-200';
-  const style = {
-    border: `1px solid ${theme.accent}40`,
-    backgroundColor: `${theme.terminalBg}cc`,
-    color: theme.accent,
-  };
-  return (
-    <div className="fixed top-3 right-5 z-[110] flex items-center gap-2 pointer-events-auto">
-      <Link to="/" aria-label="Back to home" className={linkCls} style={style}>
-        <Home className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Home</span>
-      </Link>
-      <Link to="/work" aria-label="Open the work archive" className={linkCls} style={style}>
-        <LayoutGrid className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Work</span>
-      </Link>
-    </div>
-  );
-}
-
-/** The immersive 3D workstation scene + overlay (rendered at /workstation). */
+/** The immersive 3D workstation scene + IDE overlay (rendered at /workstation). */
 function ImmersiveExperience() {
   const currentView = useWorkstationStore((s) => s.currentView);
   const returnToMonitor = useWorkstationStore((s) => s.returnToMonitor);
@@ -68,9 +41,7 @@ function ImmersiveExperience() {
   const kitchenGameOpen = useWorkstationStore((s) => s.kitchenGameOpen);
   const theme = useActiveTheme();
   const activeTheme = useThemeStore((s) => s.activeTheme);
-  const resolvedId = useResolvedThemeId();
   const useAccentBg = activeTheme === 'uga';
-  const hintColor = activeTheme === 'classic' ? theme.text : previewColors[resolvedId] ?? previewColors[activeTheme] ?? theme.accent;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,16 +69,6 @@ function ImmersiveExperience() {
           <KitchenChaosGame />
         </Suspense>
       )}
-
-      <div
-        className="fixed bottom-4 left-4 text-xs font-mono pointer-events-none hidden sm:block"
-        style={{ color: hintColor, opacity: 0.85 }}
-      >
-        ESC to return · Click objects to explore
-      </div>
-
-      <WorkstationNav />
-      <ThemeSelector />
     </div>
   );
 }

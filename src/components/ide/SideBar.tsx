@@ -1,0 +1,653 @@
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { useIde } from './context';
+import type { SidebarView } from './context';
+import { MenuDropdown } from './TitleBar';
+import type { MenuEntry } from './TitleBar';
+import {
+  profileData,
+  projectsData,
+  themeChoices,
+  toThemeCommand,
+} from './registryData';
+import { themePresets, themePreviewColors, SYSTEM_THEME_ID } from '../../store/themeStore';
+import { DOC_FILES, PDF_FILES, PROJECT_FILES, getDocLines, getFileLang } from './files';
+import type { DocId } from './files';
+import {
+  AccountIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CollapseAllIcon,
+  DebugIcon,
+  EllipsisIcon,
+  ExtensionsIcon,
+  FileTypeIcon,
+  FilesIcon,
+  FolderIcon,
+  GearIcon,
+  GitHubIcon,
+  NewFileIcon,
+  RefreshIcon,
+  SearchIcon,
+  SourceControlIcon,
+} from './icons';
+
+/* ------------------------------------------------------------------ */
+/* Activity bar                                                        */
+/* ------------------------------------------------------------------ */
+
+const ACTIVITY_VIEWS: { view: SidebarView; label: string; icon: (active: boolean) => React.ReactNode }[] = [
+  { view: 'explorer', label: 'Explorer', icon: () => <FilesIcon size={22} /> },
+  { view: 'search', label: 'Search', icon: () => <SearchIcon size={22} /> },
+  { view: 'scm', label: 'Source Control', icon: () => <SourceControlIcon size={22} /> },
+  { view: 'run', label: 'Run and Debug', icon: () => <DebugIcon size={22} /> },
+  { view: 'extensions', label: 'Extensions', icon: () => <ExtensionsIcon size={22} /> },
+];
+
+export function ActivityBar() {
+  const api = useIde();
+  const { tokens } = api;
+  const [popup, setPopup] = useState<'account' | 'gear' | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!popup) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setPopup(null);
+    };
+    window.addEventListener('mousedown', onDown);
+    return () => window.removeEventListener('mousedown', onDown);
+  }, [popup]);
+
+  const accountEntries: MenuEntry[] = [
+    { label: profileData.email, href: `mailto:${profileData.email}` },
+    { sep: true },
+    { label: 'GitHub Profile', href: `https://${profileData.github}` },
+    { label: 'LinkedIn', href: `https://${profileData.linkedin}` },
+  ];
+  const gearEntries: MenuEntry[] = [
+    { label: 'Command Palette...', action: () => api.openPalette('>') },
+    { label: 'Color Theme', action: () => api.openPalette('>theme ') },
+    { sep: true },
+    { label: 'Terminal Sound', checked: !api.soundMuted, action: () => api.setSoundMuted(!api.soundMuted) },
+    { sep: true },
+    { label: 'Edusei IDE v3.026', action: () => api.openDocTab('welcome') },
+  ];
+
+  const itemClass = 'relative flex h-12 w-12 items-center justify-center';
+
+  return (
+    <div
+      ref={wrapRef}
+      className="relative z-30 flex w-12 shrink-0 flex-col"
+      style={{ backgroundColor: tokens.chromeBg, borderRight: `1px solid ${tokens.border}` }}
+    >
+      {ACTIVITY_VIEWS.map(({ view, label, icon }) => {
+        const active = api.sidebarOpen && api.sidebarView === view;
+        return (
+          <button
+            key={view}
+            type="button"
+            className={itemClass}
+            title={label}
+            aria-label={label}
+            onClick={() => api.selectSidebarView(view)}
+            style={{ color: active ? tokens.chromeFg : tokens.chromeFgDim }}
+          >
+            {active && (
+              <span className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2" style={{ backgroundColor: tokens.accent }} />
+            )}
+            {icon(active)}
+          </button>
+        );
+      })}
+      <div className="mt-auto" />
+      <button
+        type="button"
+        className={itemClass}
+        title="Accounts"
+        aria-label="Accounts"
+        onClick={() => setPopup((v) => (v === 'account' ? null : 'account'))}
+        style={{ color: tokens.chromeFgDim }}
+      >
+        <AccountIcon size={22} />
+      </button>
+      <button
+        type="button"
+        className={itemClass}
+        title="Manage"
+        aria-label="Manage"
+        onClick={() => setPopup((v) => (v === 'gear' ? null : 'gear'))}
+        style={{ color: tokens.chromeFgDim }}
+      >
+        <GearIcon size={22} />
+      </button>
+      {popup && (
+        <div className="absolute bottom-2 left-full z-50 pl-1">
+          <MenuDropdown entries={popup === 'account' ? accountEntries : gearEntries} onClose={() => setPopup(null)} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared side bar scaffolding                                         */
+/* ------------------------------------------------------------------ */
+
+function ViewHeader({ title, actions }: { title: string; actions?: React.ReactNode }) {
+  const { tokens } = useIde();
+  return (
+    <div className="flex h-[35px] shrink-0 items-center justify-between pl-5 pr-2">
+      <span className="text-[11px] uppercase tracking-wide" style={{ color: tokens.chromeFgDim }}>
+        {title}
+      </span>
+      <div className="flex items-center gap-0.5" style={{ color: tokens.chromeFgDim }}>
+        {actions ?? (
+          <span className="p-1">
+            <EllipsisIcon size={14} />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface TreeRowProps {
+  depth: number;
+  label: string;
+  icon?: React.ReactNode;
+  chevron?: 'down' | 'right' | 'none';
+  hint?: string;
+  active?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  href?: string;
+}
+
+function TreeRow({ depth, label, icon, chevron = 'none', hint, active, disabled, onClick, href }: TreeRowProps) {
+  const { tokens } = useIde();
+  const [hover, setHover] = useState(false);
+  const style: React.CSSProperties = {
+    paddingLeft: 8 + depth * 12,
+    height: 22,
+    color: active ? tokens.listActiveFg : tokens.chromeFg,
+    backgroundColor: active ? tokens.listActiveBg : hover ? tokens.listHoverBg : 'transparent',
+    outline: active ? `1px solid ${tokens.focusBorder}` : 'none',
+    outlineOffset: -1,
+  };
+  const inner = (
+    <>
+      <span className="flex w-4 shrink-0 items-center justify-center" style={{ color: tokens.chromeFgDim }}>
+        {chevron === 'down' ? <ChevronDownIcon size={12} /> : chevron === 'right' ? <ChevronRightIcon size={12} /> : null}
+      </span>
+      {icon && <span className="mr-1.5 flex shrink-0 items-center">{icon}</span>}
+      <span className="truncate text-[13px]">{label}</span>
+      {hint && (
+        <span className="ml-auto truncate pl-2 pr-2 text-[11px]" style={{ color: tokens.chromeFgDim, opacity: hover ? 1 : 0.7 }}>
+          {hint}
+        </span>
+      )}
+    </>
+  );
+  const cls = 'flex w-full items-center text-left';
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls} style={style} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <button type="button" className={cls} style={style} disabled={disabled} onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      {inner}
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Explorer                                                            */
+/* ------------------------------------------------------------------ */
+
+function ExplorerView() {
+  const api = useIde();
+  const { tokens } = api;
+  const [projectsOpen, setProjectsOpen] = useState(true);
+  const [rootOpen, setRootOpen] = useState(true);
+
+  const rootDocs = [...DOC_FILES.map((d) => ({ kind: 'doc' as const, file: d.file, id: d.id })), ...PDF_FILES.map((d) => ({ kind: 'pdf' as const, file: d.file, href: d.href }))].sort(
+    (a, b) => a.file.localeCompare(b.file)
+  );
+
+  return (
+    <>
+      <ViewHeader title="Explorer" />
+      <div className="min-h-0 flex-1 overflow-y-auto terminal-scroll" style={{ '--scrollbar-color': `${tokens.scrollbar}55`, '--scrollbar-color-hover': `${tokens.scrollbar}88` } as React.CSSProperties}>
+        {/* Workspace section */}
+        <div className="group/section">
+          <button
+            type="button"
+            className="flex h-[22px] w-full items-center pr-2 text-left"
+            style={{ color: tokens.chromeFg }}
+            onClick={() => setRootOpen((v) => !v)}
+            aria-expanded={rootOpen}
+          >
+            <span className="flex w-4 shrink-0 items-center justify-center">
+              {rootOpen ? <ChevronDownIcon size={12} /> : <ChevronRightIcon size={12} />}
+            </span>
+            <span className="flex-1 truncate text-[11px] font-bold uppercase tracking-wide">Edusei-Workstation</span>
+            <span className="hidden items-center gap-0.5 group-hover/section:flex" style={{ color: tokens.chromeFgDim }}>
+              <span className="p-0.5" title="New File..."><NewFileIcon size={14} /></span>
+              <span className="p-0.5" title="Refresh Explorer"><RefreshIcon size={14} /></span>
+              <span className="p-0.5" title="Collapse Folders"><CollapseAllIcon size={14} /></span>
+            </span>
+          </button>
+
+          {rootOpen && (
+            <div className="relative pb-2">
+              <TreeRow
+                depth={0}
+                chevron={projectsOpen ? 'down' : 'right'}
+                icon={<FolderIcon size={15} open={projectsOpen} />}
+                label="projects"
+                onClick={() => setProjectsOpen((v) => !v)}
+              />
+              {projectsOpen && (
+                <div className="relative">
+                  <span
+                    className="pointer-events-none absolute bottom-0 top-0 w-px"
+                    style={{ left: 15, backgroundColor: tokens.indentGuide }}
+                    aria-hidden
+                  />
+                  {projectsData.map((p) => {
+                    const meta = PROJECT_FILES[p.id];
+                    if (!meta) return null;
+                    return (
+                      <TreeRow
+                        key={p.id}
+                        depth={1}
+                        icon={<FileTypeIcon lang={meta.lang} size={15} />}
+                        label={meta.file}
+                        hint={p.title}
+                        active={api.activeTab === 'project' && api.projectTab === p.id}
+                        disabled={api.isAnimating}
+                        onClick={() => api.openProject(p.id)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+              {rootDocs.map((f) =>
+                f.kind === 'doc' ? (
+                  <TreeRow
+                    key={f.file}
+                    depth={0}
+                    icon={<FileTypeIcon lang={getFileLang(f.file)} size={15} />}
+                    label={f.file}
+                    active={api.activeTab === f.id}
+                    onClick={() => api.openDocTab(f.id as DocId)}
+                  />
+                ) : (
+                  <TreeRow key={f.file} depth={0} icon={<FileTypeIcon lang="pdf" size={15} />} label={f.file} href={f.href} />
+                )
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Collapsed stock sections */}
+        {(['Outline', 'Timeline'] as const).map((name) => (
+          <button
+            key={name}
+            type="button"
+            className="flex h-[22px] w-full items-center text-left"
+            style={{ color: tokens.chromeFgDim, borderTop: `1px solid ${tokens.border}` }}
+          >
+            <span className="flex w-4 shrink-0 items-center justify-center">
+              <ChevronRightIcon size={12} />
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-wide">{name}</span>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Search                                                              */
+/* ------------------------------------------------------------------ */
+
+interface SearchHit {
+  file: string;
+  lang: string;
+  line: number;
+  text: string;
+  open: () => void;
+}
+
+function SearchView() {
+  const api = useIde();
+  const { tokens } = api;
+  const [query, setQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const corpus = useMemo(() => {
+    const rows: SearchHit[] = [];
+    DOC_FILES.forEach((d) => {
+      getDocLines(d.id, { listFiles: false }).forEach((line, i) => {
+        const text = line.map((s) => s.t).join('');
+        if (text.trim()) rows.push({ file: d.file, lang: d.lang, line: i + 1, text, open: () => api.openDocTab(d.id) });
+      });
+    });
+    projectsData.forEach((p) => {
+      const meta = PROJECT_FILES[p.id];
+      if (!meta) return;
+      [p.title, p.tagline, ...p.description].forEach((text, i) => {
+        rows.push({ file: `projects/${meta.file}`, lang: meta.lang, line: i + 1, text, open: () => api.openProject(p.id) });
+      });
+    });
+    return rows;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const q = query.trim().toLowerCase();
+  const hits = q.length >= 2 ? corpus.filter((r) => r.text.toLowerCase().includes(q)).slice(0, 40) : [];
+  const byFile = hits.reduce<Record<string, SearchHit[]>>((acc, h) => {
+    (acc[h.file] ??= []).push(h);
+    return acc;
+  }, {});
+
+  return (
+    <>
+      <ViewHeader title="Search" />
+      <div className="px-3 pb-2">
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search"
+          aria-label="Search across files"
+          className="ide-input w-full rounded-sm px-2 py-1 text-[13px] outline-none"
+          style={{
+            backgroundColor: tokens.inputBg,
+            border: `1px solid ${tokens.inputBorder}`,
+            color: tokens.editorFg,
+          }}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto terminal-scroll" style={{ '--scrollbar-color': `${tokens.scrollbar}55`, '--scrollbar-color-hover': `${tokens.scrollbar}88` } as React.CSSProperties}>
+        {q.length >= 2 && hits.length === 0 && (
+          <p className="px-5 py-2 text-[12px]" style={{ color: tokens.chromeFgDim }}>
+            No results found.
+          </p>
+        )}
+        {Object.entries(byFile).map(([file, rows]) => (
+          <div key={file}>
+            <div className="flex h-[22px] items-center gap-1.5 pl-3 pr-2" style={{ color: tokens.chromeFg }}>
+              <FileTypeIcon lang={rows[0].lang} size={14} />
+              <span className="truncate text-[13px]">{file.split('/').pop()}</span>
+              <span
+                className="ml-auto rounded-full px-1.5 text-[10px] leading-4"
+                style={{ backgroundColor: tokens.badgeBg, color: tokens.badgeFg }}
+              >
+                {rows.length}
+              </span>
+            </div>
+            {rows.map((r, i) => {
+              const idx = r.text.toLowerCase().indexOf(q);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={r.open}
+                  className="ide-list-row flex w-full items-center pl-8 pr-2 text-left"
+                  style={{ height: 22, color: tokens.chromeFgDim }}
+                >
+                  <span className="truncate text-[12px]">
+                    {idx >= 0 ? (
+                      <>
+                        {r.text.slice(Math.max(0, idx - 12), idx)}
+                        <span style={{ color: tokens.chromeFg, backgroundColor: `${tokens.accent}33` }}>
+                          {r.text.slice(idx, idx + q.length)}
+                        </span>
+                        {r.text.slice(idx + q.length)}
+                      </>
+                    ) : (
+                      r.text
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Source control                                                      */
+/* ------------------------------------------------------------------ */
+
+function ScmView() {
+  const api = useIde();
+  const { tokens } = api;
+  return (
+    <>
+      <ViewHeader title="Source Control" />
+      <div className="px-3">
+        <input
+          disabled
+          placeholder="Message (working tree clean)"
+          aria-label="Commit message"
+          className="w-full rounded-sm px-2 py-1 text-[13px] outline-none"
+          style={{ backgroundColor: tokens.inputBg, border: `1px solid ${tokens.inputBorder}`, color: tokens.chromeFgDim }}
+        />
+        <a
+          href="https://github.com/jke48222/edusei-workstation"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 flex h-[26px] items-center justify-center gap-1.5 rounded-sm text-[13px]"
+          style={{ backgroundColor: tokens.buttonBg, color: tokens.buttonFg }}
+        >
+          <GitHubIcon size={14} />
+          View on GitHub
+        </a>
+      </div>
+      <div className="mt-3">
+        <TreeRow depth={0} chevron="down" label="Edusei-Workstation" hint="main" onClick={() => {}} />
+        <TreeRow depth={1} icon={<SourceControlIcon size={14} />} label="No changes" hint="clean" onClick={() => {}} />
+      </div>
+      <p className="mt-4 px-5 text-[12px] leading-relaxed" style={{ color: tokens.chromeFgDim }}>
+        This site is a public repository. The full archive of shipped work lives at{' '}
+        <a href="/work" className="underline" style={{ color: tokens.link }}>
+          /work
+        </a>
+        .
+      </p>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Run and debug                                                       */
+/* ------------------------------------------------------------------ */
+
+function RunView() {
+  const api = useIde();
+  const { tokens } = api;
+  return (
+    <>
+      <ViewHeader title="Run and Debug" />
+      <p className="px-5 pb-2 text-[12px] leading-relaxed" style={{ color: tokens.chromeFgDim }}>
+        Run a project file to load its 3D model in the editor.
+      </p>
+      <div>
+        {projectsData.map((p) => {
+          const meta = PROJECT_FILES[p.id];
+          if (!meta) return null;
+          return (
+            <TreeRow
+              key={p.id}
+              depth={0}
+              icon={
+                <span style={{ color: '#3FB950' }}>
+                  <DebugIcon size={14} />
+                </span>
+              }
+              label={meta.file}
+              hint={p.title}
+              disabled={api.isAnimating}
+              onClick={() => api.openProject(p.id)}
+            />
+          );
+        })}
+        <div className="mx-4 my-2 h-px" style={{ backgroundColor: tokens.border }} />
+        <TreeRow
+          depth={0}
+          icon={
+            <span style={{ color: '#3FB950' }}>
+              <DebugIcon size={14} />
+            </span>
+          }
+          label="kitchen_chaos_mini.exe"
+          hint="playable"
+          onClick={api.openKitchenGame}
+        />
+      </div>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Extensions (theme gallery + links)                                  */
+/* ------------------------------------------------------------------ */
+
+function ExtensionsView() {
+  const api = useIde();
+  const { tokens } = api;
+  const [filter, setFilter] = useState('');
+
+  const themes = themeChoices().filter((t) => t.name.toLowerCase().includes(filter.toLowerCase()));
+
+  const card = (opts: {
+    key: string;
+    swatch?: string;
+    icon?: React.ReactNode;
+    name: string;
+    desc: string;
+    active?: boolean;
+    onClick?: () => void;
+    href?: string;
+  }) => {
+    const inner = (
+      <>
+        <span
+          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded"
+          style={{ backgroundColor: opts.swatch ?? tokens.inputBg, color: tokens.chromeFg }}
+        >
+          {opts.icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5">
+            <span className="truncate text-[13px]" style={{ color: tokens.chromeFg }}>
+              {opts.name}
+            </span>
+            {opts.active && (
+              <span className="rounded-sm px-1 text-[9px] uppercase" style={{ backgroundColor: tokens.badgeBg, color: tokens.badgeFg }}>
+                Active
+              </span>
+            )}
+          </span>
+          <span className="block truncate text-[11px]" style={{ color: tokens.chromeFgDim }}>
+            {opts.desc}
+          </span>
+          <span className="block text-[11px]" style={{ color: tokens.chromeFgDim, opacity: 0.8 }}>
+            jke48222
+          </span>
+        </span>
+      </>
+    );
+    const cls = 'ide-list-row flex w-full items-start gap-2 px-3 py-1.5 text-left';
+    return opts.href ? (
+      <a key={opts.key} href={opts.href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {inner}
+      </a>
+    ) : (
+      <button key={opts.key} type="button" className={cls} onClick={opts.onClick}>
+        {inner}
+      </button>
+    );
+  };
+
+  return (
+    <>
+      <ViewHeader title="Extensions" />
+      <div className="px-3 pb-2">
+        <input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Search Extensions in Marketplace"
+          aria-label="Search extensions"
+          className="w-full rounded-sm px-2 py-1 text-[13px] outline-none"
+          style={{ backgroundColor: tokens.inputBg, border: `1px solid ${tokens.inputBorder}`, color: tokens.editorFg }}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto terminal-scroll" style={{ '--scrollbar-color': `${tokens.scrollbar}55`, '--scrollbar-color-hover': `${tokens.scrollbar}88` } as React.CSSProperties}>
+        <p className="px-3 py-1 text-[11px] font-bold uppercase tracking-wide" style={{ color: tokens.chromeFgDim }}>
+          Installed
+        </p>
+        {themes.map((t) =>
+          card({
+            key: t.id,
+            swatch: themePreviewColors[t.id] ?? tokens.inputBg,
+            name: t.id === SYSTEM_THEME_ID ? 'System Theme' : `${t.name} Theme`,
+            desc: t.id === SYSTEM_THEME_ID ? 'Follows the OS appearance' : `Color theme: theme ${toThemeCommand(themePresets[t.id]?.name ?? t.name)}`,
+            active: api.activeThemeId === t.id,
+            onClick: () => api.setThemeId(t.id),
+          })
+        )}
+        {card({
+          key: 'sounds',
+          icon: <span className="text-[13px] font-bold">S</span>,
+          name: 'Terminal Sounds',
+          desc: api.soundMuted ? 'Disabled. Click to enable keystroke sound.' : 'Enabled. Click to disable keystroke sound.',
+          active: !api.soundMuted,
+          onClick: () => api.setSoundMuted(!api.soundMuted),
+        })}
+        <p className="px-3 pb-1 pt-3 text-[11px] font-bold uppercase tracking-wide" style={{ color: tokens.chromeFgDim }}>
+          Recommended
+        </p>
+        {card({ key: 'gh', icon: <GitHubIcon size={16} />, name: 'GitHub Profile', desc: profileData.github, href: `https://${profileData.github}` })}
+        {card({ key: 'li', icon: <AccountIcon size={16} />, name: 'LinkedIn', desc: profileData.linkedin, href: `https://${profileData.linkedin}` })}
+        {card({ key: 'cv', icon: <FileTypeIcon lang="pdf" size={16} />, name: 'Resume + CV', desc: 'resume.pdf and cv.pdf', href: '/resume.pdf' })}
+      </div>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Side bar shell                                                      */
+/* ------------------------------------------------------------------ */
+
+export function SideBarBody() {
+  const api = useIde();
+  const { tokens } = api;
+  return (
+    <div
+      className="flex h-full min-h-0 flex-col"
+      style={{ backgroundColor: tokens.chromeBg, color: tokens.chromeFg }}
+    >
+      {api.sidebarView === 'explorer' && <ExplorerView />}
+      {api.sidebarView === 'search' && <SearchView />}
+      {api.sidebarView === 'scm' && <ScmView />}
+      {api.sidebarView === 'run' && <RunView />}
+      {api.sidebarView === 'extensions' && <ExtensionsView />}
+    </div>
+  );
+}
