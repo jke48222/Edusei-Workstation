@@ -235,15 +235,6 @@ function ImageMedia({ src, alt }: { src: string; alt: string }) {
 function AtmoPanel({ project }: { project: WorkProject }) {
   return (
     <div className="pf-liquid-glass pf-grain absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0 z-[1] opacity-[0.16]"
-        style={{
-          backgroundImage: 'radial-gradient(currentColor 1px, transparent 1.4px)',
-          backgroundSize: '22px 22px',
-          color: 'var(--pf-accent-bright)',
-        }}
-        aria-hidden
-      />
       <div className="absolute -right-5 -top-5 z-[1] text-[var(--pf-accent)]/35 transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-6">
         {categoryGlyph(project.category, 'h-48 w-48')}
       </div>

@@ -118,26 +118,26 @@ export const site = {
   editorial: {
     community: {
       eyebrow: "THE WORKSTATION",
-      title: "There's a terminal under the hood.",
+      title: "There's a working IDE under the hood.",
       body:
-        "I built a 3D workstation you can actually explore: a retro CRT terminal, clickable hardware, the whole desk. Built with React Three Fiber and tuned to stay smooth, even on a phone.",
-      cta: { label: "Visit the workstation", href: "/workstation" },
+        "The workstation view runs like a code editor: your projects are files in an explorer, opening one loads its 3D model as the file contents, and there is a real terminal at the bottom. Built with React Three Fiber.",
+      cta: { label: "Open the IDE", href: "/workstation" },
     },
   },
 
   // ── Terminal widget ──────────────────────────────────────────────────────
   terminal: {
-    label: "EDUSEI WORKSTATION",
+    label: "EDUSEI IDE",
     meta: "v2.026",
     boot: [
-      "EDUSEI WORKSTATION v2.026",
-      "Booting Computer Systems Engineer...",
-      "Loading 30+ shipped projects...",
-      "System ready.",
+      "EDUSEI IDE v3.026",
+      "Restoring workspace...",
+      "Indexing 30+ shipped projects...",
+      "Workspace ready.",
     ],
     commands: [
       { cmd: "whoami", out: "Jalen Edusei · B.S. Computer Systems Engineering, UGA '26" },
-      { cmd: "run animaldot.exe", out: "Contactless vitals via geophone DSP: ONLINE" },
+      { cmd: "open projects/animaldot.cpp", out: "Contactless vitals via geophone DSP: ONLINE" },
       { cmd: "ls --domains", out: "embedded  vr-xr  full-stack  hardware  research" },
       { cmd: "ls clients/", out: "kulenterprises.com  akilahmali.com  ops-portal (private)" },
       { cmd: "cat status.txt", out: "Open to full-time software roles: full-stack, AI, embedded" },
@@ -150,7 +150,7 @@ export const site = {
     label: "OPEN TO OPPORTUNITIES",
     title: "Need someone who can go from firmware to front-end?",
     body:
-      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now shipping production sites for paying clients as a freelance software engineer. I'm open to full-time software roles — full-stack, AI, embedded — and I bring a habit of shipping tested, measured systems, not just demos.",
+      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now shipping production sites for paying clients as a freelance software engineer. I'm open to full-time software roles across full-stack, AI, and embedded, and I bring a habit of shipping tested, measured systems.",
     tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
     cta: { label: "Download résumé", href: "/resume.pdf" },
   },
@@ -161,7 +161,7 @@ export const site = {
     title: ["The engineer", "behind", "it all."], // middle word italic
     greeting: "Hi, I'm Jalen.",
     bio:
-      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: production client websites and realtime platforms, agentic AI systems on the Claude API, embedded firmware and signal processing, and multiplayer VR for the Quest 3. These days I ship as a freelance software engineer — kulenterprises.com and akilahmali.com are mine — after a Business Analyst internship at Capital One on the CreditWise team.",
+      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: production client websites and realtime platforms, agentic AI systems on the Claude API, embedded firmware and signal processing, and multiplayer VR for the Quest 3. These days I ship as a freelance software engineer (kulenterprises.com and akilahmali.com are mine) after a Business Analyst internship at Capital One on the CreditWise team.",
     info: [
       { label: "DEGREE", value: "B.S. Computer Systems Engineering, Cum Laude" },
       { label: "SCHOOL", value: "University of Georgia · Morehead Honors" },

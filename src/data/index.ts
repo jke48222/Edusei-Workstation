@@ -43,7 +43,7 @@ export const profileData = {
 
 export function getSayHiMailto(): string {
   // The visitor is the sender — the subject must not claim to be "from" the site owner.
-  const subject = encodeURIComponent(`Say hi — via ${profileData.name}'s portfolio`);
+  const subject = encodeURIComponent(`Say hi (via ${profileData.name}'s portfolio)`);
   const body = encodeURIComponent(
     `Hi ${profileData.name},\n\nI came across your portfolio and wanted to reach out.\n\n`
   );
@@ -410,18 +410,18 @@ export const projectsData: ProjectData[] = [
 
 export function getBootSequence(): string[] {
   const lines = [
-    'EDUSEI WORKSTATION v2.026',
-    'Initializing system...',
-    'Loading portfolio modules...',
-    'System ready.',
+    'EDUSEI IDE v3.026',
+    'Restoring workspace...',
+    'Indexing 5 project files...',
+    'Workspace ready.',
     '',
-    'Select a project or type a command:',
+    'Open a file from the explorer, or type a command in the terminal.',
   ];
   if (typeof window !== 'undefined' && profileData.birthday) {
     const now = new Date();
     const mmdd = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     if (mmdd === profileData.birthday) {
-      lines.splice(1, 0, 'Happy birthday, Jalen! 🎉');
+      lines.splice(1, 0, 'Happy birthday, Jalen!');
     }
   }
   return lines;
@@ -468,7 +468,6 @@ export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'WindowPet: Desktop Creature & Agentic Assistant for macOS': 'windowpet',
   'WindowPet: Desktop Creature & AI Assistant': 'windowpet',
   'Screen-Coach AI': 'screen-coach',
-  'Paperwork Goblin': 'paperwork-goblin',
   'QR Worlds': 'qr-worlds',
   'QR Worlds: Every URL Is a Place': 'qr-worlds',
   'Album-Art LED Matrix Wall': 'album-art-matrix',
@@ -579,14 +578,13 @@ const extraProjects: WorkProject[] = [
     category: 'ai',
     techStack: ['Swift', 'SQLite / FTS5', 'MLX', 'Qwen3-Embedding', 'Apple Foundation Models', 'MCP', 'Python'],
     description: [
-      "Exocortex is my attempt at a second brain that actually belongs to me. Fourteen streams of my digital life — messages, browsing, email, AI transcripts, phone backups — flow into one local 100,000-event store on my machine, with secret redaction, trust-class retention, and encrypted, restore-verified backups. Nothing leaves it.",
-      "Search is the heart: keyword search fused with a binary vector index over embeddings generated on-device, which found the right memory 19 times out of 20 in a controlled test where keywords alone managed 11. I published the miss, and retracted an earlier, better-looking number when I realized its ground truth was circular.",
+      "Exocortex is my attempt at a second brain that actually belongs to me. Fourteen streams of my digital life (messages, browsing, email, AI transcripts, phone backups) flow into one local 100,000-event store on my machine, with secret redaction, trust-class retention, and encrypted, restore-verified backups. Nothing leaves it.",
+      "Search is the heart: keyword search fused with a binary vector index over embeddings generated on-device. In a controlled test it found the right memory 19 times out of 20, where keywords alone managed 11. I published the miss, and retracted an earlier, better-looking number when I realized its ground truth was circular.",
       "AI tools plug in through an MCP server with real guardrails: per-client trust tiers, no bulk-read primitive, sanitization against link-based exfiltration, canary rows, and a hash-chained audit log. A nightly 'dream' pipeline finds contradictions, tracks commitments, and writes me a weekly narrative, with every model output citation-checked in code.",
     ],
     relatedProjects: [
       { title: 'WindowPet', slug: 'windowpet', period: 'August 2026 – Present' },
       { title: 'Screen-Coach AI', slug: 'screen-coach', period: 'August 2026 – Present' },
-      { title: 'Paperwork Goblin', slug: 'paperwork-goblin', period: 'August 2026 – Present' },
     ],
   },
   {
@@ -600,7 +598,7 @@ const extraProjects: WorkProject[] = [
     techStack: ['Swift', 'AppKit', 'Core Animation', 'macOS Accessibility API', 'Anthropic Messages API', 'XCTest'],
     description: [
       "WindowPet is a little creature that stands on your actual windows: it rides them while you drag, falls when you close one, and leaps between them with a physics solver tested to a point and a half. It reads window geometry through APIs that never trigger a screen-recording prompt, because a desktop pet should not be spyware.",
-      "Talk to it and there's a three-tier assistant underneath: an exact command grammar, an agentic Claude loop written directly against the Messages API — streaming, JSON-schema tool calls, vision — and an on-device fallback. Every action funnels through one confirmation gate, so nothing destructive happens without a yes.",
+      "Talk to it and there's a three-tier assistant underneath: an exact command grammar, an agentic Claude loop written directly against the Messages API (streaming, JSON-schema tool calls, vision), and an on-device fallback. Every action funnels through one confirmation gate, so nothing destructive happens without a yes.",
       "It ships as a signed app with a DMG installer, four procedurally generated skins plus a Shimeji importer for third-party art, 131 unit tests, a 93-check self-driving end-to-end rig, and an energy benchmark that keeps it at about a quarter percent of CPU while it sleeps.",
     ],
     relatedProjects: [
@@ -617,29 +615,12 @@ const extraProjects: WorkProject[] = [
     category: 'ai',
     techStack: ['Swift', 'AppKit', 'macOS Accessibility API', 'ScreenCaptureKit', 'MLX', 'Holo1.5-7B', 'XCTest'],
     description: [
-      "Ask 'where do I turn on dark mode?' and a cursor glides to the exact control. Screen-Coach grounds on the macOS accessibility tree first — on a cooperating app it answered 12 of 12 targets in under a tenth of a millisecond — and only wakes a locally quantized 7-billion-parameter vision model when the tree can't answer.",
+      "Ask 'where do I turn on dark mode?' and a cursor glides to the exact control. Screen-Coach grounds on the macOS accessibility tree first. On a cooperating app it answered 12 of 12 targets in under a tenth of a millisecond, and it only wakes a locally quantized 7-billion-parameter vision model when the tree can't answer.",
       "I benchmarked before I built: cold accessibility reads ran up to ten times slower than warm ones and decayed within seconds, so a speculative cache became the architecture, and using the tree to aim a small screenshot crop matched full-image vision accuracy at three times the speed.",
-      "It's honest about confidence — only agreement between tree and vision earns a solid pointer ring — and private by construction: a hot-reloading blocklist stops both capture and tree reads for excluded apps, added after I caught the tree alone leaking message content. Ninety-six headless tests; about 0.05% CPU at idle.",
+      "It is honest about confidence, since only agreement between tree and vision earns a solid pointer ring, and it is private by construction: a hot-reloading blocklist stops both capture and tree reads for excluded apps, added after I caught the tree alone leaking message content. Ninety-six headless tests; about 0.05% CPU at idle.",
     ],
     relatedProjects: [
       { title: 'WindowPet', slug: 'windowpet', period: 'August 2026 – Present' },
-      { title: 'Exocortex', slug: 'exocortex', period: 'August 2026 – Present' },
-    ],
-  },
-  {
-    id: 'paperwork-goblin',
-    title: 'Paperwork Goblin',
-    tagline: 'An encrypted vault that fills any form and never asks the same question twice.',
-    period: 'August 2026 – Present',
-    location: 'Personal project',
-    category: 'ai',
-    techStack: ['Swift', 'SwiftUI', 'CryptoKit', 'SQLCipher', 'PDFKit', 'Vision', 'TypeScript', 'Chrome Extension'],
-    description: [
-      "Paperwork Goblin answers a question once and fills that answer into every future form, PDF or web, forever. The vault is SQLCipher with its key wrapped under a Keychain master key, and the truly sensitive fields — SSN, birth date — are sealed a second time inside the database.",
-      "The document pipeline handles real paperwork: fillable PDFs, flat scans, and phone photos, with perspective correction, deskew, and an adaptive ink threshold that took blank-field detection on photographed forms from 15% to 100% recall on a self-labelling evaluation.",
-      "A Chrome extension fills job applications with a deliberately tiny attack surface: no host permissions, no vault data in the extension, sensitive values withheld from the wire, LinkedIn and Indeed refused outright, and no code path that can press submit.",
-    ],
-    relatedProjects: [
       { title: 'Exocortex', slug: 'exocortex', period: 'August 2026 – Present' },
     ],
   },
@@ -654,7 +635,7 @@ const extraProjects: WorkProject[] = [
     category: 'web',
     techStack: ['React', 'TypeScript', 'Vite', 'React Three Fiber', 'Framer Motion', 'Zustand', 'Tailwind CSS', 'PWA', 'Vercel'],
     description: [
-      "This is the site you're looking at. The home page is a scroll-scrubbed video I drive frame by frame with requestAnimationFrame — no scroll library, just math — and behind it sits a full 3D workstation you can explore, complete with a retro CRT terminal.",
+      "This is the site you're looking at. The home page is a scroll-scrubbed video I drive frame by frame with requestAnimationFrame, no scroll library, and behind it sits a full 3D workstation you can explore, complete with a retro CRT terminal.",
       "Under the hood it's React Three Fiber for the 3D, Framer Motion for the transitions, and a small theme engine of about two dozen presets shared by the 3D scene and the UI. It ships as a PWA with service-worker caching, lazy routes, and a render loop that pauses when it isn't needed.",
       "I designed it, built it, and shipped it on Vercel. Start to finish, it's all mine.",
     ],
@@ -676,7 +657,7 @@ const extraProjects: WorkProject[] = [
     github: 'https://github.com/jke48222/kul-enterprises-website',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'TinaCMS', 'Tailwind CSS v4', 'Framer Motion', 'Resend', 'Vercel'],
     description: [
-      "A production website for KUL Enterprises, an independent Georgia freight carrier, with me as the whole team: design, engineering, and shipping. We iterated twelve design directions — built out as twenty working variants — before landing the one that fit, then shipped 22 statically generated pages across services, driver recruiting, safety, quoting, and legal.",
+      "A production website for KUL Enterprises, an independent Georgia freight carrier, with me as the whole team: design, engineering, and shipping. We iterated twelve design directions, built out as twenty working variants, before landing the one that fit, then shipped 22 statically generated pages across services, driver recruiting, safety, quoting, and legal.",
       "The rule underneath it all: no readable sentence ships hardcoded. Every page, service, FAQ, form, and legal document lives in a typed, git-backed TinaCMS collection, a token system fills shared business facts into any sentence, and a custom build wrapper means a broken CMS edit can never take the site down.",
       "The motion starts with a brand film I produced in Blender and Higgsfield and cut in Final Cut Pro, shipped as H.264 with a quality ladder after I documented an iOS Safari codec failure the hard way. Site search scores the CMS content directly so results never go stale, four forms submit through rate-limited, honeypot-protected routes, and every color token carries a measured WCAG AA contrast ratio.",
     ],
@@ -713,8 +694,8 @@ const extraProjects: WorkProject[] = [
     liveUrl: 'https://www.akilahmali.com',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'three.js', 'React Three Fiber', 'GSAP', 'Web Audio API', 'Vercel'],
     description: [
-      "A home base for recording artist Akilah Mali — somewhere fans can listen, watch, and dig around. The centerpiece is a real-time 3D 'control room' with CCTV-style feeds, and there's a rotary payphone you can actually dial, built on the Web Audio API.",
-      "It's deliberately backend-free: music and tour dates come through embeds, email capture goes to Laylo, and the shop hands off to Shopify's hosted storefront. I built a full headless Shopify cart first — httpOnly cookie sessions, server-side mutations — then removed it after a security review, because the simpler architecture was the better product.",
+      "A home base for recording artist Akilah Mali, somewhere fans can listen, watch, and dig around. The centerpiece is a real-time 3D 'control room' with CCTV-style feeds, and there's a rotary payphone you can actually dial, built on the Web Audio API.",
+      "It's deliberately backend-free: music and tour dates come through embeds, email capture goes to Laylo, and the shop hands off to Shopify's hosted storefront. I built a full headless Shopify cart first, with httpOnly cookie sessions and server-side mutations, then removed it after a security review, because the simpler architecture was the better product.",
       "The heavy 3D pays for itself: three.js is code-split off the release pages and the WebGL mount waits behind an instant paper cover, which cut about 46 MB off the initial load.",
     ],
     relatedProjects: [
@@ -734,7 +715,7 @@ const extraProjects: WorkProject[] = [
     description: [
       "Relay is a miniature production backend: orders arrive over a JSON API, an event-driven pipeline allocates inventory across four fulfillment centers, and each order walks from received to delivered while a React console watches it all happen live over websockets.",
       "The interesting parts are the failure modes. Every state change and its event commit in one transaction (a Kafka-style outbox), allocation runs under row locks with a database constraint as the backstop so two orders can't both take the last unit, and the worker rehydrates from the database on boot so a restart strands nothing.",
-      "Fifty-two tests target exactly those failure modes — oversell, partial reservations, illegal transitions, idempotent replays — and run green in GitHub Actions alongside Docker and Kubernetes manifests.",
+      "Fifty-two tests target exactly those failure modes (oversell, partial reservations, illegal transitions, idempotent replays) and run green in GitHub Actions alongside Docker and Kubernetes manifests.",
     ],
     relatedProjects: [
       { title: 'Live Election Platform', slug: 'live-election-platform', period: 'March 2026 – June 2026' },
@@ -768,7 +749,7 @@ const extraProjects: WorkProject[] = [
     category: 'web',
     techStack: ['TypeScript', 'three.js', 'GLSL', 'Vite', 'Vitest'],
     description: [
-      "QR Worlds turns any web address into a place: the URL's QR code becomes a floating voxel ground, and the address itself deterministically grows the planet above it — its colors, rings, moons, and clouds. Type a character and thousands of instanced voxels rebuild in three draw calls, in single-digit milliseconds.",
+      "QR Worlds turns any web address into a place: the URL's QR code becomes a floating voxel ground, and the address itself deterministically grows the planet above it: colors, rings, moons, and clouds. Type a character and thousands of instanced voxels rebuild in three draw calls, in single-digit milliseconds.",
       "Determinism is guaranteed the hard way: integer-only randomness (V8 and Safari disagree in the last bits of floating point), double-hashed seeding, and a separate random stream per subsystem so adding a feature can't shift anyone's existing world.",
       "And the code still scans. A test projects every QR module through the live camera and checks the rendered pixels against the encoder's grid: at most 1.3% misread and 8% occluded, inside the error-correction budget, after I deepened a ground color that looked dark but measured 1.8:1 contrast.",
     ],
@@ -789,7 +770,7 @@ const extraProjects: WorkProject[] = [
     description: [
       "A wall of nine LED matrix panels that knows what's playing: the current album cover renders as a spinning disc, driven by a Raspberry Pi 5 and a chain of now-playing adapters for Apple Music, with more sources staged behind it.",
       "Color is the craft here. The art pipeline downscales with Lanczos sharpening, converts to linear light, applies white-balance gains derived from a colorimeter I put on a Pico 2 W and pointed at the panel itself, and spins the disc with 4x supersampling, all feeding a C daemon that refreshes the panels at 9,600 Hz.",
-      "I also designed the electronics: a custom two-layer Pi 5 backplane PCB in KiCad — level shifters with series termination, three fused 12-amp power sections, a protected power jumper — expressed as code that emits its own netlist and BOM, sized with ngspice simulations, and delivered as fab-ready gerbers. Panels arrived in August; first light is next.",
+      "I also designed the electronics: a custom two-layer Pi 5 backplane PCB in KiCad, with level shifters and series termination, three fused 12-amp power sections, and a protected power jumper, expressed as code that emits its own netlist and BOM, sized with ngspice simulations, and delivered as fab-ready gerbers. Panels arrived in August; first light is next.",
     ],
     relatedProjects: [
       { title: 'PrimeForge FPGA Prime Number Detector', slug: 'primeforge-fpga', period: 'January 2026 – May 2026' },
@@ -811,8 +792,8 @@ const extraProjects: WorkProject[] = [
     techStack: ['Verilog', 'Artix-7 FPGA', 'Vivado', 'DDR2', 'SD / SPI', 'VGA', 'Icarus Verilog'],
     description: [
       "PrimeForge is a prime-number engine built straight in hardware. No operating system, no processor running C, just 33 Verilog modules across four clock domains on a Nexys A7 doing the math.",
-      "Two engines sit under the hood — a segmented Sieve of Eratosthenes and a trial-division core — selectable at runtime from an FSM-driven menu you drive with a joystick and keypad. Every prime streams into DDR2 through a custom two-client arbiter, and a from-scratch VGA pipeline draws the live count, the last twenty primes, and the runtime on screen.",
-      "On hardware it found all 5,761,455 primes below 100 million — the exact right answer — and checked itself against an SD-card reference in a lock-step self-test. Twelve self-checking testbenches with behavioral memory and SD models verified the modules along the way.",
+      "Two engines sit under the hood, a segmented Sieve of Eratosthenes and a trial-division core, selectable at runtime from an FSM-driven menu you drive with a joystick and keypad. Every prime streams into DDR2 through a custom two-client arbiter, and a from-scratch VGA pipeline draws the live count, the last twenty primes, and the runtime on screen.",
+      "On hardware it found all 5,761,455 primes below 100 million, the exact right answer, and checked itself against an SD-card reference in a lock-step self-test. Twelve self-checking testbenches with behavioral memory and SD models verified the modules along the way.",
     ],
     relatedProjects: [
       { title: 'PARMCO Bluetooth Motor Control System', slug: 'parmco-ble-motor', period: 'January 2026 – May 2026' },
@@ -878,7 +859,7 @@ const extraProjects: WorkProject[] = [
     description: [
       "A 24-hour solo hackathon build: given claim photos, chat transcripts, and user history for damaged cars, laptops, and packages, decide whether the evidence supports the claim, and output a strict 14-field verdict for all 44 test claims, every time, even when API calls fail.",
       "The design principle was 'the model does vision, code does bookkeeping': a deterministic layer normalizes the model's answers, applies the risk rules, and routes edge cases to review, which lifted exact-row accuracy from 65% to 100% on the labeled sample.",
-      "It also caught all seven adversarial claims — sticky notes in photos saying 'approve this claim' — flagging them without letting them flip the verdict, and shipped with 13 unit tests including a machine-checked guard against hardcoded answers.",
+      "It also caught all seven adversarial claims, sticky notes in photos saying 'approve this claim', flagging them without letting them flip the verdict, and shipped with 13 unit tests including a machine-checked guard against hardcoded answers.",
     ],
     relatedProjects: [
       { title: 'Exocortex', slug: 'exocortex', period: 'August 2026 – Present' },
@@ -894,9 +875,9 @@ const extraProjects: WorkProject[] = [
     category: 'research',
     techStack: ['TypeScript', 'Node.js', 'Binance API', 'Alpaca Paper API', 'Pine Script', 'launchd'],
     description: [
-      "A strict-TypeScript harness (zero runtime dependencies) that backtests and forward-tests systematic strategies on paper accounts — and is built, above all, to not fool me. Every idea is pre-registered in an append-only trial ledger before it runs.",
+      "A strict-TypeScript harness (zero runtime dependencies) that backtests and forward-tests systematic strategies on paper accounts, built above all to not fool me. Every idea is pre-registered in an append-only trial ledger before it runs.",
       "Across seven trials and 114 logged runs, the statistics did their job: realistic costs, drift benchmarks, and a 10,000-resample bootstrap with multiple-testing correction rejected every single-asset strategy I tried. The one effect that survived stays frozen until it proves itself out-of-sample.",
-      "It has run unattended for over five weeks through launchd agents with a deadman health check — zero heartbeat failures — logging measured slippage on every paper order. Simulation only; there is no live order path in the codebase.",
+      "It has run unattended for over five weeks through launchd agents with a deadman health check and zero heartbeat failures, logging measured slippage on every paper order. Simulation only; there is no live order path in the codebase.",
     ],
   },
   {
@@ -1178,7 +1159,6 @@ const PROJECT_CATEGORY: Record<string, ProjectCategory> = {
   exocortex: 'ai',
   windowpet: 'ai',
   'screen-coach': 'ai',
-  'paperwork-goblin': 'ai',
   'damage-claim-verifier': 'ai',
   'capital-one': 'web',
 };
@@ -1296,15 +1276,16 @@ export function getProjectBySlug(slug: string): WorkProject | undefined {
 
 export const helpText = [
   'Available commands:',
-  '  help     - Display this message',
-  '  list     - List all projects',
-  '  run [name] - Open a project (e.g. run audiocar)',
-  '  theme [name] - Switch theme (e.g. theme light, theme bulldogred)',
-  '  about    - About Jalen Edusei',
-  '  skills   - View technical skills',
-  '  resume   - Download resume',
-  '  cv       - Download CV',
-  '  clear    - Clear terminal',
+  '  help          - Display this message',
+  '  ls            - List all files',
+  '  open [file]   - Open a file (e.g. open animaldot.cpp)',
+  '  run [name]    - Same as open, by executable name',
+  '  theme [name]  - Switch theme (e.g. theme light, theme bulldogred)',
+  '  about         - Open about.md',
+  '  skills        - Open skills.json',
+  '  resume        - Open resume.pdf',
+  '  cv            - Open cv.pdf',
+  '  clear         - Clear terminal',
   '',
-  'Click any project to view details.',
+  'Project files in the explorer open their 3D model.',
 ];
