@@ -406,7 +406,7 @@ export class Sim {
         this.firedTilts.add(tilt.at);
         this.tiltUntil = now + tilt.dur * 1000;
         this.tiltDir = tilt.dir;
-        this.toast('The whole rock leans on the swell — hold on!');
+        this.toast('The whole rock leans on the swell. Hold on!');
       }
     }
     if (now < this.tiltUntil) {
@@ -473,7 +473,7 @@ export class Sim {
           if (tk) tk.mystery = true;
         }
         this.flying = this.flying.filter((f) => now - f.born < TICKET_CATCH_S * 1000);
-        this.toast('The rain ate the ink — what was that order?');
+        this.toast('The rain ate the ink. What was that order?');
         this.emitTickets();
       }
     }
@@ -502,7 +502,7 @@ export class Sim {
         this.bosunDone = true;
         this.bosunHere = true;
         this.bosunUntil = now + BOSUN_BLOCK_S * 1000;
-        this.toast('BOSUN lands on the pass. He wants the crumb tax — rolls, or patience.');
+        this.toast('BOSUN lands on the pass. He wants the crumb tax: rolls, or patience.');
         this.emit({ kind: 'sfx', name: 'gull' });
       } else {
         this.gullShadowUntil = now + GULL_TELEGRAPH_S * 1000;
@@ -570,7 +570,7 @@ export class Sim {
         prize: false,
       });
     }
-    this.toast(count > 1 ? 'Wingmen inbound — shoo them!' : 'A gull slips in — shoo it!');
+    this.toast(count > 1 ? 'Wingmen inbound. Shoo them!' : 'A gull slips in. Shoo it!');
   }
 
   private gullSteal(g: Gull, now: number): void {
@@ -588,7 +588,7 @@ export class Sim {
     } else if (g.target.kind === 'pan' && this.pan.stage === 'done') {
       this.pan = freshPan();
       this.floorItems.push({ ing: null, dish: 'squall-rolls', processed: false, p: { x: L.pan.x - 20, y: L.pan.y + L.pan.h + 16 }, despawnAt: now + 6000 });
-      this.toast('Rolls overboard — the gull only got one!');
+      this.toast('Rolls overboard. The gull only got one!');
     } else if (g.target.kind === 'floor' && this.floorItems.length) {
       this.floorItems.shift();
       this.toast('The floor food is gone. The gull looks proud.');
@@ -655,7 +655,7 @@ export class Sim {
     }
     this.spawnFx('text', { x: this.layout.porthole.x, y: this.layout.porthole.y - 40 }, '⚡');
     this.emit({ kind: 'sfx', name: 'thunder' });
-    this.toast('Lightning! The brine hums — pour it while it glows.');
+    this.toast('Lightning! The brine hums. Pour it while it glows.');
   }
 
   private puddleRadius(): number {
@@ -842,7 +842,7 @@ export class Sim {
         this.jarQ = charged ? 1 : 1 - (phase / JAR_SPEC.windowMs) * 0.35;
         this.spawnFx('ring', { x: L.jar.x + L.jar.w / 2, y: L.jar.y + 8 });
         this.emit({ kind: 'sfx', name: 'ding' });
-        this.toast('POP — the jar sighs a little storm. Serve it.');
+        this.toast('POP. The jar sighs a little storm. Serve it.');
       } else {
         this.spawnFx('text', { x: L.jar.x + L.jar.w / 2, y: L.jar.y }, 'wait for the glow…');
       }
@@ -884,13 +884,13 @@ export class Sim {
     } else
     for (const source of Object.keys(L.bottles) as LayerSource[]) {
       if (!rectContains(inflate(L.bottles[source], 10), p)) continue;
-      if (this.glass.ready) return this.toast('The Fogcutter is built — serve it.');
+      if (this.glass.ready) return this.toast('The Fogcutter is built. Serve it.');
       const idx = this.glass.layers.length;
       if (idx >= GLASS_SPEC.layers.length) return;
       if (this.now < this.glass.settleUntil) {
         this.glass.murky = true;
         this.spawnFx('puff', { x: L.glass.x + L.glass.w / 2, y: L.glass.y + 10 });
-        this.toast('Too soon — the layers blur…');
+        this.toast('Too soon. The layers blur…');
       }
       this.pouring = { target: 'glass', source, startT: t, startFill: this.glass.fill };
       return;
@@ -910,7 +910,7 @@ export class Sim {
       if (this.pot.pourCommitted && !this.pot.ready) {
         this.stirring = { lastAngle: this.potAngle(p), lastT: t };
       } else if (this.pot.contents.length === 0) {
-        this.toast('The pot is empty — chop something for it.');
+        this.toast('The pot is empty. Chop something for it.');
       } else {
         this.toast('Pour the sea-smoke before you stir.');
       }
@@ -982,7 +982,7 @@ export class Sim {
             });
             this.carry = null;
             this.spawnFx('puff', p);
-            this.toast('The puddle takes its toll — grab it quick!');
+            this.toast('The puddle takes its toll. Grab it quick!');
             this.lastMove = { p, t };
             return;
           }
@@ -1052,7 +1052,7 @@ export class Sim {
         this.spawnFx('spark', { ...this.leak.p });
         if (this.leak.mopStrokes >= (this.favor === 'moss' ? 1 : MOP_STROKES)) {
           this.spawnFx('puff', { ...this.leak.p });
-          this.toast(this.leak.active ? 'Dry — for now. That drip has plans.' : 'Dry floor, safe footing.');
+          this.toast(this.leak.active ? 'Dry, for now. That drip has plans.' : 'Dry floor, safe footing.');
           if (this.leak.active) {
             this.leak.puddle = 0.05;
             this.leak.mopStrokes = 0;
@@ -1127,7 +1127,7 @@ export class Sim {
             this.pot.ready = true;
             this.stirring = null;
             this.spawnFx('text', potMouthCenter(this.layout), 'body!');
-            this.toast('The spoon stands up — serve it!');
+            this.toast('The spoon stands up. Serve it!');
           }
         }
       }
@@ -1232,7 +1232,7 @@ export class Sim {
     // Raw ingredients belong on the board.
     if (rectContains(inflate(L.board, 10), p)) {
       if (this.board || this.boardDish) {
-        this.toast('The board is busy — finish that first.');
+        this.toast('The board is busy. Finish that first.');
       } else {
         const mode: BoardState['mode'] = def.fillet ? 'fillet' : def.chopStrokes ? 'chop' : 'fold';
         const needed = def.chopStrokes ?? def.foldSlaps ?? 1;
@@ -1285,7 +1285,7 @@ export class Sim {
       if (this.pan.flips.length >= PAN_SPEC.flips) {
         this.pan.stage = 'done';
         this.spawnFx('text', panC, 'golden!');
-        this.toast('Rolls up — serve them warm!');
+        this.toast('Rolls up. Serve them warm!');
       }
     } else {
       this.spawnFx('text', panC, 'wait for the shimmer…');
@@ -1337,7 +1337,7 @@ export class Sim {
       craft,
       lateMult,
       score,
-      note: craft >= 0.8 ? null : 'Trust the note, not the panic — release later.',
+      note: craft >= 0.8 ? null : 'Trust the note, not the panic. Release later.',
     };
     this.served.push(result);
     this.emit({ kind: 'sfx', name: 'ding' });
@@ -1393,7 +1393,7 @@ export class Sim {
     if (pour.source !== spec.source) {
       q *= 0.35;
       this.glass.murky = true;
-      this.toast(`That was ${LAYER_LABEL[pour.source]} — it wanted ${LAYER_LABEL[spec.source]}.`);
+      this.toast(`That was ${LAYER_LABEL[pour.source]}. It wanted ${LAYER_LABEL[spec.source]}.`);
     }
     if (this.glass.murky) q = Math.min(q, 0.6);
     this.glass.layers.push({ source: pour.source, expected: spec.source, fill, q });
@@ -1402,7 +1402,7 @@ export class Sim {
     if (this.glass.layers.length >= GLASS_SPEC.layers.length) {
       this.glass.ready = true;
       this.spawnFx('text', { x: this.layout.glass.x + this.layout.glass.w / 2, y: this.layout.glass.y }, 'layered!');
-      this.toast('The Fogcutter stands — serve it.');
+      this.toast('The Fogcutter stands. Serve it.');
     }
   }
 
@@ -1471,7 +1471,7 @@ export class Sim {
       this.pan = freshPan();
     } else if (dish === 'lightning-pickles') {
       craft = this.jarQ;
-      note = craft >= 0.8 ? null : 'Pop the lid on the first blink of the glow — or after lightning.';
+      note = craft >= 0.8 ? null : 'Pop the lid on the first blink of the glow, or after lightning.';
     } else {
       craft = this.lastPlatterQ;
       note = craft >= 0.8 ? null : 'One steady drag along the chart lines. Trust the fish.';
