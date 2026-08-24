@@ -366,6 +366,66 @@ html, body, #root {
   animation: overlay-spin 1s linear infinite;
 }
 
+/* -----------------------------------------------------------------------------
+ * IDE workstation (VS Code-style shell)
+ * ----------------------------------------------------------------------------- */
+
+/* Editor + terminal monospace stack (Menlo first, matching VS Code on macOS). */
+.ide-code {
+  font-family: Menlo, Monaco, 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 19px;
+}
+.ide-code-sm {
+  font-family: Menlo, Monaco, 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 19px;
+}
+
+/* Tab-loading spinner. */
+.ide-spin {
+  animation: overlay-spin 1s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-spin { animation: none; }
+}
+
+/* Indeterminate progress bar under the tab strip (shown while a file opens). */
+.ide-progress-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  z-index: 10;
+  pointer-events: none;
+}
+.ide-progress-bit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28%;
+  animation: ide-progress 1.3s ease-in-out infinite;
+}
+@keyframes ide-progress {
+  0% { left: -28%; }
+  100% { left: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-progress-bit { animation-duration: 2.6s; }
+}
+
+/* Neutral hover washes that work on every theme. */
+.ide-chrome-btn:hover,
+.ide-list-row:hover,
+.ide-status-item:hover {
+  background-color: rgba(128, 128, 128, 0.16);
+}
+.ide-menu-row:hover {
+  background-color: var(--ide-menu-hover, rgba(128, 128, 128, 0.16)) !important;
+}
+
 /* Fixed full-viewport containers for canvas and overlay (z-index layering). */
 .canvas-container {
   position: fixed;
