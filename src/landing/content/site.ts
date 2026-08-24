@@ -11,7 +11,7 @@ export const site = {
   role: "SOFTWARE ENGINEER",
   tagline: "Software Engineer · UGA '26",
   degree: "B.S. Computer Systems Engineering, Cum Laude · University of Georgia '26",
-  niche: "Computer Systems Engineer building across embedded systems, VR, and the web.",
+  niche: "Full-stack software engineer shipping production sites for real clients, AI systems on the Claude API, and embedded hardware.",
   email: "jalen.edusei@gmail.com",
 
   // ── Links ──────────────────────────────────────────────────────────────
@@ -41,13 +41,13 @@ export const site = {
     // Supporting lines that fade in additively as the hero scrolls (they stack,
     // they don't replace each other), each at a narrower width.
     reveals: [
-      "From CubeSat flight software to multiplayer VR, I build the whole system.",
+      "From CubeSat flight software to production client sites and agentic AI, I build the whole system.",
       "Computer Systems Engineer · B.S. Cum Laude, University of Georgia, Class of 2026.",
     ],
-    tagline: "EMBEDDED · VR · FULL-STACK · DATA",
+    tagline: "FULL-STACK · AI · EMBEDDED · XR",
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
-    recentProjectIds: ["freight-carrier-website", "animaldot", "parmco-ble-motor", "primeforge-fpga"],
+    recentProjectIds: ["exocortex", "windowpet", "freight-carrier-website", "relay-oms"],
     scrollCue: "SCROLL TO EXPLORE",
   },
 
@@ -60,31 +60,31 @@ export const site = {
     pillars: [
       {
         n: "01",
-        title: "Embedded & Firmware",
-        desc: "C and C++ on STM32, ESP32, and Raspberry Pi. CubeSat flight software, contactless vitals sensing, and closed-loop control.",
-        tags: ["C / C++", "STM32", "DSP"],
-        to: "/work?cat=embedded",
-      },
-      {
-        n: "02",
-        title: "VR / XR",
-        desc: "Immersive multiplayer experiences for the Meta Quest 3 in Unity, with hand tracking, networking, and physics.",
-        tags: ["UNITY", "C#", "OPENXR"],
-        to: "/work?cat=vr",
-      },
-      {
-        n: "03",
         title: "Full-Stack Web",
-        desc: "Production sites and realtime apps with Next.js, React, and Supabase, shipped on Vercel.",
-        tags: ["NEXT.JS", "REACT", "SUPABASE"],
+        desc: "Production client sites, realtime platforms, and an event-driven order system. Next.js, React, Supabase, and Phoenix, shipped on Vercel.",
+        tags: ["NEXT.JS", "REACT", "POSTGRES"],
         to: "/work?cat=web",
       },
       {
+        n: "02",
+        title: "AI & Agents",
+        desc: "Agentic assistants and retrieval systems built directly on the Claude API and on-device models: tool use, MCP servers, and evaluation harnesses.",
+        tags: ["CLAUDE API", "MCP", "MLX"],
+        to: "/work?cat=ai",
+      },
+      {
+        n: "03",
+        title: "Embedded & Hardware",
+        desc: "C and C++ on STM32, ESP32, and Raspberry Pi, FPGA design in Verilog, and PCB design in KiCad. CubeSat flight software, contactless vitals, LED walls.",
+        tags: ["C / C++", "FPGA", "KICAD"],
+        to: "/work?cat=embedded",
+      },
+      {
         n: "04",
-        title: "Product & Research",
-        desc: "Business cases at Capital One, microfluidics in the cleanroom, and HCI research. Engineering with a reason behind it.",
-        tags: ["STRATEGY", "HCI", "RESEARCH"],
-        to: "/work?cat=research",
+        title: "XR & Research",
+        desc: "Multiplayer VR for the Quest 3, a UE5 vertical slice, cleanroom microfluidics, and HCI research. Engineering with a reason behind it.",
+        tags: ["UNITY", "UE5", "HCI"],
+        to: "/work?cat=vr",
       },
     ],
   },
@@ -93,7 +93,7 @@ export const site = {
   stack: {
     eyebrow: "TOOLS & TECHNOLOGIES",
     title: "A broad, hands-on toolset.",
-    count: "70+ TECHNOLOGIES",
+    count: "80+ TECHNOLOGIES",
   },
 
   // ── Experience heading ───────────────────────────────────────────────────
@@ -120,7 +120,7 @@ export const site = {
       eyebrow: "THE WORKSTATION",
       title: "There's a terminal under the hood.",
       body:
-        "I built a 3D workstation you can actually explore: a retro CRT terminal, clickable hardware, the whole desk. Built with React Three Fiber, and it holds 60fps even on a phone.",
+        "I built a 3D workstation you can actually explore: a retro CRT terminal, clickable hardware, the whole desk. Built with React Three Fiber and tuned to stay smooth, even on a phone.",
       cta: { label: "Visit the workstation", href: "/workstation" },
     },
   },
@@ -132,14 +132,15 @@ export const site = {
     boot: [
       "EDUSEI WORKSTATION v2.026",
       "Booting Computer Systems Engineer...",
-      "Loading 25+ shipped projects...",
+      "Loading 30+ shipped projects...",
       "System ready.",
     ],
     commands: [
       { cmd: "whoami", out: "Jalen Edusei · B.S. Computer Systems Engineering, UGA '26" },
       { cmd: "run animaldot.exe", out: "Contactless vitals via geophone DSP: ONLINE" },
       { cmd: "ls --domains", out: "embedded  vr-xr  full-stack  hardware  research" },
-      { cmd: "cat status.txt", out: "Open to software, technology, business & data roles" },
+      { cmd: "ls clients/", out: "kulenterprises.com  akilahmali.com  ops-portal (private)" },
+      { cmd: "cat status.txt", out: "Open to full-time software roles: full-stack, AI, embedded" },
     ],
   },
 
@@ -149,8 +150,8 @@ export const site = {
     label: "OPEN TO OPPORTUNITIES",
     title: "Need someone who can go from firmware to front-end?",
     body:
-      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, May 2026). I'm open to software, technology, business, and data roles across all domains, and I bring real breadth across the stack with a habit of shipping tested systems, not just demos.",
-    tags: ["SOFTWARE", "EMBEDDED / FIRMWARE", "FULL-STACK WEB", "VR / XR", "PRODUCT & DATA"],
+      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now shipping production sites for paying clients as a freelance software engineer. I'm open to full-time software roles — full-stack, AI, embedded — and I bring a habit of shipping tested, measured systems, not just demos.",
+    tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
     cta: { label: "Download résumé", href: "/resume.pdf" },
   },
 
@@ -160,12 +161,12 @@ export const site = {
     title: ["The engineer", "behind", "it all."], // middle word italic
     greeting: "Hi, I'm Jalen.",
     bio:
-      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: embedded firmware and signal processing, multiplayer VR for the Meta Quest 3, and full-stack web shipped on Vercel. Most recently I was a Business Analyst intern at Capital One, building the business case for a notifications center serving 60M+ CreditWise users.",
+      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: production client websites and realtime platforms, agentic AI systems on the Claude API, embedded firmware and signal processing, and multiplayer VR for the Quest 3. These days I ship as a freelance software engineer — kulenterprises.com and akilahmali.com are mine — after a Business Analyst internship at Capital One on the CreditWise team.",
     info: [
       { label: "DEGREE", value: "B.S. Computer Systems Engineering, Cum Laude" },
       { label: "SCHOOL", value: "University of Georgia · Morehead Honors" },
       { label: "BASED", value: "Atlanta, GA" },
-      { label: "FOCUS", value: "Embedded · VR · Full-Stack · Product" },
+      { label: "FOCUS", value: "Full-Stack · AI · Embedded · XR" },
     ],
   },
 
