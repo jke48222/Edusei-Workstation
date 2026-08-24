@@ -1,12 +1,14 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIde } from './context';
 import type { TabKind } from './context';
 import { DOC_FILES, PROJECT_FILES, getDocLines, getFileLang, projectFileName, LANG_LABELS } from './files';
 import type { DocId, DocLine, Span, Tone } from './files';
 import { getProjectById } from './registryData';
-import { alpha } from './tokens';
 import { ChevronRightIcon, CloseIcon, EllipsisIcon, FileTypeIcon, GitHubIcon, SpinnerIcon, SplitIcon } from './icons';
+
+/** The 3D custom editor: lazy so three.js loads only when a project file opens. */
+const ModelViewer = lazy(() => import('./ModelViewer'));
 
 /* ------------------------------------------------------------------ */
 /* Tab strip                                                           */
@@ -98,7 +100,7 @@ function TabStrip() {
             label={projectFileName(api.projectTab)}
             lang={PROJECT_FILES[api.projectTab]?.lang ?? 'md'}
             active={api.activeTab === 'project'}
-            loading={api.busy && api.activeTab === 'project'}
+            loading={api.viewerLoading}
             onSelect={() => api.setActiveTab('project')}
             onClose={api.closeProjectTab}
           />
@@ -260,7 +262,7 @@ function DocEditor({ docId }: { docId: DocId }) {
           '--scrollbar-color-hover': `${tokens.scrollbar}88`,
         } as React.CSSProperties}
       >
-        <div className="ide-code min-w-0">
+        <div className="ide-code min-w-0 cursor-text select-text">
           {lines.map((line, i) => {
             const n = i + 1;
             const isActive = n === activeLine;
@@ -344,8 +346,8 @@ function ProjectDetails() {
   }, [api.projectTab]);
 
   useEffect(() => {
-    if (!api.isAnimating && api.activeTab === 'project') closeRef.current?.focus();
-  }, [api.isAnimating, api.activeTab]);
+    if (api.activeTab === 'project') closeRef.current?.focus();
+  }, [api.activeTab, api.projectTab]);
 
   if (!project) return null;
   const meta = PROJECT_FILES[project.id];
@@ -365,9 +367,8 @@ function ProjectDetails() {
         ref={closeRef}
         type="button"
         onClick={api.closeProjectTab}
-        disabled={api.isAnimating}
         aria-label="Close file and return"
-        className="rounded p-1 disabled:opacity-40"
+        className="rounded p-1"
         style={{ color: tokens.chromeFgDim }}
       >
         <CloseIcon size={14} />
@@ -506,12 +507,12 @@ function ProjectDetails() {
             tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
-              if (!api.isAnimating) api.closeProjectTab();
+              api.closeProjectTab();
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation();
-                if (!api.isAnimating) api.closeProjectTab();
+                api.closeProjectTab();
               }
             }}
             aria-label="Close file"
@@ -549,15 +550,29 @@ function ProjectDetails() {
 /* Editor area shell                                                   */
 /* ------------------------------------------------------------------ */
 
+function ViewerLoading({ file }: { file: string }) {
+  const { tokens } = useIde();
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <div className="flex items-center gap-2 text-[13px]" style={{ color: tokens.editorFgDim }}>
+        <span style={{ color: tokens.accent }}>
+          <SpinnerIcon size={15} />
+        </span>
+        Loading {file}...
+      </div>
+    </div>
+  );
+}
+
 export function EditorArea() {
   const api = useIde();
   const { tokens } = api;
-  const isProjectHole = api.activeTab === 'project' && api.projectTab !== null;
+  const isProjectView = api.activeTab === 'project' && api.projectTab !== null;
   const empty = api.openDocs.length === 0 && !api.projectTab;
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="pointer-events-auto relative">
+    <div className="pointer-events-auto flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="relative">
         <TabStrip />
         {api.busy && (
           <div className="ide-progress-track" aria-hidden>
@@ -565,23 +580,38 @@ export function EditorArea() {
           </div>
         )}
       </div>
-      {!empty && (
-        <div className="pointer-events-auto">
-          <Breadcrumbs activeTab={api.activeTab} />
-        </div>
-      )}
+      {!empty && <Breadcrumbs activeTab={api.activeTab} />}
 
-      <motion.div
-        className="relative min-h-0 flex-1"
-        style={{ pointerEvents: isProjectHole ? 'none' : 'auto' }}
-        initial={false}
-        animate={{ backgroundColor: isProjectHole ? alpha(tokens.editorBg, 0) : alpha(tokens.editorBg, 1) }}
-        transition={{ duration: api.reducedMotion ? 0 : 0.35 }}
-      >
+      <div className="relative min-h-0 flex-1" style={{ backgroundColor: tokens.editorBg }}>
         {empty && <Watermark />}
-        {!empty && !isProjectHole && api.activeTab !== 'project' && <DocEditor docId={api.activeTab as DocId} />}
-        <AnimatePresence>{isProjectHole && <ProjectDetails key={api.projectTab} />}</AnimatePresence>
-      </motion.div>
+        {!empty && !isProjectView && api.activeTab !== 'project' && <DocEditor docId={api.activeTab as DocId} />}
+
+        {/* Keep the viewer mounted while its tab is inactive so the model does
+            not reload every time the visitor flips between tabs. */}
+        {api.projectTab && (
+          <div className="absolute inset-0" style={{ display: isProjectView ? 'block' : 'none' }}>
+            {/* The canvas stops where the details panel starts, so the model
+                centers itself in the space that is actually visible. */}
+            <div
+              className="absolute inset-y-0 left-0"
+              style={{ right: api.isMobile ? 0 : 'min(384px, 48vw)' }}
+            >
+              <Suspense fallback={<ViewerLoading file={projectFileName(api.projectTab)} />}>
+                <ModelViewer
+                  key={api.projectTab}
+                  id={api.projectTab}
+                  accent={tokens.accent}
+                  isDark={tokens.isDark}
+                  reducedMotion={api.reducedMotion}
+                  onReady={() => api.setViewerLoading(false)}
+                />
+              </Suspense>
+              {api.viewerLoading && <ViewerLoading file={projectFileName(api.projectTab)} />}
+            </div>
+            <AnimatePresence>{isProjectView && <ProjectDetails key={api.projectTab} />}</AnimatePresence>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -56,6 +56,8 @@ export interface IdeApi {
   /* Progress + status */
   busy: boolean;
   statusMessage: string | null;
+  viewerLoading: boolean;
+  setViewerLoading: (v: boolean) => void;
   cursorLine: number;
   setCursorLine: (n: number) => void;
 
@@ -68,10 +70,7 @@ export interface IdeApi {
   soundMuted: boolean;
   setSoundMuted: (v: boolean) => void;
 
-  /* Scene */
-  currentView: ViewState;
-  isAnimating: boolean;
-  returnToMonitor: () => void;
+  /* Extras */
   openKitchenGame: () => void;
 }
 
