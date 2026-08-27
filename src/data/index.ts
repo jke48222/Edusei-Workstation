@@ -380,14 +380,6 @@ export const projectsData: ProjectData[] = [
           'Most of the work was working with people: pulling requirements out of a dozen stakeholders and applying solid UX so the site worked well everywhere.',
         ],
       },
-      {
-        title: 'Travel Itinerary Application',
-        period: 'December 2023',
-        description: [
-          'A desktop app that builds you a travel plan by pulling in hotels, attractions, and restaurants from live APIs and assembling an itinerary.',
-          'Built in JavaFX, with background threading so the interface stays smooth while it\'s busy fetching data.',
-        ],
-      },
     ],
   },
   {
@@ -497,7 +489,6 @@ export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'Website Development': 'website-development',
   'Creation and Development of Websites': 'website-development',
   'Student Organization Websites': 'website-development',
-  'Travel Itinerary Application': 'travel-itinerary-application',
   'Capital One Internship': 'capital-one',
 };
 
@@ -1090,24 +1081,6 @@ function buildCoreProjects(): WorkProject[] {
       github: websites.github,
       relatedProjects: [
         { title: 'MEMESat-1 Flight Software', slug: 'memesat', period: memesat.period },
-        { title: 'Travel Itinerary Application', slug: 'travel-itinerary-application', period: (memesat.additionalProjects?.find(a => a.title === 'Travel Itinerary Application'))?.period ?? '' },
-      ],
-    });
-  }
-  const travelApp = memesat.additionalProjects?.find(a => a.title === 'Travel Itinerary Application');
-  if (travelApp) {
-    list.push({
-      id: 'travel-itinerary-application',
-      title: travelApp.title,
-      tagline: travelApp.description[0] ?? travelApp.title,
-      description: travelApp.description,
-      techStack: ['JavaFX', 'REST APIs', 'Google Places'],
-      period: travelApp.period,
-      location: defaultLocation,
-      github: travelApp.github,
-      relatedProjects: [
-        { title: 'MEMESat-1 Flight Software', slug: 'memesat', period: memesat.period },
-        { title: 'Creation and Development of Websites', slug: 'website-development', period: websites?.period ?? '' },
       ],
     });
   }
@@ -1155,7 +1128,6 @@ const PROJECT_CATEGORY: Record<string, ProjectCategory> = {
   'qr-worlds': 'web',
   'ubersicht-widgets': 'web',
   'website-development': 'web',
-  'travel-itinerary-application': 'web',
   exocortex: 'ai',
   windowpet: 'ai',
   'screen-coach': 'ai',
