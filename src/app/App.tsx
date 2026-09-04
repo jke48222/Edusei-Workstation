@@ -1,7 +1,5 @@
-import { Suspense, lazy, useCallback, useEffect, useLayoutEffect } from 'react';
+import { useCallback, useEffect, useLayoutEffect } from 'react';
 
-// Lazy-loaded: the minigame stays out of the IDE's initial bundle.
-const KitchenChaosGame = lazy(() => import('../components/game/KitchenChaosGame').then((m) => ({ default: m.KitchenChaosGame })));
 import { Overlay } from '../components/Overlay';
 import { useKonamiCode } from '../hooks/useKonamiCode';
 import { usePrefersReducedMotion } from '../hooks/useIsMobile';
@@ -37,18 +35,11 @@ function useGlobalChrome() {
  * there is no background scene anymore.
  */
 function IdeWorkstation() {
-  const kitchenGameOpen = useWorkstationStore((s) => s.kitchenGameOpen);
   const theme = useActiveTheme();
 
   return (
     <div className="h-screen w-full overflow-hidden" style={{ backgroundColor: theme.bg }}>
       <Overlay />
-
-      {kitchenGameOpen && (
-        <Suspense fallback={null}>
-          <KitchenChaosGame />
-        </Suspense>
-      )}
     </div>
   );
 }

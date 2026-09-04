@@ -1,7 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { IdeTokens } from './tokens';
-import type { DocId } from './files';
-import type { ViewState } from '../../store/store';
+import type { DocId, ProjectId } from './files';
 
 export type SidebarView = 'explorer' | 'search' | 'scm' | 'run' | 'extensions';
 export type PanelTab = 'problems' | 'output' | 'debug' | 'terminal' | 'ports';
@@ -17,7 +16,7 @@ export interface IdeApi {
   /* Tabs */
   openDocs: DocId[];
   activeTab: TabKind;
-  projectTab: ViewState | null;
+  projectTab: ProjectId | null;
   setActiveTab: (tab: TabKind) => void;
   openDocTab: (id: DocId) => void;
   closeDocTab: (id: DocId) => void;
@@ -25,7 +24,7 @@ export interface IdeApi {
 
   /* Files */
   openFileByName: (name: string) => boolean;
-  openProject: (id: ViewState) => void;
+  openProject: (id: ProjectId) => void;
 
   /* Side bar */
   sidebarView: SidebarView;
@@ -69,9 +68,6 @@ export interface IdeApi {
   /* Sound */
   soundMuted: boolean;
   setSoundMuted: (v: boolean) => void;
-
-  /* Extras */
-  openKitchenGame: () => void;
 }
 
 export const IdeContext = createContext<IdeApi | null>(null);

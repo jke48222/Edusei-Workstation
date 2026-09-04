@@ -1,37 +1,27 @@
-import { profileData, projectsData, skillsData, getSayHiMailto, themeCommandNames } from './registryData';
-import type { ViewState } from '../../store/store';
+import { profileData, skillsData, getSayHiMailto, themeCommandNames } from './registryData';
+import { IDE_PROJECTS, LANG_LABELS, getIdeProject } from './projectRegistry';
+import type { IdeProject, LangId, ProjectId } from './projectRegistry';
 
 /* ------------------------------------------------------------------ */
 /* File registry: every project and document the IDE can open          */
 /* ------------------------------------------------------------------ */
 
-export type LangId = 'py' | 'cpp' | 'cs' | 'c' | 'sql' | 'md' | 'json' | 'pdf';
-
-export const LANG_LABELS: Record<LangId, string> = {
-  py: 'Python',
-  cpp: 'C++',
-  cs: 'C#',
-  c: 'C',
-  sql: 'SQL',
-  md: 'Markdown',
-  json: 'JSON',
-  pdf: 'PDF',
-};
+export type { LangId, ProjectId };
+export { LANG_LABELS };
 
 export interface ProjectFileMeta {
   file: string;
   lang: LangId;
 }
 
-/** Project executables rendered as source files in the explorer. */
-export const PROJECT_FILES: Record<ViewState, ProjectFileMeta | undefined> = {
-  monitor: undefined,
-  'audio-tracking-car': { file: 'audio_tracking_car.py', lang: 'py' },
-  animaldot: { file: 'animaldot.cpp', lang: 'cpp' },
-  'kitchen-chaos-vr': { file: 'kitchen_chaos.cs', lang: 'cs' },
-  memesat: { file: 'memesat_fsw.c', lang: 'c' },
-  'capital-one': { file: 'creditwise_case.sql', lang: 'sql' },
-};
+/**
+ * Filename + language for every project, keyed by id. Derived from the registry,
+ * which derives from the site's own project list — so the explorer shows exactly
+ * what /work shows.
+ */
+export const PROJECT_FILES: Record<ProjectId, ProjectFileMeta | undefined> = Object.fromEntries(
+  IDE_PROJECTS.map((p) => [p.id, { file: p.file, lang: p.lang }])
+);
 
 export type DocId = 'welcome' | 'about' | 'skills' | 'contact';
 
@@ -54,13 +44,13 @@ export const PDF_FILES = [
   { file: 'cv.pdf', href: '/cv.pdf' },
 ];
 
-export function projectFileName(id: ViewState): string {
-  return PROJECT_FILES[id]?.file ?? 'file';
+export function projectFileName(id: ProjectId): string {
+  return getIdeProject(id)?.file ?? 'file';
 }
 
 export function getFileLang(name: string): LangId {
-  const project = (Object.keys(PROJECT_FILES) as ViewState[]).find((k) => PROJECT_FILES[k]?.file === name);
-  if (project) return PROJECT_FILES[project]!.lang;
+  const project = IDE_PROJECTS.find((p) => p.file === name);
+  if (project) return project.lang;
   const doc = DOC_FILES.find((d) => d.file === name);
   if (doc) return doc.lang;
   if (name.endsWith('.pdf')) return 'pdf';
@@ -70,7 +60,7 @@ export function getFileLang(name: string): LangId {
 
 export function getAllFileNames(): string[] {
   return [
-    ...projectsData.map((p) => PROJECT_FILES[p.id]?.file ?? p.executable),
+    ...IDE_PROJECTS.map((p) => p.file),
     ...DOC_FILES.map((d) => d.file),
     ...PDF_FILES.map((d) => d.file),
   ];
@@ -80,7 +70,7 @@ export function getAllFileNames(): string[] {
 /* Terminal command plumbing                                           */
 /* ------------------------------------------------------------------ */
 
-export const COMPLETE_COMMANDS = ['help', 'list', 'run', 'open', 'theme', 'about', 'skills', 'resume', 'cv', 'clear', 'play'];
+export const COMPLETE_COMMANDS = ['help', 'list', 'run', 'open', 'theme', 'about', 'skills', 'resume', 'cv', 'clear'];
 
 export const MAX_HISTORY = 50;
 
@@ -92,7 +82,7 @@ export const GAG_COMMANDS: Record<string, string[]> = {
   'sudo rm -rf /': ['Nice try.'],
 };
 
-export const PROJECT_TEASERS: Partial<Record<ViewState, string | string[]>> = {
+export const PROJECT_TEASERS: Record<ProjectId, string | string[] | undefined> = {
   'audio-tracking-car': 'Vroom vroom.',
   animaldot: 'Go Dawgs!',
   'kitchen-chaos-vr': 'Entering virtual reality...',
@@ -118,7 +108,7 @@ export function getCompletionSuffix(inputValue: string): string {
   if (lower.startsWith('run ')) {
     const prefix = lower.slice(4).trim();
     if (!prefix) return '';
-    const candidates = projectsData.map((p) => p.executable.toLowerCase());
+    const candidates = IDE_PROJECTS.map((p) => p.executable.toLowerCase());
     return longestCommon(candidates.filter((c) => c.startsWith(prefix)), prefix);
   }
   if (lower.startsWith('open ')) {
@@ -204,12 +194,10 @@ export function buildWelcomeLines(opts: { listFiles: boolean }): DocLine[] {
 
   if (opts.listFiles) {
     lines.push([], [{ t: '## Files', tone: 'heading' }], []);
-    projectsData.forEach((p) => {
-      const meta = PROJECT_FILES[p.id];
-      if (!meta) return;
+    IDE_PROJECTS.forEach((p) => {
       lines.push([
         { t: '- ', tone: 'punct' },
-        { t: `projects/${meta.file}`, tone: 'link', openFile: meta.file },
+        { t: p.path, tone: 'link', openFile: p.file },
         { t: `  (${p.title})`, tone: 'dim' },
       ]);
     });
@@ -313,6 +301,69 @@ export function buildSkillsLines(): DocLine[] {
     }
     return [{ t: line, tone: 'punct' }];
   });
+}
+
+/**
+ * A project rendered as the contents of its own file. Used for projects with no
+ * model, video, screenshot, or embeddable site — they open as a document rather
+ * than as an empty canvas, which is also why the details side-panel is hidden
+ * for them: this view already carries everything it would have shown.
+ */
+export function buildProjectLines(p: IdeProject): DocLine[] {
+  const field = (key: string, value: string): DocLine => [
+    { t: key.padEnd(11, ' '), tone: 'variable' },
+    { t: value, tone: 'plain' },
+  ];
+  const linkField = (key: string, value: string, href: string): DocLine => [
+    { t: key.padEnd(11, ' '), tone: 'variable' },
+    { t: value, tone: 'link', href },
+  ];
+
+  const lines: DocLine[] = [
+    [{ t: `# ${p.title}`, tone: 'heading' }],
+    [],
+    [{ t: p.tagline, tone: 'dim' }],
+    [],
+    field('Period:', p.period),
+    field('Location:', p.location),
+  ];
+
+  if (p.liveUrl) lines.push(linkField('Live:', p.liveUrl.replace(/^https?:\/\//, ''), p.liveUrl));
+  if (p.github) lines.push(linkField('GitHub:', p.github.replace(/^https?:\/\//, ''), p.github));
+
+  lines.push([], [{ t: '## Overview', tone: 'heading' }], []);
+  p.description.forEach((para) => {
+    lines.push([{ t: para, tone: 'plain' }], []);
+  });
+
+  lines.push([{ t: '## Stack', tone: 'heading' }], []);
+  p.techStack.forEach((tech) => {
+    lines.push([
+      { t: '- ', tone: 'punct' },
+      { t: tech, tone: 'string' },
+    ]);
+  });
+
+  if (p.project.additionalProjects?.length) {
+    lines.push([], [{ t: '## Related', tone: 'heading' }], []);
+    p.project.additionalProjects.forEach((add) => {
+      lines.push([
+        { t: '- ', tone: 'punct' },
+        { t: add.title, tone: 'bold' },
+        { t: `  (${add.period})`, tone: 'dim' },
+      ]);
+    });
+  }
+
+  lines.push(
+    [],
+    [
+      { t: '<!-- Full entry with gallery and demos: ', tone: 'comment' },
+      { t: `/work/${p.id}`, tone: 'link', href: `/work/${p.id}` },
+      { t: ' -->', tone: 'comment' },
+    ]
+  );
+  return lines;
 }
 
 export function getDocLines(id: DocId, opts: { listFiles: boolean }): DocLine[] {

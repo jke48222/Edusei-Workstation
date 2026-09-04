@@ -7,7 +7,7 @@ export {
   skillsData,
   getSayHiMailto,
   getBootSequence,
-  getProjectById,
+  getAllProjectsForWork,
   helpText,
 } from '../../data';
 

@@ -5,12 +5,12 @@ import { MenuDropdown } from './TitleBar';
 import type { MenuEntry } from './TitleBar';
 import {
   profileData,
-  projectsData,
   themeChoices,
   toThemeCommand,
 } from './registryData';
+import { IDE_PROJECTS, PROJECT_FOLDERS } from './projectRegistry';
 import { themePresets, SYSTEM_THEME_ID } from '../../store/themeStore';
-import { DOC_FILES, PDF_FILES, PROJECT_FILES, getDocLines, getFileLang } from './files';
+import { DOC_FILES, PDF_FILES, getDocLines, getFileLang } from './files';
 import type { DocId } from './files';
 import {
   AccountIcon,
@@ -183,7 +183,12 @@ function TreeRow({ depth, label, icon, chevron = 'none', hint, active, disabled,
       {icon && <span className="mr-1.5 flex shrink-0 items-center">{icon}</span>}
       <span className="truncate text-[13px]">{label}</span>
       {hint && (
-        <span className="ml-auto truncate pl-2 pr-2 text-[11px]" style={{ color: tokens.chromeFgDim, opacity: hover ? 1 : 0.7 }}>
+        // shrink-[10]: the filename is the row's real label, so the title hint
+        // gives up width first instead of both truncating together.
+        <span
+          className="ml-auto shrink-[10] truncate pl-2 pr-2 text-[11px]"
+          style={{ color: tokens.chromeFgDim, opacity: hover ? 1 : 0.7 }}
+        >
           {hint}
         </span>
       )}
@@ -213,6 +218,10 @@ function ExplorerView() {
   const { tokens } = api;
   const [projectsOpen, setProjectsOpen] = useState(true);
   const [rootOpen, setRootOpen] = useState(true);
+  // Folders default to open: showing the whole body of work is the point.
+  const [collapsedFolders, setCollapsedFolders] = useState<Record<string, boolean>>({});
+  const toggleFolder = (name: string) =>
+    setCollapsedFolders((prev) => ({ ...prev, [name]: !prev[name] }));
 
   const rootDocs = [...DOC_FILES.map((d) => ({ kind: 'doc' as const, file: d.file, id: d.id })), ...PDF_FILES.map((d) => ({ kind: 'pdf' as const, file: d.file, href: d.href }))].sort(
     (a, b) => a.file.localeCompare(b.file)
@@ -249,6 +258,7 @@ function ExplorerView() {
                 chevron={projectsOpen ? 'down' : 'right'}
                 icon={<FolderIcon size={15} open={projectsOpen} />}
                 label="projects"
+                hint={`${IDE_PROJECTS.length}`}
                 onClick={() => setProjectsOpen((v) => !v)}
               />
               {projectsOpen && (
@@ -258,19 +268,31 @@ function ExplorerView() {
                     style={{ left: 15, backgroundColor: tokens.indentGuide }}
                     aria-hidden
                   />
-                  {projectsData.map((p) => {
-                    const meta = PROJECT_FILES[p.id];
-                    if (!meta) return null;
+                  {PROJECT_FOLDERS.map((folder) => {
+                    const open = !collapsedFolders[folder.name];
                     return (
-                      <TreeRow
-                        key={p.id}
-                        depth={1}
-                        icon={<FileTypeIcon lang={meta.lang} size={15} />}
-                        label={meta.file}
-                        hint={p.title}
-                        active={api.activeTab === 'project' && api.projectTab === p.id}
-                        onClick={() => api.openProject(p.id)}
-                      />
+                      <div key={folder.name}>
+                        <TreeRow
+                          depth={1}
+                          chevron={open ? 'down' : 'right'}
+                          icon={<FolderIcon size={15} open={open} />}
+                          label={folder.name}
+                          hint={`${folder.projects.length}`}
+                          onClick={() => toggleFolder(folder.name)}
+                        />
+                        {open &&
+                          folder.projects.map((p) => (
+                            <TreeRow
+                              key={p.id}
+                              depth={2}
+                              icon={<FileTypeIcon lang={p.lang} size={15} />}
+                              label={p.file}
+                              hint={p.title}
+                              active={api.activeTab === 'project' && api.projectTab === p.id}
+                              onClick={() => api.openProject(p.id)}
+                            />
+                          ))}
+                      </div>
                     );
                   })}
                 </div>
@@ -342,11 +364,9 @@ function SearchView() {
         if (text.trim()) rows.push({ file: d.file, lang: d.lang, line: i + 1, text, open: () => api.openDocTab(d.id) });
       });
     });
-    projectsData.forEach((p) => {
-      const meta = PROJECT_FILES[p.id];
-      if (!meta) return;
-      [p.title, p.tagline, ...p.description].forEach((text, i) => {
-        rows.push({ file: `projects/${meta.file}`, lang: meta.lang, line: i + 1, text, open: () => api.openProject(p.id) });
+    IDE_PROJECTS.forEach((p) => {
+      [p.title, p.tagline, ...p.description, p.techStack.join(', ')].forEach((text, i) => {
+        rows.push({ file: p.path, lang: p.lang, line: i + 1, text, open: () => api.openProject(p.id) });
       });
     });
     return rows;
@@ -484,39 +504,33 @@ function RunView() {
     <>
       <ViewHeader title="Run and Debug" />
       <p className="px-5 pb-2 text-[12px] leading-relaxed" style={{ color: tokens.chromeFgDim }}>
-        Run a project file to load its 3D model in the editor.
+        Run any of the {IDE_PROJECTS.length} project files to open it in the editor.
       </p>
       <div>
-        {projectsData.map((p) => {
-          const meta = PROJECT_FILES[p.id];
-          if (!meta) return null;
-          return (
-            <TreeRow
-              key={p.id}
-              depth={0}
-              icon={
-                <span style={{ color: '#3FB950' }}>
-                  <DebugIcon size={14} />
-                </span>
-              }
-              label={meta.file}
-              hint={p.title}
-              onClick={() => api.openProject(p.id)}
-            />
-          );
-        })}
-        <div className="mx-4 my-2 h-px" style={{ backgroundColor: tokens.border }} />
-        <TreeRow
-          depth={0}
-          icon={
-            <span style={{ color: '#3FB950' }}>
-              <DebugIcon size={14} />
-            </span>
-          }
-          label="kitchen_chaos_mini.exe"
-          hint="playable"
-          onClick={api.openKitchenGame}
-        />
+        {PROJECT_FOLDERS.map((folder) => (
+          <div key={folder.name}>
+            <p
+              className="px-5 pb-0.5 pt-2 text-[11px] font-bold uppercase tracking-wide"
+              style={{ color: tokens.chromeFgDim }}
+            >
+              {folder.name}
+            </p>
+            {folder.projects.map((p) => (
+              <TreeRow
+                key={p.id}
+                depth={0}
+                icon={
+                  <span style={{ color: '#3FB950' }}>
+                    <DebugIcon size={14} />
+                  </span>
+                }
+                label={p.file}
+                hint={p.title}
+                onClick={() => api.openProject(p.id)}
+              />
+            ))}
+          </div>
+        ))}
       </div>
     </>
   );
