@@ -370,6 +370,13 @@ export const FILE_TYPE_COLORS: Record<string, string> = {
   md: '#519ABA',
   json: '#CBCB41',
   pdf: '#E05252',
+  swift: '#F05138',
+  ts: '#3178C6',
+  tsx: '#3178C6',
+  js: '#F1E05A',
+  ex: '#9B6BCC',
+  v: '#B2B7F8',
+  java: '#E76F00',
 };
 
 export function FileTypeIcon({ lang, size = 16 }: { lang: string; size?: number }) {
@@ -392,6 +399,20 @@ export function FileTypeIcon({ lang, size = 16 }: { lang: string; size?: number 
       return <GlyphIcon size={size} color={color} label="C#" fontSize={7.5} />;
     case 'c':
       return <GlyphIcon size={size} color={color} label="C" fontSize={9} />;
+    case 'swift':
+      return <GlyphIcon size={size} color={color} label="sw" fontSize={8} />;
+    case 'ts':
+      return <GlyphIcon size={size} color={color} label="TS" fontSize={7.5} />;
+    case 'tsx':
+      return <GlyphIcon size={size} color={color} label="TSX" fontSize={6.2} />;
+    case 'js':
+      return <GlyphIcon size={size} color={color} label="JS" fontSize={7.5} />;
+    case 'ex':
+      return <GlyphIcon size={size} color={color} label="ex" fontSize={8} />;
+    case 'v':
+      return <GlyphIcon size={size} color={color} label="V" fontSize={9} />;
+    case 'java':
+      return <GlyphIcon size={size} color={color} label="jv" fontSize={8} />;
     case 'sql':
       return (
         <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden>

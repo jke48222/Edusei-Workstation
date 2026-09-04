@@ -1,21 +1,14 @@
 import { create } from 'zustand';
 
 /**
- * ViewState type representing all possible camera positions and object views in the workstation scene.
+ * Session state for the /workstation IDE.
+ *
+ * The camera/view state this store used to carry (`currentView`, `setView`,
+ * `returnToMonitor`, the animation clock) belonged to the original 3D desk
+ * scene and died with it — the IDE addresses projects by id through
+ * `components/ide/projectRegistry.ts` instead.
  */
-export type ViewState = 'monitor' | 'audio-tracking-car' | 'animaldot' | 'kitchen-chaos-vr' | 'memesat' | 'capital-one';
-
-/** Workstation state interface defining core application state properties. */
 interface WorkstationState {
-  /** Current workstation view state identifier. */
-  currentView: ViewState;
-  /** Whether a camera animation is currently in progress. */
-  isAnimating: boolean;
-  /** Timestamp when the current animation started, or null if not animating. */
-  animationStartTime: number | null;
-  /** Duration of camera transition animations in milliseconds. */
-  transitionDuration: number;
-
   /** Whether the terminal boot sequence has completed (shown only once per session). */
   terminalBooted: boolean;
 
@@ -25,14 +18,19 @@ interface WorkstationState {
   /** Whether terminal sound effects are muted (persisted to localStorage). */
   soundMuted: boolean;
 
-  /** Whether the Kitchen Chaos mini-game overlay is currently open. */
+  /**
+   * Whether the Kitchen Chaos mini-game overlay is currently open.
+   * The game is unwired: no UI opens it any more, and nothing imports
+   * KitchenChaosGame, so its chunk is out of the bundle. These three
+   * members stay because `src/components/game/**` is still on disk and
+   * inside tsconfig's `include`, so it must keep type-checking. Re-wire
+   * by calling `openKitchenGame()` from anywhere and mounting the
+   * component again.
+   */
   kitchenGameOpen: boolean;
 }
 
 interface WorkstationActions {
-  setView: (view: ViewState) => void;
-  returnToMonitor: () => void;
-  completeAnimation: () => void;
   setTerminalBooted: (booted: boolean) => void;
   setPrefersReducedMotion: (value: boolean) => void;
   setSoundMuted: (muted: boolean) => void;
@@ -52,69 +50,14 @@ function getStoredSoundMuted(): boolean {
 }
 
 const initialWorkstationState: WorkstationState = {
-  currentView: 'monitor',
-  isAnimating: false,
-  animationStartTime: null,
-  transitionDuration: 1500,
   terminalBooted: false,
   prefersReducedMotion: false,
   soundMuted: getStoredSoundMuted(),
   kitchenGameOpen: false,
 };
 
-export const useWorkstationStore = create<WorkstationState & WorkstationActions>()((set, get) => ({
+export const useWorkstationStore = create<WorkstationState & WorkstationActions>()((set) => ({
   ...initialWorkstationState,
-
-  setView: (view: ViewState) => {
-    const state = get();
-    if (state.isAnimating || state.currentView === view) return;
-
-    const duration = state.prefersReducedMotion ? 0 : state.transitionDuration;
-
-    set({
-      currentView: view,
-      isAnimating: true,
-      animationStartTime: Date.now(),
-    });
-
-    setTimeout(() => {
-      const currentState = get();
-      if (currentState.isAnimating && currentState.animationStartTime) {
-        const elapsed = Date.now() - currentState.animationStartTime;
-        const effectiveDuration = currentState.prefersReducedMotion ? 0 : currentState.transitionDuration;
-        if (elapsed >= effectiveDuration * 0.9 || effectiveDuration === 0) {
-          set({ isAnimating: false, animationStartTime: null });
-        }
-      }
-    }, duration + 200);
-  },
-
-  returnToMonitor: () => {
-    const state = get();
-    if (state.isAnimating || state.currentView === 'monitor') return;
-
-    const duration = state.prefersReducedMotion ? 0 : state.transitionDuration;
-    const startedAt = Date.now();
-
-    set({
-      currentView: 'monitor',
-      isAnimating: true,
-      animationStartTime: startedAt,
-    });
-
-    setTimeout(() => {
-      const currentState = get();
-      // Only clear the animation THIS call started — a stale fallback timer must
-      // not cut short a newer, unrelated transition.
-      if (currentState.isAnimating && currentState.animationStartTime === startedAt) {
-        set({ isAnimating: false, animationStartTime: null });
-      }
-    }, duration + 200);
-  },
-
-  completeAnimation: () => {
-    set({ isAnimating: false, animationStartTime: null });
-  },
 
   setTerminalBooted: (booted: boolean) => set({ terminalBooted: booted }),
 

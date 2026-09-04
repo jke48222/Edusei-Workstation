@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useWorkstationStore } from '../../store/store';
-import type { ViewState } from '../../store/store';
 import {
   themePresets,
   useResolvedThemeId,
@@ -23,12 +22,12 @@ import {
   GAG_COMMANDS,
   PROJECT_TEASERS,
 } from './files';
-import type { DocId } from './files';
+import type { DocId, ProjectId } from './files';
+import { IDE_PROJECTS, PROJECT_FOLDERS, findIdeProject, getIdeProject } from './projectRegistry';
 import {
   getBootSequence,
   helpText,
   profileData,
-  projectsData,
   resolveThemeCommand,
   themeCommandNames,
 } from './registryData';
@@ -206,13 +205,38 @@ function MobileDrawer({ api }: { api: IdeApi }) {
 /* IDE shell                                                           */
 /* ------------------------------------------------------------------ */
 
+const SIDEBAR_DEFAULT_WIDTH = 300;
+const SIDEBAR_MIN_WIDTH = 180;
+const SIDEBAR_MAX_WIDTH = 560;
+const SIDEBAR_WIDTH_STORAGE_KEY = 'edusei-workstation-sidebarWidth';
+
+const clampSidebarWidth = (n: number) => Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, n));
+
+function getStoredSidebarWidth(): number {
+  // try/catch, not a typeof guard: with site data blocked, merely touching
+  // localStorage throws a SecurityError in some browsers.
+  try {
+    const raw = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
+    if (raw !== null && Number.isFinite(Number(raw))) return clampSidebarWidth(Number(raw));
+  } catch { /* storage blocked */ }
+  return SIDEBAR_DEFAULT_WIDTH;
+}
+
+function storeSidebarWidth(width: number): void {
+  try {
+    localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(Math.round(width)));
+  } catch { /* storage blocked */ }
+}
+
+/** The query param that makes a single file linkable: /workstation?file=exocortex.swift */
+const FILE_PARAM = 'file';
+
 export function Ide() {
   const terminalBooted = useWorkstationStore((s) => s.terminalBooted);
   const setTerminalBooted = useWorkstationStore((s) => s.setTerminalBooted);
   const reducedMotion = useWorkstationStore((s) => s.prefersReducedMotion);
   const soundMuted = useWorkstationStore((s) => s.soundMuted);
   const setSoundMuted = useWorkstationStore((s) => s.setSoundMuted);
-  const openKitchenGame = useWorkstationStore((s) => s.openKitchenGame);
 
   const activeThemeId = useThemeStore((s) => s.activeTheme);
   const setTheme = useThemeStore((s) => s.setTheme);
@@ -228,12 +252,15 @@ export function Ide() {
   /* ----- tabs ----- */
   const [openDocs, setOpenDocs] = useState<DocId[]>(['welcome']);
   const [activeTab, setActiveTabState] = useState<TabKind>('welcome');
-  const [projectTab, setProjectTab] = useState<ViewState | null>(null);
+  const [projectTab, setProjectTab] = useState<ProjectId | null>(null);
   const lastDocRef = useRef<DocId>('welcome');
   if (activeTab !== 'project') lastDocRef.current = activeTab;
 
   /* ----- layout ----- */
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [sidebarWidth, setSidebarWidth] = useState(getStoredSidebarWidth);
+  const [resizingSidebar, setResizingSidebar] = useState(false);
   const [sidebarView, setSidebarView] = useState<SidebarView>('explorer');
   const [panelOpen, setPanelOpenState] = useState(true);
   const [panelTab, setPanelTab] = useState<PanelTab>('terminal');
@@ -251,6 +278,35 @@ export function Ide() {
   const setPanelOpen = useCallback((v: boolean) => {
     userToggledLayoutRef.current = true;
     setPanelOpenState(v);
+  }, []);
+
+  /** Pointer-capture drag on the side bar's right edge. Double-click resets. */
+  const startSidebarResize = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const handle = e.currentTarget;
+    handle.setPointerCapture(e.pointerId);
+    setResizingSidebar(true);
+    const startX = e.clientX;
+    const startWidth = handle.parentElement?.getBoundingClientRect().width ?? SIDEBAR_DEFAULT_WIDTH;
+
+    let latestWidth = startWidth;
+
+    const onMove = (ev: PointerEvent) => {
+      latestWidth = clampSidebarWidth(startWidth + (ev.clientX - startX));
+      setSidebarWidth(latestWidth);
+    };
+    const onUp = () => {
+      setResizingSidebar(false);
+      // Written once on release — a write per pointermove frame would hammer
+      // localStorage for no benefit.
+      storeSidebarWidth(latestWidth);
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+    };
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
   }, []);
 
   /* ----- terminal + output buffers ----- */
@@ -308,15 +364,15 @@ export function Ide() {
   projectTabRef.current = projectTab;
 
   const openProject = useCallback(
-    (id: ViewState, echoLine?: string) => {
+    (id: ProjectId, echoLine?: string) => {
       setMobileDrawerOpen(false);
       if (projectTabRef.current !== id) {
-        const meta = PROJECT_FILES[id];
+        const meta = getIdeProject(id);
         const teaser = PROJECT_TEASERS[id];
         const teaserLines = teaser ? (Array.isArray(teaser) ? teaser : [teaser]) : [];
         setTermLines((lines) => [
           ...lines,
-          echoLine ?? `$ open projects/${projectFileName(id)}`,
+          echoLine ?? `$ open ${meta?.path ?? projectFileName(id)}`,
           ...teaserLines,
           `Opening ${meta?.file ?? id}...`,
         ]);
@@ -363,11 +419,9 @@ export function Ide() {
   const openFileByName = useCallback(
     (name: string): boolean => {
       const lower = name.toLowerCase();
-      const project = (Object.keys(PROJECT_FILES) as ViewState[]).find(
-        (k) => PROJECT_FILES[k]?.file.toLowerCase() === lower
-      );
+      const project = findIdeProject(name);
       if (project) {
-        openProject(project);
+        openProject(project.id);
         return true;
       }
       const doc = DOC_FILES.find((d) => d.file.toLowerCase() === lower);
@@ -384,6 +438,42 @@ export function Ide() {
     },
     [openProject, openDocTab]
   );
+
+  /* ----- deep links: /workstation?file=<name> ----- */
+
+  // Kept in a ref so the open-on-mount effect does not re-fire when
+  // openFileByName's identity changes.
+  const openFileByNameRef = useRef(openFileByName);
+  openFileByNameRef.current = openFileByName;
+  const deepLinkOpened = useRef(false);
+
+  useEffect(() => {
+    if (deepLinkOpened.current) return;
+    deepLinkOpened.current = true;
+    const name = searchParams.get(FILE_PARAM);
+    if (name) openFileByNameRef.current(name);
+  }, [searchParams]);
+
+  // Mirror the visible file back into the address bar so it can be copied and
+  // shared. welcome.md is the default tab, so it stays out of the URL and a
+  // plain visit keeps a clean address.
+  const visibleFile =
+    activeTab === 'project' && projectTab
+      ? getIdeProject(projectTab)?.file
+      : DOC_FILES.find((d) => d.id === activeTab)?.file;
+  const linkedFile = visibleFile === 'welcome.md' ? undefined : visibleFile;
+
+  useEffect(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (linkedFile) next.set(FILE_PARAM, linkedFile);
+        else next.delete(FILE_PARAM);
+        return next;
+      },
+      { replace: true }
+    );
+  }, [linkedFile, setSearchParams]);
 
   /* ----- side bar / panel ops ----- */
   const selectSidebarView = useCallback(
@@ -456,13 +546,10 @@ export function Ide() {
       } else if (trimmedCmd === 'clear') {
         setTermLines([]);
         return;
-      } else if (trimmedCmd === 'play') {
-        openKitchenGame();
-        response = ['Launching Kitchen Chaos...'];
       } else if (trimmedCmd === 'list' || trimmedCmd === 'ls') {
         response = [
           'projects/',
-          ...projectsData.map((p) => `  ${PROJECT_FILES[p.id]?.file ?? p.executable}`),
+          ...PROJECT_FOLDERS.flatMap((f) => [`  ${f.name}/`, ...f.projects.map((p) => `    ${p.file}`)]),
           ...DOC_FILES.map((d) => d.file),
           ...PDF_FILES.map((d) => d.file),
         ];
@@ -495,19 +582,16 @@ export function Ide() {
       } else if (trimmedCmd === 'run' || trimmedCmd === 'open') {
         response = [
           'Usage: open [file]',
-          ...projectsData.map((p) => `  open ${PROJECT_FILES[p.id]?.file ?? p.executable}`),
+          `  ${IDE_PROJECTS.length} project files across ${PROJECT_FOLDERS.length} folders. Run 'ls' to list them.`,
+          `  e.g. open ${IDE_PROJECTS[0]?.file ?? 'animaldot.cpp'}`,
         ];
       } else if (trimmedCmd.startsWith('run ') || trimmedCmd.startsWith('open ')) {
         const argRaw = raw.replace(/^(run|open)\s+/i, '').trim();
         const normalized = argRaw.replace(/\.exe$/i, '').replace(/^projects\//i, '').trim().toLowerCase();
-        const project = projectsData.find(
-          (p) =>
-            p.executable.toLowerCase() === normalized ||
-            PROJECT_FILES[p.id]?.file.toLowerCase() === normalized
-        );
+        const project = findIdeProject(argRaw);
         if (project) {
           if (projectTabRef.current === project.id) {
-            setTermLines((prev) => [...prev, `$ ${cmd}`, `${PROJECT_FILES[project.id]?.file ?? project.executable} is already open.`]);
+            setTermLines((prev) => [...prev, `$ ${cmd}`, `${project.file} is already open.`]);
             setActiveTabState('project');
             return;
           }
@@ -523,10 +607,14 @@ export function Ide() {
           window.open(pdf.href, '_blank');
           response = [`Opening ${pdf.file}...`];
         } else {
+          const near = IDE_PROJECTS.filter(
+            (p) => p.file.toLowerCase().includes(normalized) || p.title.toLowerCase().includes(normalized)
+          ).slice(0, 5);
           response = [
             `Error: '${argRaw}' not found.`,
-            'Files:',
-            ...projectsData.map((p) => `  open ${PROJECT_FILES[p.id]?.file ?? p.executable}`),
+            ...(near.length
+              ? ['Did you mean:', ...near.map((p) => `  open ${p.file}`)]
+              : [`Run 'ls' to list all ${IDE_PROJECTS.length} project files.`]),
           ];
         }
       } else if (trimmedCmd) {
@@ -535,7 +623,7 @@ export function Ide() {
 
       setTermLines((prev) => [...prev, `$ ${cmd}`, ...response]);
     },
-    [setTheme, openKitchenGame, openDocTab, openProject]
+    [setTheme, openDocTab, openProject]
   );
 
   /* ----- global keybindings ----- */
@@ -643,7 +731,6 @@ export function Ide() {
     setThemeId,
     soundMuted,
     setSoundMuted,
-    openKitchenGame,
   };
 
   return (
@@ -669,10 +756,25 @@ export function Ide() {
           )}
           {!isMobile && sidebarOpen && (
             <div
-              className="pointer-events-auto z-20 w-[260px] shrink-0"
-              style={{ borderRight: `1px solid ${tokens.border}` }}
+              className="pointer-events-auto z-20 flex shrink-0"
+              style={{ width: sidebarWidth }}
             >
-              <SideBarBody />
+              <div className="min-w-0 flex-1" style={{ borderRight: `1px solid ${tokens.border}` }}>
+                <SideBarBody />
+              </div>
+              {/* Drag handle: 30 project files need more room than 260px. */}
+              <div
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize side bar"
+                onPointerDown={startSidebarResize}
+                onDoubleClick={() => {
+                  setSidebarWidth(SIDEBAR_DEFAULT_WIDTH);
+                  storeSidebarWidth(SIDEBAR_DEFAULT_WIDTH);
+                }}
+                className="-ml-px w-[3px] shrink-0"
+                style={{ cursor: 'col-resize', backgroundColor: resizingSidebar ? tokens.accent : 'transparent' }}
+              />
             </div>
           )}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
