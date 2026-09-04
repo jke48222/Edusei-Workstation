@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIde } from './context';
-import { DOC_FILES, PDF_FILES, PROJECT_FILES, getFileLang } from './files';
-import { projectsData, themeChoices } from './registryData';
+import { DOC_FILES, PDF_FILES, getFileLang } from './files';
+import { themeChoices } from './registryData';
+import { IDE_PROJECTS } from './projectRegistry';
 import { FileTypeIcon } from './icons';
 
 interface QuickItem {
@@ -53,14 +54,14 @@ export function QuickInput({ initial, onClose }: { initial: string; onClose: () 
         { label: 'View: Toggle Panel', hint: mod + 'J', run: () => { api.togglePanel(); onClose(); } },
         { label: 'View: Toggle Terminal', hint: '⌃`', run: () => { api.toggleTerminal(); onClose(); } },
         { label: 'View: Command Palette', hint: shiftMod + 'P', run: () => setText('>') },
+        { label: 'Copy Link to File', detail: 'Shareable /workstation?file=... URL', run: () => { navigator.clipboard?.writeText(window.location.href); onClose(); } },
         { label: 'Terminal: Clear', run: () => { api.runCommand('clear'); onClose(); } },
         { label: 'Terminal: Toggle Sound', run: () => { api.setSoundMuted(!api.soundMuted); onClose(); } },
-        ...projectsData.map((p) => ({
-          label: `Run: ${PROJECT_FILES[p.id]?.file ?? p.executable}`,
+        ...IDE_PROJECTS.map((p) => ({
+          label: `Run: ${p.file}`,
           detail: p.title,
           run: () => { api.openProject(p.id); onClose(); },
         })),
-        { label: 'Run: Kitchen Chaos (mini-game)', run: () => { api.openKitchenGame(); onClose(); } },
         { label: 'Open Resume (PDF)', run: () => { window.open('/resume.pdf', '_blank'); onClose(); } },
         { label: 'Open CV (PDF)', run: () => { window.open('/cv.pdf', '_blank'); onClose(); } },
         { label: 'Go: Home', run: () => { onClose(); navigate('/'); } },
@@ -71,16 +72,12 @@ export function QuickInput({ initial, onClose }: { initial: string; onClose: () 
       ];
     }
     return [
-      ...projectsData.map((p) => {
-        const meta = PROJECT_FILES[p.id];
-        const file = meta?.file ?? p.executable;
-        return {
-          label: `projects/${file}`,
-          detail: p.title,
-          lang: meta?.lang ?? 'md',
-          run: () => { api.openProject(p.id); onClose(); },
-        };
-      }),
+      ...IDE_PROJECTS.map((p) => ({
+        label: p.path,
+        detail: p.title,
+        lang: p.lang,
+        run: () => { api.openProject(p.id); onClose(); },
+      })),
       ...DOC_FILES.map((d) => ({
         label: d.file,
         lang: d.lang,

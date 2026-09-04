@@ -1,11 +1,10 @@
-import type { ViewState } from '../store/store.ts';
-
 /**
  * Project data interface defining the structure for portfolio projects.
- * Aligns with ViewState type for 3D object mapping in the immersive workstation view.
+ * These five carry a 3D model and the richest write-ups; `extraProjects`
+ * below holds the rest. `getAllProjectsForWork()` merges both.
  */
 export interface ProjectData {
-  id: ViewState;
+  id: string;
   executable: string;
   title: string;
   tagline: string;
@@ -432,10 +431,6 @@ export const asciiArt = `
 |                                                            |
 +------------------------------------------------------------+
 `;
-
-export const getProjectById = (id: ViewState): ProjectData | undefined => {
-  return projectsData.find(project => project.id === id);
-};
 
 export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'AnimalDot': 'animaldot',

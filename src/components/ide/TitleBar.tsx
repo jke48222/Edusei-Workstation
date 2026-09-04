@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useIde } from './context';
 import type { IdeApi } from './context';
-import { profileData, projectsData, themeChoices, getSayHiMailto } from './registryData';
-import { PROJECT_FILES } from './files';
+import { profileData, themeChoices, getSayHiMailto } from './registryData';
+import { IDE_PROJECTS } from './projectRegistry';
+
+/** How many project files the Run menu lists before deferring to Quick Open. */
+const RUN_MENU_COUNT = 8;
 import { CheckIcon, ChevronRightIcon, LayoutPanelIcon, LayoutSidebarIcon, SearchIcon } from './icons';
 
 interface MenuEntry {
@@ -89,13 +92,17 @@ function buildMenus(api: IdeApi, navigate: (to: string) => void): Menu[] {
     {
       label: 'Run',
       entries: [
-        ...projectsData.map((p) => ({
-          label: PROJECT_FILES[p.id]?.file ?? p.executable,
+        ...IDE_PROJECTS.slice(0, RUN_MENU_COUNT).map((p) => ({
+          label: p.file,
           hint: p.title,
           action: () => api.openProject(p.id),
         })),
         { sep: true },
-        { label: 'Kitchen Chaos (mini-game)', action: api.openKitchenGame },
+        {
+          label: `All ${IDE_PROJECTS.length} Projects...`,
+          hint: api.isMac ? '⌘P' : 'Ctrl+P',
+          action: () => api.openPalette(''),
+        },
       ],
     },
     {
