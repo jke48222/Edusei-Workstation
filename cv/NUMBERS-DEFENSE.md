@@ -79,4 +79,4 @@ Every metric on the resumes and CV, with how it was measured and where the evide
 
 ## If asked about AI-assisted development
 
-The repos carry Claude co-author trailers, and "AI-paired development" is on the resume — own it. The honest framing: you direct the architecture, write the specs and evaluation criteria, review everything, and independently verify every number above; AI pairs on implementation speed. The CGI posting explicitly requires AI-paired programming experience, so this is a strength, not a disclosure.
+"AI-paired development" is on the resume; own it. The honest framing: you direct the architecture, write the specs and evaluation criteria, review everything, and independently verify every number above; AI pairs on implementation speed. The CGI posting explicitly requires AI-paired programming experience, so this is a strength, not a disclosure.
