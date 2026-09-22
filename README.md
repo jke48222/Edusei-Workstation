@@ -1,10 +1,14 @@
 # Edusei Workstation
 
+[![License](https://img.shields.io/github/license/jke48222/Edusei-Workstation)](LICENSE) ![Top language](https://img.shields.io/github/languages/top/jke48222/Edusei-Workstation) ![platform](https://img.shields.io/badge/platform-web-blue) [![live](https://img.shields.io/badge/live-jalenedusei.com-brightgreen)](https://www.jalenedusei.com)
+
 My personal portfolio, built as a code editor you can actually use. Every project I have worked on
 appears as a file in an explorer. You open it, and the file's contents are the project itself: a 3D
 model, a screen capture, a screenshot, or the live site running in browser chrome.
 
 **Live at [jalenedusei.com](https://www.jalenedusei.com)**
+
+![The landing page at jalenedusei.com](docs/readme/hero.png)
 
 ## What problem this solves
 
@@ -206,6 +210,10 @@ Known gaps, in the order I would fix them:
 | [Capital One](https://skfb.ly/px9vD) | Laurance Animations | [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) |
 
 Additional models (robot car, sleeping dog, satellite) are in `public/models/`.
+
+## License
+
+MIT for the code. See [LICENSE](LICENSE). The written content, CV, and media in this repository are © Jalen Edusei.
 
 ---
 
