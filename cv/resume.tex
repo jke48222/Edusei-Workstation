@@ -91,9 +91,9 @@ Atlanta, GA \,|\,
 \item Built Exocortex, a local-first memory system that gives AI tools one private, shared memory: 14 life-log streams flow into a 100,000-event SQLite/FTS5 store with deduplication, secret redaction, trust-class retention, and encrypted, restore-verified backups.
 \item Engineered hybrid search fusing BM25 with a binary vector index over on-device embeddings, measuring 0.95 Recall@1 against a 0.55 keyword-only baseline, and exposed it through an MCP server with per-client trust tiers and sanitization against data exfiltration.
 \end{itemize}
-\projectheading{WindowPet: Desktop Creature \& AI Assistant}{Swift, AppKit, Accessibility API, Anthropic API}{Aug 2026}
+\projectheading{Otto: AI Assistant in the MacBook Notch}{Swift, SwiftUI, AppKit, Anthropic API}{Sep 2026}
 \begin{itemize}
-\item Built a native macOS desktop companion that rides real application windows (131 unit tests, zero dependencies) with an agentic Claude assistant (streaming, JSON-schema tool calls, prompt caching) where every action is confirmation-gated; shipped signed with a 93-check end-to-end rig at a measured 0.24\% idle CPU.
+\item Built a macOS assistant in the MacBook notch that streams Claude API replies over SSE with web search and citations, modeling hover and click-through as a pure state machine (24 tests); 16,400 lines of dependency-free Swift, 212 unit tests.
 \end{itemize}
 
 \sectiontitle{LEADERSHIP \& HONORS}
