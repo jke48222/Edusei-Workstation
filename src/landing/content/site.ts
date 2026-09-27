@@ -45,7 +45,7 @@ export const site = {
     tagline: "FULL-STACK · AI · EMBEDDED · XR",
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
-    recentProjectIds: ["exocortex", "windowpet", "freight-carrier-website", "relay-oms"],
+    recentProjectIds: ["otto", "exocortex", "windowpet", "freight-carrier-website"],
     scrollCue: "SCROLL TO EXPLORE",
   },
 

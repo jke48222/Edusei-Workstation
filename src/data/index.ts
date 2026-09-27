@@ -930,6 +930,7 @@ const extraProjects: WorkProject[] = [
  * objects (which remain the five projectsData entries). Order is the display order.
  */
 export const FEATURED_IDS = [
+  'otto',
   'exocortex',
   'windowpet',
   'freight-carrier-website',

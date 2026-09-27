@@ -18,26 +18,28 @@ type BentoSize = "lg" | "wide" | "tall" | "sm";
  * Curated Selected Work as a bento mosaic (decoupled from /work's featured order).
  * Source order + per-tile size is tuned so the tiles pack with no gaps on both the
  * 2-col (md) and 4-col (xl) grids, and each project's medium sits in a shape that
- * flatters it: models/videos fill the large squares, the CubeSat model stands in the
- * tall tile, and the landscape live-site tiles take the small/wide cells.
+ * flatters it: the landscape Otto video and the freight site fill the large squares,
+ * the AnimalDot model (framed to fit by <Bounds>) stands in the tall tile, and the
+ * rest take the small/wide cells.
  *
  *   xl (4 cols)          md (2 cols)
  *   ┌─────┬──┬──┐        ┌─────┐
- *   │ ani │me│ms│        │ ani │
- *   │ mal │me│fc│        │ mal │
- *   ├──┴──┼──┴──┤        ├──┬──┤
- *   │ kit │ pri │        │me│ms│
- *   ├──┬──┤ me  │        │me│fc│
- *   │le│pa│ for │        ├──┴──┤   … (kitchen, primeforge, le, parmco follow)
+ *   │ fre │an│ex│        │ fre │
+ *   │ ight│im├──┤        │ ight│
+ *   │     │al│wp│        ├──┬──┤
+ *   ├─────┼──┴──┤        │an│ex│
+ *   │ kit │     │        │im├──┤
+ *   ├──┬──┤ otto│        │al│wp│
+ *   │ms│re│     │        ├──┴──┤   … (kitchen, otto, ms, relay follow)
  *   └──┴──┴─────┘        └─────┘
  */
 const BENTO_LAYOUT: { id: string; size: BentoSize }[] = [
   { id: "freight-carrier-website", size: "lg" },
-  { id: "memesat", size: "tall" },
+  { id: "animaldot", size: "tall" },
   { id: "exocortex", size: "sm" },
   { id: "windowpet", size: "sm" },
   { id: "kitchen-chaos-vr", size: "wide" },
-  { id: "animaldot", size: "lg" },
+  { id: "otto", size: "lg" },
   { id: "musical-artist-site", size: "sm" },
   { id: "relay-oms", size: "sm" },
 ];
