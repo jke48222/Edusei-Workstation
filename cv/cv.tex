@@ -176,6 +176,15 @@ Atlanta, GA \;|\;
 % ============================================================
 \sectiontitle{TECHNICAL \& ENGINEERING PROJECTS}
 \groupheading{Systems, macOS \& AI Engineering}
+\projectheading{Otto: AI Assistant in the MacBook Notch}{Sep 2026 -- Present}
+{Swift, SwiftUI, AppKit, Anthropic Messages API (SSE, server tools), Carbon, XCTest}{\href{https://github.com/jke48222/otto}{github.com/jke48222/otto} \;|\; \href{https://otto-sandy.vercel.app}{otto-sandy.vercel.app}}
+\begin{itemize}
+\item Built Otto, a native macOS assistant that turns the MacBook notch into a Claude client (16,400+ lines of Swift, 212 unit tests, zero dependencies): resting the pointer on the notch or pressing Option-Space opens a borderless, non-activating \texttt{NSPanel} under the camera that takes files, images, PDFs, a screen region, or the front browser tab and streams the reply in place.
+\item Wrote the Anthropic client as raw HTTPS and server-sent events on \texttt{URLSession} with its own line splitter, since \texttt{AsyncBytes.lines} also breaks on U+2028 and U+2029 inside JSON strings; a stream accumulator folds text, thinking, web search and fetch activity, and citations, returns thinking signatures unchanged, and encodes requests with sorted keys so the prefix stays byte-stable for prompt caching.
+\item Modeled hover, click, and drag as a pure state machine with 24 unit tests, so the notch opens only after the pointer rests for 90 ms and not when it passes on the way to a menu; the panel toggles \texttt{ignoresMouseEvents} to take clicks only over its drawn shape, and a \texttt{--selftest} mode drives the real notch through a scripted session.
+\item Published the source under the MIT license with CI running the suite on every push, a product site on Vercel, and a promo film recorded from the real app window; the API key stays in the Keychain with no account or telemetry, the Carbon hot key needs no Accessibility permission, and a signed, notarized build is coming soon.
+\end{itemize}
+
 \projectheading{Exocortex: Local-First Personal Memory System}{Aug 2026 -- Present}
 {Swift, SQLite/FTS5, MLX, Qwen3-Embedding, Apple Foundation Models, Python, MCP, restic, age}{Private repository}
 \begin{itemize}

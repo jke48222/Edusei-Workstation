@@ -50,6 +50,22 @@ Every metric on the resumes and CV, with how it was measured and where the evide
 | Zero dependencies | `Package.swift` declares no external packages; AppKit/CoreGraphics/Speech only | `Package.swift` |
 | Confirmation gating | Destructive ops and `run_admin` always confirm; AppleScript confirms when classified dangerous (harmless scripts run, and the rig asserts that too); root actions need a typed password, never stored | `Assistant.swift`, `AgentSession.swift`, `TestRig.swift` |
 
+## Otto
+
+Measured on 2026-09-27 at commit `8cec069` of `jke48222/otto` (a clean `git archive` export, so nothing uncommitted counts).
+
+| Claim | How | Evidence |
+|---|---|---|
+| 212 unit tests | `xcodegen generate` then `xcodebuild -scheme Otto test` on the export: "Executed 212 tests, with 0 failures"; `grep -rh 'func test' OttoTests \| wc -l` also gives 212. GitHub Actions runs the same suite on every push and pull request to `main` (run 36320471653 on `8cec069` passed) | `OttoTests/`, `.github/workflows/ci.yml` |
+| 24 pointer state-machine tests | `grep -c 'func test' OttoTests/NotchPointerMachineTests.swift` = 24. Hover, click, and drag live in a pure `NotchPointerMachine` that takes events and time and returns effects, so the tests need no window | `Otto/Notch/NotchPointerMachine.swift`, `OttoTests/NotchPointerMachineTests.swift` |
+| 90 ms hover rest | `hoverDwell = 0.09`; a hover schedules `.hoverOpen` at the anchor time plus the dwell and cancels if the pointer leaves first. A design value tuned by hand, not a user study | `NotchPointerMachine.swift` |
+| 16,400 lines of Swift | `find Otto -name '*.swift' \| xargs cat \| wc -l` = 16,437, blank lines and comments included. **Caveat to volunteer:** 3,720 of those are the Debug tools (self-test, snapshot renderer, promo stage), so 12,717 without them. Tests are another 4,461 lines | `Otto/`, `Otto/Debug/`, `OttoTests/` |
+| Zero dependencies | `project.yml` declares no packages; every import is an Apple framework (AppKit, SwiftUI, Foundation, os, Carbon, PDFKit, Security, and a few more) | `project.yml`, `grep -rh '^import ' Otto` |
+| No Accessibility permission | The global Option-Space shortcut uses Carbon `RegisterEventHotKey`, which needs no Accessibility grant; the browser tab chip uses AppleScript (Automation, asked per browser) | `Otto/App/HotKeyManager.swift`, `Otto/Otto.entitlements` |
+| Own SSE line splitter | Used instead of `AsyncBytes.lines`, which also splits on U+0085, U+2028, and U+2029, characters that can sit unescaped inside a JSON string and would cut an event in half | `Otto/API/SSEParser.swift` |
+| macOS 14 or later | `deploymentTarget` in `project.yml` | `project.yml` |
+| Status | `gh repo view jke48222/otto`: public, MIT. `curl -sI https://otto-sandy.vercel.app`: 200. No tag or GitHub release yet (the changelog lists 1.0.0 as unreleased), and the signed app is not on sale, so no sales, users, stars, or downloads appear anywhere | GitHub, Vercel, `CHANGELOG.md` |
+
 ## Freelance work
 
 | Claim | How | Evidence |
