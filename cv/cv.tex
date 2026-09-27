@@ -231,7 +231,7 @@ Atlanta, GA \;|\;
 
 \groupheading{Web \& Full-Stack Engineering}
 \projectheading{Relay: Order Management \& Fulfillment Console}{Jul 2026}
-{Elixir 1.20, Phoenix 1.8, Ecto, PostgreSQL 16, Phoenix Channels, React 19, TypeScript, Vitest, Docker, Kubernetes}{Private repository}
+{Elixir 1.20, Phoenix 1.8, Ecto, PostgreSQL 16, Phoenix Channels, React 19, TypeScript, Vitest, Docker, Kubernetes}{\href{https://github.com/jke48222/relay-oms}{github.com/jke48222/relay-oms}}
 \begin{itemize}
 \item Built an event-driven order-management system on Elixir/Phoenix and PostgreSQL with a React 19/TypeScript console: a 13-route JSON API feeds an asynchronous fulfillment worker that walks orders from received to delivered, streamed live over Phoenix Channels with metrics coalesced to one push per 300 ms.
 \item Implemented a transactional outbox (each state change and its event commit in one \texttt{Ecto.Multi}, fan-out after commit), an 8-state, 11-transition machine enforced under row locks so timer and cancel races resolve to HTTP 409, and boot-time rehydration that rescans in-flight orders so a restart strands nothing.
@@ -240,7 +240,7 @@ Atlanta, GA \;|\;
 \end{itemize}
 
 \projectheading{Live Election Platform for a Campus Engineering Organization}{Mar 2026 -- Jun 2026}
-{Next.js 14 (App Router), JavaScript, Tailwind CSS, Supabase (Postgres, Realtime Broadcast, RLS), Vercel}{Private repository}
+{Next.js 14 (App Router), JavaScript, Tailwind CSS, Supabase (Postgres, Realtime Broadcast, RLS), Vercel}{\href{https://github.com/jke48222/live-election-platform}{github.com/jke48222/live-election-platform}}
 \begin{itemize}
 \item Designed and shipped a presenter-paced election system for a 14-role, 39-candidate chapter election, built for 60--80 concurrent phone voters: a three-state election machine with runoff restarts and floor nominations, countdowns synced to absolute UTC expiry timestamps, and 0--400 ms submission jitter to spread load.
 \item Built the realtime layer on Supabase WebSocket Broadcast with a single-row election state enforced by a unique index, a generation counter that fixed a broadcast race, and a REST fail-safe that refetches on \texttt{visibilitychange} and resubscribes after channel errors.
@@ -282,7 +282,7 @@ Atlanta, GA \;|\;
 
 \groupheading{Embedded Systems \& Hardware}
 \projectheading{Album-Art LED Matrix Wall}{Aug 2026 -- Present}
-{Python, C, MicroPython, Raspberry Pi 5, HUB75, KiCad 10, ngspice, systemd}{Private repository; hardware integration in progress}
+{Python, C, MicroPython, Raspberry Pi 5, HUB75, KiCad 10, ngspice, systemd}{\href{https://github.com/jke48222/album-art-matrix}{github.com/jke48222/album-art-matrix}; hardware integration in progress}
 \begin{itemize}
 \item Designed a 9-panel, 480 mm HUB75 LED wall (Raspberry Pi 5, 64x64 P2.5 panels) that displays the playing album cover as a spinning disc: a Python controller chains now-playing adapters (Music.app scripting, MusicKit account history, a staged Spotify PKCE adapter) into an artwork cache and pluggable frame sinks, exercised end to end through a macOS preview sink before any hardware arrived.
 \item Wrote the display path in C against the GPU-driven \texttt{rpi-gpu-hub75-matrix} library (9,600 Hz refresh on an isolated core) as a daemon fed raw RGB888 frames over a named pipe, with an art pipeline that downscales with Lanczos and unsharp masking, applies white-balance gains in linear light, and spins the disc with 4x supersampling, the gains derived from a TCS34725 colorimeter on a Pico 2 W.
@@ -347,7 +347,7 @@ Atlanta, GA \;|\;
 
 \groupheading{Games \& XR}
 \projectheading{Ashfall: The Last Hours of Pompeii (Vertical-Slice Prototype)}{Jun 2026}
-{Unreal Engine 5.8, C++, Lumen, Nanite, StateTree, Python, three.js, Git LFS}{Private repository}
+{Unreal Engine 5.8, C++, Lumen, Nanite, StateTree, Python, three.js, Git LFS}{\href{https://github.com/jke48222/ashfall}{github.com/jke48222/ashfall}}
 \begin{itemize}
 \item Built the C++ gameplay framework for a photoreal time-travel puzzle prototype in which a Pompeii city block toggles between its intact ``Zenith'' and eruption ``Fall'' states: a world subsystem as the single source of truth, per-actor temporal components that morph transform, material, and physics with tick-on-demand blending, a lighting director that cross-fades scene moods, and causal flags that persist interventions across toggles (1,333 lines of new C++).
 \item Wrote a license-gated Python asset pipeline that pulls only CC0/CC-BY assets from Poly Haven, Sketchfab, and Freesound with provenance manifests, imports 9 PBR texture sets and 87 Nanite meshes with correct color spaces, and builds the entire level procedurally from a script.

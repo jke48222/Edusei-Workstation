@@ -720,8 +720,9 @@ const extraProjects: WorkProject[] = [
     shortTitle: 'Relay OMS',
     tagline: 'An event-driven order pipeline that refuses to oversell.',
     period: 'July 2026',
-    location: 'Personal project (private repo)',
+    location: 'Personal project',
     category: 'web',
+    github: 'https://github.com/jke48222/relay-oms',
     techStack: ['Elixir', 'Phoenix', 'Ecto', 'PostgreSQL', 'Phoenix Channels', 'React 19', 'TypeScript', 'Docker', 'Kubernetes'],
     description: [
       "Relay is a miniature production backend: orders arrive over a JSON API, an event-driven pipeline allocates inventory across four fulfillment centers, and each order walks from received to delivered while a React console watches it all happen live over websockets.",
@@ -740,6 +741,7 @@ const extraProjects: WorkProject[] = [
     period: 'March 2026 – June 2026',
     location: 'for a campus engineering student organization',
     category: 'web',
+    github: 'https://github.com/jke48222/live-election-platform',
     techStack: ['Next.js 14', 'JavaScript', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'WebSockets', 'Row-Level Security'],
     description: [
       "When a room full of people needs to vote live, things break in funny ways. Everyone submits at once, someone tries to vote twice, and the presenter loses control of the pace. This system fixes all three, and it ran a real 14-role, 39-candidate chapter election.",
@@ -775,8 +777,9 @@ const extraProjects: WorkProject[] = [
     shortTitle: 'LED Matrix Wall',
     tagline: 'A 9-panel LED wall that shows whatever is playing as a spinning disc.',
     period: 'August 2026 – Present',
-    location: 'Personal project (private repo)',
+    location: 'Personal project',
     category: 'hardware',
+    github: 'https://github.com/jke48222/album-art-matrix',
     techStack: ['Python', 'C', 'MicroPython', 'Raspberry Pi 5', 'HUB75', 'KiCad', 'ngspice', 'systemd'],
     description: [
       "A wall of nine LED matrix panels that knows what's playing: the current album cover renders as a spinning disc, driven by a Raspberry Pi 5 and a chain of now-playing adapters for Apple Music, with more sources staged behind it.",
@@ -897,8 +900,9 @@ const extraProjects: WorkProject[] = [
     shortTitle: 'Ashfall',
     tagline: 'A UE5 vertical slice where you toggle Pompeii between its golden age and its final hours.',
     period: 'June 2026',
-    location: 'Personal project (private repo)',
+    location: 'Personal project',
     category: 'vr',
+    github: 'https://github.com/jke48222/ashfall',
     techStack: ['Unreal Engine 5.8', 'C++', 'Lumen', 'Nanite', 'Python', 'three.js'],
     description: [
       "Ashfall is a time-travel puzzle prototype set hours before Vesuvius: every street can flip between its living 'Zenith' and its buried 'Fall', and changing the past is how you save people.",
