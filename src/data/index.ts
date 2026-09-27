@@ -663,10 +663,9 @@ const extraProjects: WorkProject[] = [
     shortTitle: 'Freight Carrier Site',
     tagline: 'Production Next.js site with a git-backed CMS and a token design system for KUL Enterprises.',
     period: 'June 2026 – Present',
-    location: 'Freelance client work',
+    location: 'Freelance client work (private repo)',
     category: 'web',
     liveUrl: 'https://www.kulenterprises.com',
-    github: 'https://github.com/jke48222/kul-enterprises-website',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'TinaCMS', 'Tailwind CSS v4', 'Framer Motion', 'Resend', 'Vercel'],
     description: [
       "A production website for KUL Enterprises, an independent Georgia freight carrier, with me as the whole team: design, engineering, and shipping. We iterated twelve design directions, built out as twenty working variants, before landing the one that fit, then shipped 22 statically generated pages across services, driver recruiting, safety, quoting, and legal.",
