@@ -50,7 +50,7 @@
   \begin{tabularx}{\textwidth}{@{}X r@{}}
     \textbf{#1} & #2 \\
   \end{tabularx}\par
-  {\textit{#3}\IfEmpty{#4}{}{\hspace*{0pt plus 1filll}\mbox{\small #4}}}\par
+  {\textit{#3}\IfEmpty{#4}{}{\hspace*{1.5em plus 1filll}\mbox{\small #4}}}\par
   \vspace{\EntryGapAfter}%
 }
 \newcommand{\experienceheading}[4]{%
@@ -186,7 +186,7 @@ Atlanta, GA \;|\;
 \end{itemize}
 
 \projectheading{Exocortex: Local-First Personal Memory System}{Aug 2026 -- Present}
-{Swift, SQLite/FTS5, MLX, Qwen3-Embedding, Apple Foundation Models, Python, MCP, restic, age}{Private repository}
+{Swift, SQLite/FTS5, MLX, Qwen3-Embedding, Apple Foundation Models, Python, MCP, restic, age}{\href{https://github.com/jke48222/exocortex}{github.com/jke48222/exocortex}}
 \begin{itemize}
 \item Built a local-first personal memory system in Swift (8,400+ lines) that ingests 14 life-log streams (iMessage, Chrome and Safari history, Gmail, IMAP, Claude Code transcripts, and iPhone-backup calls, messages, calendars, contacts, and notes) into a 100,000-event SQLite/FTS5 store with content-hash deduplication, secret redaction, trust-class retention, and encrypted, restore-verified backups.
 \item Recovered 31,000+ iMessages with a parser for Apple's 2026 typedstream \texttt{attributedBody} format, and engineered hybrid retrieval fusing BM25 with a binary vector index over on-device MLX embeddings and reciprocal-rank fusion, measuring 0.95 Recall@1 against a 0.55 BM25 baseline after retracting an earlier result whose ground truth came from the system under test.
@@ -195,7 +195,7 @@ Atlanta, GA \;|\;
 \end{itemize}
 
 \projectheading{WindowPet: Desktop Creature \& Agentic Assistant for macOS}{Aug 2026 -- Present}
-{Swift, AppKit, Core Animation, macOS Accessibility API, Anthropic Messages API, Apple Foundation Models, XCTest}{Private repository}
+{Swift, AppKit, Core Animation, macOS Accessibility API, Anthropic Messages API, Apple Foundation Models, XCTest}{\href{https://github.com/jke48222/WindowPet}{github.com/jke48222/WindowPet}}
 \begin{itemize}
 \item Built a native Swift/AppKit desktop creature (11,000+ lines, 131 unit tests, zero dependencies) that rides real application windows, fusing permission-free \texttt{CGWindowList} geometry polled adaptively (60 Hz in motion, stepping down to 10 and 4 Hz at rest) with a read-free \texttt{AXObserver} event stream; passive tracking never reads window titles, so it never triggers a Screen Recording prompt.
 \item Wrote the physics and behavior as pure, unit-tested code: occluded window edges become platformer terrain with a ballistic leap solver tested to 1.5 pt, per-frame alpha masks open a click-through hole only over creature pixels for boop, grab, and throw, and a softmax-utility engine with a GOAP planner picks actions; a self-instrumenting benchmark enforces energy budgets, measuring 0.24\% CPU asleep and 1.04\% in motion at 48 MB.
@@ -204,7 +204,7 @@ Atlanta, GA \;|\;
 \end{itemize}
 
 \projectheading{Screen-Coach AI: Accessibility-Grounded On-Screen Coaching for macOS}{Aug 2026 -- Present}
-{Swift, AppKit, macOS Accessibility API, ScreenCaptureKit, MLX, Holo1.5-7B (4-bit), Speech, Python, XCTest}{Not yet published}
+{Swift, AppKit, macOS Accessibility API, ScreenCaptureKit, MLX, Holo1.5-7B (4-bit), Speech, Python, XCTest}{\href{https://github.com/jke48222/screen-coach}{github.com/jke48222/screen-coach}}
 \begin{itemize}
 \item Built a hotkey-summoned macOS coaching overlay in Swift (8,300+ lines, 96 headless tests) that points a cursor at the exact UI control a user names: it grounds on the accessibility tree first and falls back to a locally quantized Holo1.5-7B vision model (MLX, 4-bit) only when the tree cannot answer; on a cooperating app the lexical resolver answered 12/12 targets in 0.067 ms without ever loading the model.
 \item Let measurement set the architecture: cold accessibility reads ran 6--10x slower than warm and decayed within 10 s, so an \texttt{AXObserver}-driven cache with a heartbeat became load-bearing; batched attribute reads cut extraction 3.1x, a warm ScreenCaptureKit stream beat \texttt{screencapture} 7.9 ms to 204 ms at p90, and tree-aimed crops matched full-frame vision accuracy at 3x the speed.

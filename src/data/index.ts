@@ -581,8 +581,9 @@ const extraProjects: WorkProject[] = [
     shortTitle: 'Exocortex',
     tagline: 'A local-first memory system that gives AI tools one private, shared memory.',
     period: 'August 2026 – Present',
-    location: 'Personal project (private repo)',
+    location: 'Personal project',
     category: 'ai',
+    github: 'https://github.com/jke48222/exocortex',
     techStack: ['Swift', 'SQLite / FTS5', 'MLX', 'Qwen3-Embedding', 'Apple Foundation Models', 'MCP', 'Python'],
     description: [
       "Exocortex is my attempt at a second brain that actually belongs to me. Fourteen streams of my digital life (messages, browsing, email, AI transcripts, phone backups) flow into one local 100,000-event store on my machine, with secret redaction, trust-class retention, and encrypted, restore-verified backups. Nothing leaves it.",
@@ -600,8 +601,9 @@ const extraProjects: WorkProject[] = [
     shortTitle: 'WindowPet',
     tagline: 'A creature that lives on your real macOS windows, with an agentic AI brain.',
     period: 'August 2026 – Present',
-    location: 'Personal project (private repo)',
+    location: 'Personal project',
     category: 'ai',
+    github: 'https://github.com/jke48222/WindowPet',
     techStack: ['Swift', 'AppKit', 'Core Animation', 'macOS Accessibility API', 'Anthropic Messages API', 'XCTest'],
     description: [
       "WindowPet is a little creature that stands on your actual windows: it rides them while you drag, falls when you close one, and leaps between them with a physics solver tested to a point and a half. It reads window geometry through APIs that never trigger a screen-recording prompt, because a desktop pet should not be spyware.",
@@ -621,6 +623,7 @@ const extraProjects: WorkProject[] = [
     period: 'August 2026 – Present',
     location: 'Personal project',
     category: 'ai',
+    github: 'https://github.com/jke48222/screen-coach',
     techStack: ['Swift', 'AppKit', 'macOS Accessibility API', 'ScreenCaptureKit', 'MLX', 'Holo1.5-7B', 'XCTest'],
     description: [
       "Ask 'where do I turn on dark mode?' and a cursor glides to the exact control. Screen-Coach grounds on the macOS accessibility tree first. On a cooperating app it answered 12 of 12 targets in under a tenth of a millisecond, and it only wakes a locally quantized 7-billion-parameter vision model when the tree can't answer.",
