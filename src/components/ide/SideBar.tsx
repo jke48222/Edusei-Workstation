@@ -7,11 +7,11 @@ import {
   profileData,
   themeChoices,
   toThemeCommand,
+  getSayHiMailto,
 } from './registryData';
 import { IDE_PROJECTS, PROJECT_FOLDERS } from './projectRegistry';
 import { themePresets, SYSTEM_THEME_ID } from '../../store/themeStore';
-import { DOC_FILES, PDF_FILES, getDocLines, getFileLang } from './files';
-import type { DocId } from './files';
+import { DOC_FILES, getDocLines, getFileLang } from './files';
 import {
   AccountIcon,
   ChevronDownIcon,
@@ -223,9 +223,7 @@ function ExplorerView() {
   const toggleFolder = (name: string) =>
     setCollapsedFolders((prev) => ({ ...prev, [name]: !prev[name] }));
 
-  const rootDocs = [...DOC_FILES.map((d) => ({ kind: 'doc' as const, file: d.file, id: d.id })), ...PDF_FILES.map((d) => ({ kind: 'pdf' as const, file: d.file, href: d.href }))].sort(
-    (a, b) => a.file.localeCompare(b.file)
-  );
+  const rootDocs = [...DOC_FILES].sort((a, b) => a.file.localeCompare(b.file));
 
   return (
     <>
@@ -297,20 +295,16 @@ function ExplorerView() {
                   })}
                 </div>
               )}
-              {rootDocs.map((f) =>
-                f.kind === 'doc' ? (
-                  <TreeRow
-                    key={f.file}
-                    depth={0}
-                    icon={<FileTypeIcon lang={getFileLang(f.file)} size={15} />}
-                    label={f.file}
-                    active={api.activeTab === f.id}
-                    onClick={() => api.openDocTab(f.id as DocId)}
-                  />
-                ) : (
-                  <TreeRow key={f.file} depth={0} icon={<FileTypeIcon lang="pdf" size={15} />} label={f.file} href={f.href} />
-                )
-              )}
+              {rootDocs.map((f) => (
+                <TreeRow
+                  key={f.file}
+                  depth={0}
+                  icon={<FileTypeIcon lang={getFileLang(f.file)} size={15} />}
+                  label={f.file}
+                  active={api.activeTab === f.id}
+                  onClick={() => api.openDocTab(f.id)}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -649,14 +643,11 @@ function LinkedInExtIcon({ size = 32 }: { size?: number }) {
   );
 }
 
-function ResumeExtIcon({ size = 32 }: { size?: number }) {
+function MailExtIcon({ size = 32 }: { size?: number }) {
   return (
     <ExtTile bg="#C0392B" size={size}>
-      <path d="M11 7h7.5L23 11.5V25H11V7z" fill="#FFFFFF" />
-      <path d="M18.5 7v4.5H23" fill="none" stroke="#C0392B" strokeWidth="1.2" />
-      <g stroke="#C0392B" strokeWidth="1.4" strokeLinecap="round">
-        <path d="M13.5 15h7M13.5 18h7M13.5 21h4.5" />
-      </g>
+      <rect x="8" y="10" width="16" height="12" rx="1.5" fill="#FFFFFF" />
+      <path d="M8.8 11l7.2 5.6 7.2-5.6" fill="none" stroke="#C0392B" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </ExtTile>
   );
 }
@@ -758,7 +749,7 @@ function ExtensionsView() {
         </p>
         {card({ key: 'gh', icon: <GitHubExtIcon />, name: 'GitHub Profile', desc: profileData.github, href: `https://${profileData.github}` })}
         {card({ key: 'li', icon: <LinkedInExtIcon />, name: 'LinkedIn', desc: profileData.linkedin, href: `https://${profileData.linkedin}` })}
-        {card({ key: 'cv', icon: <ResumeExtIcon />, name: 'Resume + CV', desc: 'resume.pdf and cv.pdf', href: '/resume.pdf' })}
+        {card({ key: 'mail', icon: <MailExtIcon />, name: 'Say Hi', desc: profileData.email, href: getSayHiMailto() })}
       </div>
     </>
   );

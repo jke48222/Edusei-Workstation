@@ -19,8 +19,6 @@ export const site = {
     github: "https://github.com/jke48222",
     linkedin: "https://www.linkedin.com/in/jalenedusei",
     email: "mailto:jalen.edusei@gmail.com",
-    resume: "/resume.pdf",
-    cv: "/cv.pdf",
     source: "https://github.com/jke48222/edusei-workstation",
     site: "https://www.jalenedusei.com",
   },
@@ -152,7 +150,7 @@ export const site = {
     body:
       "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now shipping production sites for paying clients as a freelance software engineer. I'm open to full-time software roles across full-stack, AI, and embedded, and I bring a habit of shipping tested, measured systems.",
     tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
-    cta: { label: "Download résumé", href: "/resume.pdf" },
+    cta: { label: "Email me", href: "mailto:jalen.edusei@gmail.com" },
   },
 
   // ── About ─────────────────────────────────────────────────────────────────
@@ -189,8 +187,6 @@ export const socialRow = [
   { label: "GitHub", short: "GITHUB", href: site.socials.github },
   { label: "LinkedIn", short: "LINKEDIN", href: site.socials.linkedin },
   { label: "Email", short: "EMAIL", href: site.socials.email },
-  { label: "Résumé", short: "RÉSUMÉ", href: site.socials.resume },
-  { label: "CV", short: "CV", href: site.socials.cv },
 ];
 
 export type Site = typeof site;

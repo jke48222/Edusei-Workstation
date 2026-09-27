@@ -14,7 +14,6 @@ import { IdeContext } from './context';
 import type { IdeApi, PanelTab, SidebarView, TabKind } from './context';
 import {
   DOC_FILES,
-  PDF_FILES,
   PROJECT_FILES,
   LANG_LABELS,
   getFileLang,
@@ -429,11 +428,6 @@ export function Ide() {
         openDocTab(doc.id);
         return true;
       }
-      const pdf = PDF_FILES.find((d) => d.file.toLowerCase() === lower);
-      if (pdf) {
-        window.open(pdf.href, '_blank');
-        return true;
-      }
       return false;
     },
     [openProject, openDocTab]
@@ -551,7 +545,6 @@ export function Ide() {
           'projects/',
           ...PROJECT_FOLDERS.flatMap((f) => [`  ${f.name}/`, ...f.projects.map((p) => `    ${p.file}`)]),
           ...DOC_FILES.map((d) => d.file),
-          ...PDF_FILES.map((d) => d.file),
         ];
       } else if (trimmedCmd === 'about') {
         openDocTab('about');
@@ -559,12 +552,11 @@ export function Ide() {
       } else if (trimmedCmd === 'skills') {
         openDocTab('skills');
         response = ['Opened skills.json'];
-      } else if (trimmedCmd === 'resume') {
-        response = ['Opening resume.pdf...'];
-        window.open('/resume.pdf', '_blank');
-      } else if (trimmedCmd === 'cv') {
-        response = ['Opening cv.pdf...'];
-        window.open('/cv.pdf', '_blank');
+      } else if (trimmedCmd === 'contact' || trimmedCmd === 'resume' || trimmedCmd === 'cv') {
+        // 'resume' and 'cv' were commands before the PDFs left the site; they now
+        // lead to the contact page instead of an error.
+        openDocTab('contact');
+        response = ['Opened contact.md'];
       } else if (trimmedCmd === 'theme' || trimmedCmd.startsWith('theme ')) {
         const name = trimmedCmd === 'theme' ? '' : trimmedCmd.replace('theme ', '').trim();
         const themeList = themeCommandNames().map((n) => `  theme ${n}`);
@@ -599,13 +591,9 @@ export function Ide() {
           return;
         }
         const doc = DOC_FILES.find((d) => d.file.toLowerCase() === normalized);
-        const pdf = PDF_FILES.find((d) => d.file.toLowerCase() === normalized);
         if (doc) {
           openDocTab(doc.id);
           response = [`Opened ${doc.file}`];
-        } else if (pdf) {
-          window.open(pdf.href, '_blank');
-          response = [`Opening ${pdf.file}...`];
         } else {
           const near = IDE_PROJECTS.filter(
             (p) => p.file.toLowerCase().includes(normalized) || p.title.toLowerCase().includes(normalized)

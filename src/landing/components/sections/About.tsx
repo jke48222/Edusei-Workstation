@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Mail, FileText, FileBadge, Code2, Boxes, ArrowUpRight, type LucideIcon } from "lucide-react";
+import { Github, Linkedin, Mail, Code2, Boxes, ArrowUpRight, type LucideIcon } from "lucide-react";
 import { site } from "../../content/site";
 import { EyebrowPill, Reveal } from "../ui";
 
@@ -9,8 +9,6 @@ const LINKS: LinkItem[] = [
   { label: "GitHub", sub: "jke48222", href: site.socials.github, icon: Github },
   { label: "LinkedIn", sub: "in/jalenedusei", href: site.socials.linkedin, icon: Linkedin },
   { label: "Email", sub: "jalen.edusei@gmail.com", href: site.socials.email, icon: Mail },
-  { label: "Résumé", sub: "PDF", href: site.socials.resume, icon: FileText },
-  { label: "CV", sub: "PDF", href: site.socials.cv, icon: FileBadge },
   { label: "Source", sub: "this site on GitHub", href: site.socials.source, icon: Code2 },
 ];
 

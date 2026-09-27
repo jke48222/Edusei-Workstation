@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/resume.pdf", "destination": "/#contact", "permanent": false },
+    { "source": "/cv.pdf", "destination": "/#contact", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

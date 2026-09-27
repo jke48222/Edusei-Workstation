@@ -2,7 +2,7 @@
  * Simple service worker: caches same-origin GET requests so the site works
  * offline for static content after the first visit.
  */
-const CACHE_NAME = 'edusei-workstation-v4';
+const CACHE_NAME = 'edusei-workstation-v5';
 
 /** Never cache the multi-MB media/model payloads — they'd blow the origin quota. */
 const SKIP_CACHE = /\.(mp4|webm|glb|gltf|hdr)$/i;

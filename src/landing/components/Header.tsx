@@ -42,8 +42,8 @@ export default function Header() {
         {/* Right */}
         <div className="flex items-center gap-2">
           <div className="hidden md:block">
-            <BtnPrimary href={site.socials.resume} match target="_blank">
-              Résumé
+            <BtnPrimary href="#contact" match>
+              Get in touch
             </BtnPrimary>
           </div>
           <button
@@ -83,12 +83,11 @@ export default function Header() {
               Workstation
             </Link>
             <a
-              href={site.socials.resume}
-              target="_blank"
-              rel="noreferrer"
+              href={site.socials.email}
+              onClick={() => setOpen(false)}
               className="mt-3 inline-flex justify-center rounded-xl bg-ink py-3 font-display text-[13px] text-white"
             >
-              Download résumé
+              Email me
             </a>
           </nav>
         </div>

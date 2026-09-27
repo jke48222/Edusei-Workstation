@@ -30,7 +30,7 @@ export function WorkHeader({ active }: { active?: 'work' }) {
             Workstation
           </Link>
           <span className="ml-1 hidden sm:block">
-            <BtnPrimary href="/resume.pdf" target="_blank">Résumé</BtnPrimary>
+            <BtnPrimary href="/#contact">Get in touch</BtnPrimary>
           </span>
         </nav>
       </div>

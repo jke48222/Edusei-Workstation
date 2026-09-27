@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIde } from './context';
-import { DOC_FILES, PDF_FILES, getFileLang } from './files';
+import { DOC_FILES } from './files';
 import { themeChoices } from './registryData';
 import { IDE_PROJECTS } from './projectRegistry';
 import { FileTypeIcon } from './icons';
@@ -62,8 +62,6 @@ export function QuickInput({ initial, onClose }: { initial: string; onClose: () 
           detail: p.title,
           run: () => { api.openProject(p.id); onClose(); },
         })),
-        { label: 'Open Resume (PDF)', run: () => { window.open('/resume.pdf', '_blank'); onClose(); } },
-        { label: 'Open CV (PDF)', run: () => { window.open('/cv.pdf', '_blank'); onClose(); } },
         { label: 'Go: Home', run: () => { onClose(); navigate('/'); } },
         { label: 'Go: Work Archive', run: () => { onClose(); navigate('/work'); } },
         { label: 'Help: Welcome', run: () => { api.openDocTab('welcome'); onClose(); } },
@@ -82,12 +80,6 @@ export function QuickInput({ initial, onClose }: { initial: string; onClose: () 
         label: d.file,
         lang: d.lang,
         run: () => { api.openDocTab(d.id); onClose(); },
-      })),
-      ...PDF_FILES.map((d) => ({
-        label: d.file,
-        detail: 'opens in a new tab',
-        lang: getFileLang(d.file),
-        run: () => { window.open(d.href, '_blank'); onClose(); },
       })),
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps

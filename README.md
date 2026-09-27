@@ -54,7 +54,7 @@ frame.
 
 A working imitation of VS Code in the browser: file explorer, Quick Open, command palette,
 full-text search across every project, a resizable sidebar, tab management, a typeable terminal
-(`help`, `ls`, `open`, `theme`, `resume`, `clear`), and nine color themes.
+(`help`, `ls`, `open`, `theme`, `contact`, `clear`), and nine color themes.
 
 The part worth reading is
 [`src/components/ide/projectRegistry.ts`](src/components/ide/projectRegistry.ts). The file tree is

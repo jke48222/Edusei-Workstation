@@ -34,8 +34,6 @@ export const profileData = {
   email: 'jalen.edusei@gmail.com',
   linkedin: 'linkedin.com/in/jalenedusei',
   github: 'github.com/jke48222',
-  resumeUrl: '/resume.pdf',
-  cvUrl: '/cv.pdf',
   openForWork: true,
   birthday: '09-28',
 };
@@ -1250,8 +1248,7 @@ export const helpText = [
   '  theme [name]  - Switch theme (e.g. theme light, theme bulldogred)',
   '  about         - Open about.md',
   '  skills        - Open skills.json',
-  '  resume        - Open resume.pdf',
-  '  cv            - Open cv.pdf',
+  '  contact       - Open contact.md',
   '  clear         - Clear terminal',
   '',
   'Project files in the explorer open their 3D model.',

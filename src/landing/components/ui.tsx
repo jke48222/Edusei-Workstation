@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useInView } from "../lib/hooks";
 
-/** True for in-app routes ("/workstation", "/work") but not files ("/resume.pdf") or anchors. */
+/** True for in-app routes ("/workstation", "/work") but not files ("/favicon.svg") or anchors. */
 function isInternalRoute(href?: string): href is string {
   return Boolean(href) && href!.startsWith("/") && !/\.[a-z0-9]+$/i.test(href!);
 }

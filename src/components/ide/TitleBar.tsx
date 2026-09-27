@@ -38,9 +38,7 @@ function buildMenus(api: IdeApi, navigate: (to: string) => void): Menu[] {
     {
       label: 'File',
       entries: [
-        { label: 'Open Resume (PDF)', href: '/resume.pdf' },
-        { label: 'Open CV (PDF)', href: '/cv.pdf' },
-        { sep: true },
+        { label: 'Open contact.md', action: () => api.openDocTab('contact') },
         { label: 'Say Hi by Email', href: getSayHiMailto() },
         { sep: true },
         { label: 'Close Window', hint: 'Back to home', action: () => navigate('/') },

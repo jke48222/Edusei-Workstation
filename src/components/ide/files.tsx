@@ -38,12 +38,6 @@ export const DOC_FILES: DocFile[] = [
   { id: 'contact', file: 'contact.md', lang: 'md' },
 ];
 
-/** Rows in the tree that open a PDF in a new tab instead of an editor tab. */
-export const PDF_FILES = [
-  { file: 'resume.pdf', href: '/resume.pdf' },
-  { file: 'cv.pdf', href: '/cv.pdf' },
-];
-
 export function projectFileName(id: ProjectId): string {
   return getIdeProject(id)?.file ?? 'file';
 }
@@ -62,7 +56,6 @@ export function getAllFileNames(): string[] {
   return [
     ...IDE_PROJECTS.map((p) => p.file),
     ...DOC_FILES.map((d) => d.file),
-    ...PDF_FILES.map((d) => d.file),
   ];
 }
 
@@ -70,7 +63,7 @@ export function getAllFileNames(): string[] {
 /* Terminal command plumbing                                           */
 /* ------------------------------------------------------------------ */
 
-export const COMPLETE_COMMANDS = ['help', 'list', 'run', 'open', 'theme', 'about', 'skills', 'resume', 'cv', 'clear'];
+export const COMPLETE_COMMANDS = ['help', 'list', 'run', 'open', 'theme', 'about', 'skills', 'contact', 'clear'];
 
 export const MAX_HISTORY = 50;
 
@@ -207,12 +200,6 @@ export function buildWelcomeLines(opts: { listFiles: boolean }): DocLine[] {
         { t: d.file, tone: 'link', openFile: d.file },
       ]);
     });
-    PDF_FILES.forEach((d) => {
-      lines.push([
-        { t: '- ', tone: 'punct' },
-        { t: d.file, tone: 'link', href: d.href },
-      ]);
-    });
   }
   return lines;
 }
@@ -244,7 +231,7 @@ export function buildAboutLines(): DocLine[] {
       { t: profileData.github, tone: 'link', href: `https://${profileData.github}` },
     ],
     [],
-    [{ t: '<!-- Full CV: open cv.pdf from the explorer. -->', tone: 'comment' }],
+    [{ t: '<!-- To get in touch, open contact.md from the explorer. -->', tone: 'comment' }],
   ];
 }
 

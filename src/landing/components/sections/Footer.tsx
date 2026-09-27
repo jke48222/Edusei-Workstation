@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Mail, FileText, FileBadge, Code2, Boxes, type LucideIcon } from "lucide-react";
+import { Github, Linkedin, Mail, Code2, Boxes, type LucideIcon } from "lucide-react";
 import { site } from "../../content/site";
 
 type IconLink = { label: string; href: string; icon: LucideIcon; internal?: boolean };
@@ -8,8 +8,6 @@ const ICON_LINKS: IconLink[] = [
   { label: "GitHub", href: site.socials.github, icon: Github },
   { label: "LinkedIn", href: site.socials.linkedin, icon: Linkedin },
   { label: "Email", href: site.socials.email, icon: Mail },
-  { label: "Résumé", href: site.socials.resume, icon: FileText },
-  { label: "CV", href: site.socials.cv, icon: FileBadge },
   { label: "Source code", href: site.socials.source, icon: Code2 },
   { label: "3D Workstation", href: "/workstation", icon: Boxes, internal: true },
 ];
