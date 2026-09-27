@@ -453,6 +453,8 @@ export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'WindowPet: Desktop Creature & Agentic Assistant for macOS': 'windowpet',
   'WindowPet: Desktop Creature & AI Assistant': 'windowpet',
   'Screen-Coach AI': 'screen-coach',
+  'Otto': 'otto',
+  'Otto: AI Assistant in the MacBook Notch': 'otto',
   'QR Worlds': 'qr-worlds',
   'QR Worlds: Every URL Is a Place': 'qr-worlds',
   'Album-Art LED Matrix Wall': 'album-art-matrix',
@@ -553,6 +555,27 @@ const GH_RAW = 'https://raw.githubusercontent.com/jke48222';
  */
 const extraProjects: WorkProject[] = [
   {
+    id: 'otto',
+    title: 'Otto: AI Assistant in the MacBook Notch',
+    shortTitle: 'Otto',
+    tagline: 'A native Mac assistant that lives in the MacBook notch and streams Claude\'s answers.',
+    period: 'September 2026 – Present',
+    location: 'Personal project',
+    category: 'ai',
+    github: 'https://github.com/jke48222/otto',
+    liveUrl: 'https://otto-sandy.vercel.app',
+    techStack: ['Swift', 'SwiftUI', 'AppKit', 'Anthropic Messages API', 'Server-Sent Events', 'XCTest'],
+    description: [
+      "I kept leaving whatever I was doing to ask Claude a quick question, and the notch was the one part of my screen I never used. So I put Claude in it. Rest the pointer on the notch or press ⌥Space, drop in a file, a PDF, or the browser tab you're reading, and the answer streams in right under the camera. Move away and it tucks back into the housing.",
+      "It's plain Swift with SwiftUI, AppKit, and no third-party dependencies. The window is a borderless panel above the menu bar that only takes clicks over the shape it draws. The Anthropic client is raw HTTPS and server-sent events with its own line splitter, because Apple's line reader also breaks on Unicode separators that can sit inside a JSON string. Web searches, cited sources, and the model's thinking stream into the notch as they happen.",
+      "The hard part was opening only when you mean it and not when you're heading for a menu, so hover, click, and drag became a pure state machine with 24 tests of its own and a 90 ms rest before a hover counts. The app is 16,400 lines of Swift with 212 unit tests that run in CI on every push. Your key stays in the Keychain, with no account and no telemetry. The source is MIT on GitHub, and a signed app is coming soon.",
+    ],
+    relatedProjects: [
+      { title: 'WindowPet', slug: 'windowpet', period: 'August 2026 – Present' },
+      { title: 'Screen-Coach AI', slug: 'screen-coach', period: 'August 2026 – Present' },
+    ],
+  },
+  {
     id: 'exocortex',
     title: 'Exocortex: Local-First Personal Memory System',
     shortTitle: 'Exocortex',
@@ -586,6 +609,7 @@ const extraProjects: WorkProject[] = [
       "It ships as a signed app with a DMG installer, four procedurally generated skins plus a Shimeji importer for third-party art, 131 unit tests, a 93-check self-driving end-to-end rig, and an energy benchmark that keeps it at about a quarter percent of CPU while it sleeps.",
     ],
     relatedProjects: [
+      { title: 'Otto', slug: 'otto', period: 'September 2026 – Present' },
       { title: 'Exocortex', slug: 'exocortex', period: 'August 2026 – Present' },
       { title: 'Screen-Coach AI', slug: 'screen-coach', period: 'August 2026 – Present' },
     ],
@@ -604,6 +628,7 @@ const extraProjects: WorkProject[] = [
       "It is honest about confidence, since only agreement between tree and vision earns a solid pointer ring, and it is private by construction: a hot-reloading blocklist stops both capture and tree reads for excluded apps, added after I caught the tree alone leaking message content. Ninety-six headless tests; about 0.05% CPU at idle.",
     ],
     relatedProjects: [
+      { title: 'Otto', slug: 'otto', period: 'September 2026 – Present' },
       { title: 'WindowPet', slug: 'windowpet', period: 'August 2026 – Present' },
       { title: 'Exocortex', slug: 'exocortex', period: 'August 2026 – Present' },
     ],
@@ -1124,6 +1149,7 @@ const PROJECT_CATEGORY: Record<string, ProjectCategory> = {
   exocortex: 'ai',
   windowpet: 'ai',
   'screen-coach': 'ai',
+  otto: 'ai',
   'damage-claim-verifier': 'ai',
   'capital-one': 'web',
 };
@@ -1168,6 +1194,14 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
     alt: 'PrimeForge FPGA prime engine running a timed prime search',
   },
 
+  // Otto: an 8-second cut of the promo film, which records the real app window
+  otto: {
+    kind: 'video',
+    src: '/media/otto.mp4',
+    poster: '/media/otto-poster.jpg',
+    alt: 'Otto answering a question from the MacBook notch, with its web search and sources streaming in',
+  },
+
   // LED frequency filter demo video
   'led-frequency-filter': {
     kind: 'video',
@@ -1201,6 +1235,13 @@ const PROJECT_DEMOS: Record<string, { title: string; youtubeId: string }[]> = {
 const PROJECT_GALLERY: Record<string, { src: string; alt: string }[]> = {
   animaldot: [
     { src: '/media/animaldot-poster.png', alt: 'AnimalDot capstone research poster' },
+  ],
+  otto: [
+    { src: '/media/otto-1.jpg', alt: 'Otto open under the notch with a browser tab attached as a chip and a question typed into the composer' },
+    { src: '/media/otto-2.jpg', alt: 'Context chips for a browser tab, an image, a PDF, and a text file above the composer' },
+    { src: '/media/otto-3.jpg', alt: 'An answer in the notch with the page Otto read, the web search it ran, and a source pill for each site' },
+    { src: '/media/otto-4.jpg', alt: 'The closed notch while Otto keeps writing: a breathing orb on the left and equalizer bars on the right' },
+    { src: '/media/otto-5.jpg', alt: 'Otto Settings with the API key saved in Keychain, the Claude model picker, and the response style' },
   ],
   'pdms-microfluidic-mixer': [
     { src: '/media/pdms-1.jpg', alt: 'PDMS microfluidic mixer device' },
