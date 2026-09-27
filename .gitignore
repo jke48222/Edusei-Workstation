@@ -13,9 +13,12 @@ screen-recording-script.md
 /*.tex
 /headshot-original.png
 
-# Built CV and resume PDFs stay local; the repo keeps only their sources
+# Built CV and resume PDFs stay local. The only PDFs in the repo are the one
+# resume and the one CV the site serves, built from cv/resume.tex and cv/cv.tex.
 /cv/*.pdf
 /public/*.pdf
+!/public/resume.pdf
+!/public/cv.pdf
 
 # Resume variants beyond cv/resume.tex and cv/cv.tex stay local
 /cv/resume-*.tex

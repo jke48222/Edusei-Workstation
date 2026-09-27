@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useInView } from "../lib/hooks";
 
-/** True for in-app routes ("/workstation", "/work") but not files ("/favicon.svg") or anchors. */
+/** True for in-app routes ("/workstation", "/work") but not files ("/resume.pdf") or anchors. */
 function isInternalRoute(href?: string): href is string {
   return Boolean(href) && href!.startsWith("/") && !/\.[a-z0-9]+$/i.test(href!);
 }
@@ -75,6 +75,23 @@ export function BtnPrimary({
     );
   }
   return <button className={cls} onClick={onClick}>{inner}</button>;
+}
+
+/* ---------- Secondary button (glass pill, same height as BtnPrimary match) ---------- */
+export function BtnSecondary({
+  href, children, className = "", target,
+}: {
+  href: string; children: React.ReactNode; className?: string; target?: string;
+}) {
+  const cls = `inline-flex h-11 items-center rounded-xl border border-[var(--line)] bg-white/60 px-[18px] font-display text-[13px] font-medium tracking-[-0.01em] text-ink backdrop-blur transition-colors duration-300 hover:bg-white ${className}`;
+  if (isInternalRoute(href)) {
+    return <Link to={href} className={cls}>{children}</Link>;
+  }
+  return (
+    <a href={href} className={cls} target={target} rel={target === "_blank" ? "noreferrer" : undefined}>
+      {children}
+    </a>
+  );
 }
 
 /* ---------- Reveal-on-scroll wrapper ---------- */

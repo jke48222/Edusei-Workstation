@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { site } from "../content/site";
-import { BtnPrimary } from "./ui";
+import { BtnPrimary, BtnSecondary } from "./ui";
 import LandingSearch from "./LandingSearch";
 
 export default function Header() {
@@ -41,9 +41,10 @@ export default function Header() {
 
         {/* Right */}
         <div className="flex items-center gap-2">
-          <div className="hidden md:block">
-            <BtnPrimary href="#contact" match>
-              Get in touch
+          <div className="hidden items-center gap-2 md:flex">
+            <BtnSecondary href="#contact">Get in touch</BtnSecondary>
+            <BtnPrimary href={site.socials.resume} match target="_blank">
+              Résumé
             </BtnPrimary>
           </div>
           <button
@@ -82,13 +83,23 @@ export default function Header() {
             >
               Workstation
             </Link>
-            <a
-              href={site.socials.email}
-              onClick={() => setOpen(false)}
-              className="mt-3 inline-flex justify-center rounded-xl bg-ink py-3 font-display text-[13px] text-white"
-            >
-              Email me
-            </a>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <a
+                href={site.socials.resume}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex justify-center rounded-xl bg-ink py-3 font-display text-[13px] text-white"
+              >
+                Download résumé
+              </a>
+              <a
+                href={site.socials.email}
+                onClick={() => setOpen(false)}
+                className="inline-flex justify-center rounded-xl border border-[var(--line)] bg-white/70 py-3 font-display text-[13px] text-ink"
+              >
+                Email me
+              </a>
+            </div>
           </nav>
         </div>
       )}

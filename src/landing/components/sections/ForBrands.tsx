@@ -1,5 +1,5 @@
 import { site } from "../../content/site";
-import { EyebrowPill, Reveal, TagChip, BtnPrimary } from "../ui";
+import { EyebrowPill, Reveal, TagChip, BtnPrimary, BtnSecondary } from "../ui";
 
 export default function ForBrands() {
   const { forBrands: s } = site;
@@ -20,8 +20,9 @@ export default function ForBrands() {
                   {s.tags.map((t) => <TagChip key={t}>{t}</TagChip>)}
                 </div>
               </div>
-              <div className="md:pt-2">
+              <div className="flex flex-wrap gap-2 md:flex-col md:items-stretch md:pt-2">
                 <BtnPrimary href={s.cta.href} match target="_blank">{s.cta.label}</BtnPrimary>
+                <BtnSecondary href={s.contact.href} className="justify-center">{s.contact.label}</BtnSecondary>
               </div>
             </div>
           </div>

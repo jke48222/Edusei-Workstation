@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Github, Linkedin, Mail, Code2, Boxes, type LucideIcon } from "lucide-react";
+import { Github, Linkedin, Mail, FileText, FileBadge, Code2, Boxes, type LucideIcon } from "lucide-react";
 import { site } from "../../content/site";
 
 type IconLink = { label: string; href: string; icon: LucideIcon; internal?: boolean };
@@ -8,12 +8,14 @@ const ICON_LINKS: IconLink[] = [
   { label: "GitHub", href: site.socials.github, icon: Github },
   { label: "LinkedIn", href: site.socials.linkedin, icon: Linkedin },
   { label: "Email", href: site.socials.email, icon: Mail },
+  { label: "Résumé", href: site.socials.resume, icon: FileText },
+  { label: "CV", href: site.socials.cv, icon: FileBadge },
   { label: "Source code", href: site.socials.source, icon: Code2 },
   { label: "3D Workstation", href: "/workstation", icon: Boxes, internal: true },
 ];
 
 function IconButton({ item }: { item: IconLink }) {
-  const cls = "flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-bg-elev text-ink-dim transition-all hover:-translate-y-0.5 hover:border-ink hover:text-ink";
+  const cls = "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] bg-bg-elev text-ink-dim transition-all hover:-translate-y-0.5 hover:border-ink hover:text-ink sm:h-10 sm:w-10";
   const inner = <item.icon className="h-[17px] w-[17px]" strokeWidth={1.8} />;
   return item.internal ? (
     <Link to={item.href} aria-label={item.label} title={item.label} className={cls}>{inner}</Link>
@@ -42,7 +44,8 @@ export default function Footer() {
           <span className="text-[12px] text-ink-mute">{site.footer.copyright}</span>
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <span className="font-mono text-[11px] tracking-[0.06em] text-ink-mute">Atlanta, GA · {site.email}</span>
-            <div className="flex flex-wrap gap-2.5">
+            {/* Seven icons fit one row down to a 360 px phone at 36 px, gap 8. */}
+            <div className="flex flex-wrap gap-2 sm:gap-2.5">
               {ICON_LINKS.map((l) => <IconButton key={l.label} item={l} />)}
             </div>
           </div>

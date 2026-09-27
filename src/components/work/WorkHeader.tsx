@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { BtnPrimary } from '../../landing/components/ui';
+import { BtnPrimary, BtnSecondary } from '../../landing/components/ui';
 
 /**
  * Light, bone-themed header for /work and /work/:id, matching the home page's
@@ -29,8 +29,9 @@ export function WorkHeader({ active }: { active?: 'work' }) {
           >
             Workstation
           </Link>
-          <span className="ml-1 hidden sm:block">
-            <BtnPrimary href="/#contact">Get in touch</BtnPrimary>
+          <span className="ml-1 hidden items-center gap-2 sm:flex">
+            <BtnSecondary href="/#contact" className="!h-10">Get in touch</BtnSecondary>
+            <BtnPrimary href="/resume.pdf" target="_blank">Résumé</BtnPrimary>
           </span>
         </nav>
       </div>
