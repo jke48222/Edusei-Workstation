@@ -18,24 +18,12 @@ interface WorkstationState {
   /** Whether terminal sound effects are muted (persisted to localStorage). */
   soundMuted: boolean;
 
-  /**
-   * Whether the Kitchen Chaos mini-game overlay is currently open.
-   * The game is unwired: no UI opens it any more, and nothing imports
-   * KitchenChaosGame, so its chunk is out of the bundle. These three
-   * members stay because `src/components/game/**` is still on disk and
-   * inside tsconfig's `include`, so it must keep type-checking. Re-wire
-   * by calling `openKitchenGame()` from anywhere and mounting the
-   * component again.
-   */
-  kitchenGameOpen: boolean;
 }
 
 interface WorkstationActions {
   setTerminalBooted: (booted: boolean) => void;
   setPrefersReducedMotion: (value: boolean) => void;
   setSoundMuted: (muted: boolean) => void;
-  openKitchenGame: () => void;
-  closeKitchenGame: () => void;
 }
 
 const SOUND_MUTED_STORAGE_KEY = 'edusei-workstation-soundMuted';
@@ -53,7 +41,6 @@ const initialWorkstationState: WorkstationState = {
   terminalBooted: false,
   prefersReducedMotion: false,
   soundMuted: getStoredSoundMuted(),
-  kitchenGameOpen: false,
 };
 
 export const useWorkstationStore = create<WorkstationState & WorkstationActions>()((set) => ({
@@ -70,8 +57,6 @@ export const useWorkstationStore = create<WorkstationState & WorkstationActions>
     } catch (_) {}
   },
 
-  openKitchenGame: () => set({ kitchenGameOpen: true }),
-  closeKitchenGame: () => set({ kitchenGameOpen: false }),
 }));
 
 if (import.meta.env?.DEV) {

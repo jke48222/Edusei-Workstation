@@ -146,8 +146,7 @@ src/
 │   │   ├── SideBar.tsx         Explorer, search, source control, run panels
 │   │   ├── EditorArea.tsx      Tabs and per-project custom editors
 │   │   └── ModelViewer.tsx     3D model as a file's contents (lazy loaded)
-│   ├── work/               The /work archive and detail pages
-│   └── game/               Kitchen Chaos 2D, complete but unwired (see Status)
+│   └── work/               The /work archive and detail pages
 ├── store/                  Zustand stores for workstation and theme state
 ├── styles/index.css        Tailwind layers plus three scoped design systems
 └── hooks/                  Shared hooks (mobile detection, konami)
@@ -197,9 +196,6 @@ Known gaps, in the order I would fix them:
 - **3D models are unoptimized.** 27 MB of glTF in `public/models/` with no Draco or meshopt
   compression and no level-of-detail. They are lazy loaded and excluded from the service worker
   cache, so they do not hurt first paint, but they are heavy when opened.
-- **Kitchen Chaos 2D** in `src/components/game/` is complete but intentionally unwired. Nothing
-  imports it, so it stays out of the bundle. See `kitchenGameOpen` in `src/store/store.ts` to
-  restore it.
 - **The HEVC workflow is not generic**, as noted above.
 
 ## 3D model attributions
