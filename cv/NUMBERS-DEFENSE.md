@@ -66,6 +66,20 @@ Measured on 2026-09-27 at commit `8cec069` of `jke48222/otto` (a clean `git arch
 | macOS 14 or later | `deploymentTarget` in `project.yml` | `project.yml` |
 | Status | `gh repo view jke48222/otto`: public, MIT. `curl -sI https://otto-sandy.vercel.app`: 200. No tag or GitHub release yet (the changelog lists 1.0.0 as unreleased), and the signed app is not on sale, so no sales, users, stars, or downloads appear anywhere | GitHub, Vercel, `CHANGELOG.md` |
 
+## Thataway (formerly Screen-Coach AI)
+
+Measured on 2026-09-30 at commit `a6b5ad5` of `jke48222/thataway` unless a row says otherwise. The repo's `docs/BENCHMARKS.md` holds every figure with its source file.
+
+| Claim | How | Evidence |
+|---|---|---|
+| 233 tests | `swift test`: 132 Core + 83 Kit + 18 Bench XCTest cases, 0 failures; `grep -rh 'func test' Tests \| wc -l` also gives 233 | `Tests/` |
+| 12 of 12 targets at 0.067 ms p50 | `thataway-bench axplan` on a committed Google Chrome accessibility snapshot: `ax_hit_rate: 1` over 12 plans, `resolve_p50_ms: 0.067166`. **Caveat:** one Chrome window, and seven of the twelve targets are bookmarks-bar buttons, so this is a narrow result, not a general accuracy figure. CI reproduces the 12 of 12; the timing moves with the machine | `bench-data/axplan-chrome.json`, `docs/BENCHMARKS.md` |
+| Local 4-bit vision model on MLX | Holo1.5-7B quantized from the 16.6 GB BF16 build to a 5.65 GB 4-bit MLX build, called through a Python sidecar only when the tree can't answer | `PHASE-0-FINDINGS.md` Finding 6, `Tools/` |
+| Cold reads 6 to 10x slower than warm | Logic Pro: 220 ms cold against 21 ms warm, which is why the `AXObserver`-driven cache exists | `PHASE-0-FINDINGS.md` Finding 1, `docs/ARCHITECTURE.md` |
+| Batching cut extraction 3.1x | Batched attribute reads at 0.81 ms p50 against 2.54 ms one attribute at a time | `PHASE-0-FINDINGS.md` Finding 2 |
+| 7.9 ms against 204 ms at p90 | A warm ScreenCaptureKit stream against spawning `screencapture(1)` per frame | `PHASE-0-FINDINGS.md` Finding 4 |
+| Not claimed | Idle CPU and memory were never recorded, and the "aimed crops match full-frame accuracy at 3x the speed" result did not hold on a second run (10 of 12 against 11 of 12). Neither appears on the resume | `docs/BENCHMARKS.md` |
+
 ## Freelance work
 
 | Claim | How | Evidence |
