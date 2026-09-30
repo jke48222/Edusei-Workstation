@@ -207,13 +207,13 @@ Atlanta, GA \;|\;
 \item Shipped v1.0 as a signed app with a DMG installer, first-run onboarding, Start at Login, four procedurally generated skins plus user-defined JSON skins, on-device speech recognition with a neural TTS chain, and a 93-check self-driving end-to-end rig covering window riding, reactions, hot-swapped Shimeji characters, and the confirmation gates.
 \end{itemize}
 
-\projectheading{Screen-Coach AI: Accessibility-Grounded On-Screen Coaching for macOS}{Aug 2026 -- Present}
-{Swift, AppKit, macOS Accessibility API, ScreenCaptureKit, MLX, Holo1.5-7B (4-bit), Speech, Python, XCTest}{\href{https://github.com/jke48222/screen-coach}{github.com/jke48222/screen-coach}}
+\projectheading{Thataway: On-Screen Pointer for macOS}{Aug 2026 -- Present}
+{Swift, AppKit, macOS Accessibility API, ScreenCaptureKit, MLX, Holo1.5-7B (4-bit), Speech, Python, XCTest}{\href{https://github.com/jke48222/thataway}{github.com/jke48222/thataway} \;|\; \href{https://thataway-app.vercel.app}{thataway-app.vercel.app}}
 \begin{itemize}
-\item Built a hotkey-summoned macOS coaching overlay in Swift (8,300+ lines, 96 headless tests) that points a cursor at the exact UI control a user names: it grounds on the accessibility tree first and falls back to a locally quantized Holo1.5-7B vision model (MLX, 4-bit) only when the tree cannot answer; on a cooperating app the lexical resolver answered 12/12 targets in 0.067 ms without ever loading the model.
-\item Let measurement set the architecture: cold accessibility reads ran 6--10x slower than warm and decayed within 10 s, so an \texttt{AXObserver}-driven cache with a heartbeat became load-bearing; batched attribute reads cut extraction 3.1x, a warm ScreenCaptureKit stream beat \texttt{screencapture} 7.9 ms to 204 ms at p90, and tree-aimed crops matched full-frame vision accuracy at 3x the speed.
-\item Engineered honest confidence rendering: only agreement between tree and vision earns a solid pointer ring, vision-only answers are always marked uncertain, and vague queries decline to point; a hot-reloading privacy gate blocks both capture and tree reads for excluded apps, added after testing showed the tree alone leaked private message content.
-\item Extended the coach into a teacher: multi-step lessons detect completion by diffing live accessibility trees against each step's starting state, a click-through scrim with numbered badges highlights targets, and a ``watch me'' recorder converts real clicks into machine-independent JSON workflows, idling at about 0.05\% CPU and 45 MB resident.
+\item Built Thataway, a hotkey-summoned macOS overlay in Swift (11,000+ lines of app and library code, 233 tests, no third-party Swift dependencies) that points a cursor at the exact UI control a user names. It grounds on the accessibility tree first and falls back to a locally quantized Holo1.5-7B vision model (MLX, 4-bit) only when the tree cannot answer. On a Google Chrome window, the lexical resolver answered 12 of 12 targets in 0.067 ms without loading the model.
+\item Let measurement set the architecture: cold accessibility reads ran 6--10x slower than warm and decayed within 10 s, so an \texttt{AXObserver}-driven cache with a heartbeat became load-bearing; batched attribute reads cut extraction 3.1x, and a warm ScreenCaptureKit stream beat \texttt{screencapture} 7.9 ms to 204 ms at p90.
+\item Rendered confidence honestly: a solid pointer ring only when the accessibility tree resolves the control exactly, a dashed ring when the match is weak or tree and vision disagree, and no pointer at all for a query too vague to answer; a hot-reloading privacy gate blocks both capture and tree reads for excluded apps, added after testing showed the tree alone leaked private message content.
+\item Extended the coach into a teacher: multi-step lessons detect completion by diffing live accessibility trees against each step's starting state, a click-through scrim with numbered badges highlights targets, and a ``watch me'' recorder converts real clicks into machine-independent JSON workflows.
 \end{itemize}
 
 \projectheading{Damage-Claim Evidence Verifier (HackerRank Orchestrate Hackathon)}{Jun 2026}
@@ -401,7 +401,7 @@ Atlanta, GA \;|\;
 \end{itemize}
 \experienceheading{UGA Office of Engagement, Leadership, and Service}{ELS Peer Leader}{Athens, GA}{Jan 2024 -- May 2024}
 \begin{itemize}
-\item Selected for a leadership-coaching program; mentored first- and second-year students 1:1 and facilitated workshops on values-based leadership.
+\item Selected for a leadership-coaching program; mentored first- and second-year students 1:1 and led workshops on values-based leadership.
 \end{itemize}
 
 % ============================================================
@@ -435,10 +435,10 @@ Atlanta, GA \;|\;
 % HONORS & AWARDS
 % ============================================================
 \sectiontitle{HONORS \& AWARDS}
-\awardrow{Extraordinary Engineer, UGA College of Engineering {\normalfont -- leadership, academics, and service}}{Feb 2024}
-\awardrow{Presidential Scholar (2x) {\normalfont -- 4.0 GPA in consecutive full-time semesters}}{Fall 2022, Spring 2023}
+\awardrow{Extraordinary Engineer, UGA College of Engineering{\normalfont : leadership, academics, and service}}{Feb 2024}
+\awardrow{Presidential Scholar (2x){\normalfont : 4.0 GPA in consecutive full-time semesters}}{Fall 2022, Spring 2023}
 \awardrow{Dean's List, University of Georgia}{Spring 2024}
-\awardrow{Dire Needs Project Fund {\normalfont -- competitive \$1,500 grant for a student-led engineering project}}{Aug 2023 -- May 2024}
+\awardrow{Dire Needs Project Fund{\normalfont : competitive \$1,500 grant for a student-led engineering project}}{Aug 2023 -- May 2024}
 
 % ============================================================
 

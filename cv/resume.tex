@@ -43,7 +43,7 @@ Atlanta, GA \,|\,
 \end{center}
 
 \vspace{3pt}
-{\small Full-stack software engineer shipping production web applications for paying clients: React/TypeScript frontends, REST and realtime services on PostgreSQL, Docker/Kubernetes deployment, and AI features built directly on the Claude API.}\par
+{\small Software engineer who works from the hardware up: Verilog on FPGAs, embedded C/C++ on ESP32 and STM32, native macOS apps on the Claude API and on-device models, and production web apps for paying clients.}\par
 
 \sectiontitle{EDUCATION}
 \begin{tabularx}{\textwidth}{@{}X r@{}}
@@ -54,7 +54,7 @@ Atlanta, GA \,|\,
 {\small \textbf{Relevant Coursework:} Data Structures, Systems Programming, Software Development, Discrete Mathematics, Embedded Systems I \& II, Advanced Digital Design, Human-Computer Interaction}
 
 \sectiontitle{TECHNICAL SKILLS}
-\textbf{Languages:} TypeScript, JavaScript, Python, Swift, Elixir, Java, C, C++, SQL\par
+\textbf{Languages:} TypeScript, JavaScript, Python, Swift, C, C++, Verilog, SQL, Elixir, Java\par
 \textbf{Frontend:} React 19, Next.js (App Router, ISR), Tailwind CSS, three.js / React Three Fiber, Framer Motion, WCAG AA accessibility\par
 \textbf{Backend \& Data:} Node.js, Phoenix / Ecto, PostgreSQL (row-level security, transactional outbox), Supabase, REST / JSON APIs, WebSockets, SQLite / FTS5, Docker, Kubernetes, GitHub Actions, Vercel\par
 \textbf{AI \& Practices:} AI-paired development (Claude Code, Cursor), Anthropic Claude API (tool use, streaming, structured outputs), MCP servers, Agile team development, code review, automated testing (Vitest, ExUnit, XCTest)
@@ -77,23 +77,23 @@ Atlanta, GA \,|\,
 \end{itemize}
 
 \sectiontitle{PROJECTS}
-\projectheading{Relay: Order Management \& Fulfillment}{Elixir, Phoenix, PostgreSQL, React, TypeScript, CI/CD}{Jul 2026}
-\begin{itemize}
-\item Built an event-driven order management system: 13-route JSON API, Kafka-style transactional outbox, 8-state machine enforced under row locks, crash-safe worker with boot-time rehydration, and a live React dashboard over Phoenix Channels.
-\item Prevented oversell with \texttt{SELECT \ldots FOR UPDATE} allocation across four facilities plus a \texttt{CHECK} constraint and \texttt{Idempotency-Key} replay; 52 failure-mode tests (ExUnit, Vitest) run in GitHub Actions; Docker and Kubernetes manifests.
-\end{itemize}
-\projectheading{Live Election Platform}{Next.js 14, JavaScript, Supabase (Postgres, Realtime, RLS)}{Mar 2026 -- Jun 2026}
-\begin{itemize}
-\item Shipped a realtime chapter election system (14 roles, 39 candidates): three-state election machine, SHA-256 device fingerprinting with a \texttt{UNIQUE(role\_id, device\_hash)} constraint and row-level security, and a 29-finding security audit verified by 42 HTTP-level tests.
-\end{itemize}
-\projectheading{Exocortex: Local-First Personal Memory System}{Swift, SQLite/FTS5, MLX, Foundation Models, MCP}{Aug 2026}
-\begin{itemize}
-\item Built Exocortex, a local-first memory system that gives AI tools one private, shared memory: 14 life-log streams flow into a 100,000-event SQLite/FTS5 store with deduplication, secret redaction, trust-class retention, and encrypted, restore-verified backups.
-\item Engineered hybrid search fusing BM25 with a binary vector index over on-device embeddings, measuring 0.95 Recall@1 against a 0.55 keyword-only baseline, and exposed it through an MCP server with per-client trust tiers and sanitization against data exfiltration.
-\end{itemize}
 \projectheading{Otto: AI Assistant in the MacBook Notch}{Swift, SwiftUI, AppKit, Anthropic API}{Sep 2026}
 \begin{itemize}
 \item Built a macOS assistant in the MacBook notch that streams Claude API replies over SSE with web search and citations, modeling hover and click-through as a pure state machine (24 tests); 16,400 lines of dependency-free Swift, 212 unit tests.
+\end{itemize}
+\projectheading{Thataway: On-Screen Pointer for macOS}{Swift, AppKit, Accessibility API, ScreenCaptureKit, MLX}{Aug 2026}
+\begin{itemize}
+\item Built a macOS overlay that points at the control a user names, reading the accessibility tree first and falling back to a local 4-bit vision model on MLX; 12 of 12 targets on a Chrome window at 0.067 ms p50, 233 tests.
+\item Measured before designing: cold accessibility reads ran 6--10x slower than warm, so an \texttt{AXObserver}-driven cache became load-bearing; batching cut extraction 3.1x, and a warm ScreenCaptureKit stream beat \texttt{screencapture} 7.9 to 204 ms at p90.
+\end{itemize}
+\projectheading{AnimalDot: Pet Vital-Signs Bed (Senior Capstone)}{ESP32, C++, SwiftUI, Express, PostgreSQL, MQTT}{Aug 2025 -- May 2026}
+\begin{itemize}
+\item Led all software for a six-person capstone (36 of 37 commits) for two faculty clients: ESP32 firmware, a SwiftUI iOS app, a React Native app, and an Express/PostgreSQL backend that streams each user's vitals over WebSockets.
+\item Wrote real-time ballistocardiography DSP in C++ (200 Hz geophone sampling, a 0.67--3 Hz Butterworth band-pass, kurtosis-based motion rejection) and a binary MQTT telemetry protocol with tested TypeScript and Swift decoders.
+\end{itemize}
+\projectheading{PrimeForge: FPGA Prime Finder (2-person team)}{Verilog, Artix-7, Vivado, DDR2}{Jan 2026 -- May 2026}
+\begin{itemize}
+\item Designed a Verilog prime finder across four clock domains whose segmented sieve found all 5,761,455 primes below $10^8$ on hardware, streaming them to DDR2 through a two-client arbiter and gray-coded async FIFOs.
 \end{itemize}
 
 \sectiontitle{LEADERSHIP \& HONORS}
