@@ -181,12 +181,12 @@ Atlanta, GA \;|\;
 \sectiontitle{TECHNICAL \& ENGINEERING PROJECTS}
 \groupheading{Systems, macOS \& AI Engineering}
 \projectheading{Otto: AI Assistant in the MacBook Notch}{Sep 2026 -- Present}
-{Swift, SwiftUI, AppKit, Anthropic Messages API (SSE, server tools), Carbon, XCTest}{\href{https://github.com/jke48222/otto}{github.com/jke48222/otto} \;|\; \href{https://otto-sandy.vercel.app}{otto-sandy.vercel.app}}
+{Swift, SwiftUI, AppKit, Anthropic Messages API (SSE, tool use), EventKit, XCTest}{\href{https://github.com/jke48222/otto}{github.com/jke48222/otto} \;|\; \href{https://ottonotch.com}{ottonotch.com}}
 \begin{itemize}
-\item Built Otto, a native macOS assistant that turns the MacBook notch into a Claude client (16,400+ lines of Swift, 212 unit tests, zero dependencies): resting the pointer on the notch or pressing Option-Space opens a borderless, non-activating \texttt{NSPanel} under the camera that takes files, images, PDFs, a screen region, or the front browser tab and streams the reply in place.
+\item Built and shipped Otto, a native macOS assistant that turns the MacBook notch into a Claude client (71,000 lines of Swift, 1,873 unit tests): resting the pointer on the notch or pressing Option-Space opens a borderless, non-activating \texttt{NSPanel} under the camera that takes files, images, PDFs, a screen region, a window capture, or the front browser tab and streams the reply with cited web sources.
 \item Wrote the Anthropic client as raw HTTPS and server-sent events on \texttt{URLSession} with its own line splitter, since \texttt{AsyncBytes.lines} also breaks on U+2028 and U+2029 inside JSON strings; a stream accumulator folds text, thinking, web search and fetch activity, and citations, returns thinking signatures unchanged, and encodes requests with sorted keys so the prefix stays byte-stable for prompt caching.
-\item Modeled hover, click, and drag as a pure state machine with 24 unit tests, so the notch opens only after the pointer rests for 90 ms and not when it passes on the way to a menu; the panel toggles \texttt{ignoresMouseEvents} to take clicks only over its drawn shape, and a \texttt{--selftest} mode drives the real notch through a scripted session.
-\item Published the source under the MIT license with CI running the suite on every push to \texttt{main}, a product site on Vercel, and a promo film recorded from the real app window; the API key stays in the Keychain with no account or telemetry, the Carbon hot key needs no Accessibility permission, and a signed, notarized build is coming soon.
+\item Added opt-in actions over Claude tool use (EventKit calendar events and reminders, Shortcuts, AppleScript, media control, links), each behind an approval card that accepts only hardware input pressed after the card arms; an AppleScript lexer blocks privileged or obfuscated scripts, and added events and reminders have a 10-minute Undo.
+\item Modeled hover, click, and drag as a pure state machine with 51 unit tests, so the notch opens only after a 90 ms rest; shipped v1.1.0 on Sep 30, 2026 as a signed, notarized app at \$19 with a 14-day trial, Polar license keys, and Sparkle updates, while the MIT source builds with Apple frameworks only and CI runs the suite on every push to \texttt{main}.
 \end{itemize}
 
 \projectheading{Exocortex: Local-First Personal Memory System}{Aug 2026 -- Present}
