@@ -441,6 +441,7 @@ export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'Musical Artist Website and Storefront': 'musical-artist-site',
   'Akilah Mali: Musical Artist Website': 'musical-artist-site',
   'Freight Carrier Website': 'freight-carrier-website',
+  'Freight Carrier Marketing Website': 'freight-carrier-website',
   'KUL Enterprises: Freight Carrier Marketing Website': 'freight-carrier-website',
   'Freight Carrier Operations Portal': 'freight-operations-portal',
   'KUL Enterprises: Broker Credit-Vetting Operations Portal': 'freight-operations-portal',
@@ -668,11 +669,11 @@ const extraProjects: WorkProject[] = [
     location: 'Freelance client work (private repo)',
     category: 'web',
     liveUrl: 'https://www.kulenterprises.com',
-    techStack: ['Next.js 16', 'React 19', 'TypeScript', 'TinaCMS', 'Tailwind CSS v4', 'Framer Motion', 'Resend', 'Vercel'],
+    techStack: ['Next.js 16', 'React 19', 'TypeScript', 'TinaCMS', 'Tailwind CSS v4', 'Framer Motion', 'Resend', 'Vitest', 'Vercel'],
     description: [
       "A production website for KUL Enterprises, an independent Georgia freight carrier, with me as the whole team: design, engineering, and shipping. We iterated twelve design directions, built out as twenty working variants, before landing the one that fit, then shipped 22 statically generated pages across services, driver recruiting, safety, quoting, and legal.",
-      "The rule underneath it all: no readable sentence ships hardcoded. Every page, service, FAQ, form, and legal document lives in a typed, git-backed TinaCMS collection, a token system fills shared business facts into any sentence, and a custom build wrapper means a broken CMS edit can never take the site down.",
-      "The motion starts with a brand film I produced in Blender and Higgsfield and cut in Final Cut Pro, shipped as H.264 with a quality ladder after I documented an iOS Safari codec failure the hard way. Site search scores the CMS content directly so results never go stale, four forms submit through rate-limited, honeypot-protected routes, and every color token carries a measured WCAG AA contrast ratio.",
+      "The rule underneath it all: no readable sentence ships hardcoded. Every page, service, FAQ, form, and legal document lives in a typed, git-backed TinaCMS collection, a token system fills shared business facts into any sentence, and a custom build wrapper means a broken CMS editor can never take the site down.",
+      "The motion starts with a brand film I made from the owner's storyboard with ChatGPT, Higgsfield Cinema Studio 3.5, and Final Cut Pro, shipped as H.264 after I documented an iOS Safari codec failure the hard way. Site search scores the CMS content directly so results never go stale, four forms submit through rate-limited, honeypot-protected routes, and all eight text colors carry measured WCAG AA contrast ratios, ink at 12.25:1. CI runs 433 Vitest tests and a 74-step smoke test of the production build on every push.",
     ],
     relatedProjects: [
       { title: 'Freight Carrier Operations Portal', slug: 'freight-operations-portal', period: 'August 2026 – Present' },
