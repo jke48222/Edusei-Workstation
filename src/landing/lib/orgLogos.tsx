@@ -5,6 +5,7 @@
  */
 const LOGO_FILE: Record<string, string> = {
   // Experience
+  "Self-Employed": "self-employed.svg",
   "Capital One": "capitalone",
   "University of Georgia Housing": "uga-housing",
   "Joyner Research Laboratory": "uga-research",
@@ -21,7 +22,10 @@ const LOGO_FILE: Record<string, string> = {
 };
 
 export function orgLogoSrc(name: string): string | undefined {
-  return LOGO_FILE[name] ? `/logos/${LOGO_FILE[name]}.png` : undefined;
+  const file = LOGO_FILE[name];
+  if (!file) return undefined;
+  // Entries without an extension are PNGs.
+  return `/logos/${file.includes(".") ? file : `${file}.png`}`;
 }
 
 function monogram(name: string): string {
