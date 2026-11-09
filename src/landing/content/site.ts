@@ -41,10 +41,10 @@ export const site = {
     // Supporting lines that fade in additively as the hero scrolls (they stack,
     // they don't replace each other), each at a narrower width.
     reveals: [
-      "From CubeSat flight software to production client sites and agentic AI, I build the whole system.",
+      "From flight software for a small satellite to websites for paying clients and AI assistants, I build the whole system.",
       "Computer Systems Engineer · B.S. Cum Laude, University of Georgia, Class of 2026.",
     ],
-    tagline: "FULL-STACK · AI · EMBEDDED · XR",
+    tagline: "WEB · AI · HARDWARE · VR",
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
     recentProjectIds: ["otto", "exocortex", "windowpet", "freight-carrier-website"],
@@ -56,33 +56,33 @@ export const site = {
     eyebrow: "WHAT I BUILD",
     title: ["Engineering across", "the full", "stack."], // middle word italic
     intro:
-      "I build the whole system, from the firmware on the board to the interface in your hands.",
+      "I build complete products, from the code that runs on a circuit board to the app or website in your hands.",
     pillars: [
       {
         n: "01",
-        title: "Full-Stack Web",
-        desc: "Production client sites, realtime platforms, and an event-driven order system. Next.js, React, Supabase, and Phoenix, shipped on Vercel.",
+        title: "Websites & Web Apps",
+        desc: "Websites for paying clients, live voting used in a real campus election, and an order system for online stores that never sells more than it has.",
         tags: ["NEXT.JS", "REACT", "POSTGRES"],
         to: "/work?cat=web",
       },
       {
         n: "02",
-        title: "AI & Agents",
-        desc: "Agentic assistants and retrieval systems built directly on the Claude API and on-device models: tool use, MCP servers, and evaluation harnesses.",
+        title: "AI Assistants",
+        desc: "Assistants that answer with sources, remember what you've read and written, and only act after you say yes. Built on Claude and on AI models that run on your own computer.",
         tags: ["CLAUDE API", "MCP", "MLX"],
         to: "/work?cat=ai",
       },
       {
         n: "03",
-        title: "Embedded & Hardware",
-        desc: "C and C++ on STM32, ESP32, and Raspberry Pi, FPGA design in Verilog, and PCB design in KiCad. CubeSat flight software, contactless vitals, LED walls.",
+        title: "Hardware & Devices",
+        desc: "The code inside small devices and the circuit boards they run on: flight software for a satellite, a pet bed that reads a dog's heartbeat, and an LED wall that shows album art.",
         tags: ["C / C++", "FPGA", "KICAD"],
         to: "/work?cat=embedded",
       },
       {
         n: "04",
-        title: "XR & Research",
-        desc: "Multiplayer VR for the Quest 3, a UE5 vertical slice, cleanroom microfluidics, and HCI research. Engineering with a reason behind it.",
+        title: "VR, Games & Research",
+        desc: "A two-player VR cooking game, a game prototype set in Pompeii's last hours, tiny fluid-mixing chips made in a cleanroom, and research on how people use technology.",
         tags: ["UNITY", "UE5", "HCI"],
         to: "/work?cat=vr",
       },
@@ -118,10 +118,10 @@ export const site = {
   editorial: {
     community: {
       eyebrow: "THE WORKSTATION",
-      title: "There's a working IDE under the hood.",
+      title: "There's a working code editor under the hood.",
       body:
-        "The workstation view runs like a code editor: your projects are files in an explorer, opening one loads its 3D model as the file contents, and there is a real terminal at the bottom. Built with React Three Fiber.",
-      cta: { label: "Open the IDE", href: "/workstation" },
+        "The workstation works like a code editor. Every project is a file you can open to see its 3D model, and there's a working terminal at the bottom.",
+      cta: { label: "Open the workstation", href: "/workstation" },
     },
   },
 
@@ -148,9 +148,9 @@ export const site = {
   forBrands: {
     eyebrow: "FOR TEAMS",
     label: "OPEN TO OPPORTUNITIES",
-    title: "Need someone who can go from firmware to front-end?",
+    title: "Need an engineer who can build the whole product?",
     body:
-      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now shipping production sites for paying clients as a freelance software engineer. I'm open to full-time software roles across full-stack, AI, and embedded, and I bring a habit of shipping tested, measured systems.",
+      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now building websites for paying clients as a freelance software engineer. I'm open to full-time software roles in web, AI, and hardware, and I test and measure what I ship.",
     tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
     cta: { label: "Download résumé", href: "/resume.pdf" },
     contact: { label: "Email me", href: "mailto:jalen.edusei@gmail.com" },
@@ -162,12 +162,12 @@ export const site = {
     title: ["The engineer", "behind", "it all."], // middle word italic
     greeting: "Hi, I'm Jalen.",
     bio:
-      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: production client websites and realtime platforms, agentic AI systems on the Claude API, embedded firmware and signal processing, and multiplayer VR for the Quest 3. These days I ship as a freelance software engineer (kulenterprises.com and akilahmali.com are mine) after a Business Analyst internship at Capital One on the CreditWise team.",
+      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build websites for real clients, AI assistants, the software inside small devices, and multiplayer VR games. These days I work as a freelance software engineer (kulenterprises.com, akilahmali.com and cake-artista.vercel.app are mine), after a Business Analyst internship at Capital One on the CreditWise team.",
     info: [
       { label: "DEGREE", value: "B.S. Computer Systems Engineering, Cum Laude" },
       { label: "SCHOOL", value: "University of Georgia · Morehead Honors" },
       { label: "BASED", value: "Atlanta, GA" },
-      { label: "FOCUS", value: "Full-Stack · AI · Embedded · XR" },
+      { label: "FOCUS", value: "Web · AI · Hardware · VR" },
     ],
   },
 
