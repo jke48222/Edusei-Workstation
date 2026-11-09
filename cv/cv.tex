@@ -150,6 +150,16 @@ Atlanta, GA \;|\;
 \item Built a sentence-case, sidebar design system benchmarked against Mercury, Stripe, and Cal.com, with semantic risk color, tabular numerals, and reduced-motion-aware skeleton states, documented in a committed design contract; middleware validates sessions with \texttt{getUser()} so a revoked account is out on the next request.
 \end{itemize}
 
+\projectheading{Cake Artista: Bakery Storefront and Academy}{Oct 2026 -- Present}
+{Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Sanity, Anthropic Claude API, Vitest, Vercel}{\href{https://cake-artista.vercel.app}{cake-artista.vercel.app} \;|\; Private repository}
+\begin{itemize}
+\item Designed and built an English and Spanish storefront for a Maryland custom cake studio as sole designer and engineer, built to replace its WordPress site: 19 Next.js 16 routes covering cake kits, a subscription, classes, a gallery that filters by kind and color, server-priced carts, and consults booked through Calendly, with 1,363 Vitest tests. Live ahead of the move to cakeartista.com, with sample prices and checkout in demo mode until the client's Stripe account is connected.
+\item Modeled the site's words and 154 photo slots in Sanity with click-to-edit on the live page and per-page section ordering, replacing a one-field-per-string schema that reached 2,556 attributes against the dataset's limit of 2,000 and blocked writes with uniform word lists that hold the dataset at 209.
+\item Built an assistant on Claude Opus 5.5 whose answers stream over NDJSON from a knowledge base compiled out of the site's own content; one strict tool, validated against real pages and products, is all it can act through, behind tap-to-confirm cart and booking cards, a same-origin check, and per-visitor rate limits. Chose the model by grading 160 answers across four Opus, Sonnet and Haiku setups, then measured a 1.8 s median to first words at about one cent an answer.
+\item Compared the rebuild with the live WordPress site in Lighthouse mobile (median of 3 runs, same day): largest paint 19.4 to 4.0 s, page weight 3,234 to 568 KiB, JavaScript 1,141 to 302 KiB, and accessibility 91 to 100, by holding off-screen photos until near the viewport and loading the menus, search, and assistant on demand.
+\end{itemize}
+
+\Needspace*{8\baselineskip}
 \projectheading{Akilah Mali: Musical Artist Website}{May 2026 -- Present}
 {Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, three.js, React Three Fiber, GSAP, Web Audio API, Vercel}{\href{https://www.akilahmali.com}{akilahmali.com} \;|\; \href{https://github.com/jke48222/akilahmali}{github.com/jke48222/akilahmali}}
 \begin{itemize}

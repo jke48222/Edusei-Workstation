@@ -107,6 +107,23 @@ The KUL Enterprises website rows were re-measured on 2026-10-08 at `09c3edc`, th
 | Portal: 12 questions, 4 roles | The client's twelve screening questions verbatim in a typed constant; `app_role` enum = dispatcher/operations/accounting/admin. The Postgres schema (RLS, triggers, functions) is in `supabase/migrations/` | `lib/screening.ts`, `lib/database.types.ts`, `supabase/migrations/` |
 | Akilah: ~46 MB payload cut, 2,700-line deletion | three.js code-split off release routes + WebGL mount deferred to idle (commit series); the Shopify cart removal commit shows −2,698 lines with the rationale in its message | git history (`ee615e5`, `0b15f8b`) |
 
+## Cake Artista (client rebuild)
+
+Measured on 2026-11-08 at `e64bf16` of `jke48222/cake-artista` (a private repository), the commit production at cake-artista.vercel.app was built from, unless a row says otherwise. Paths are in that repository. The site is live at that address with `noindex`; cakeartista.com still serves the WordPress site.
+
+| Claim | How | Evidence |
+|---|---|---|
+| 19 routes, English and Spanish | `find app -name page.tsx \| wc -l` = 19; kit, course and blog pages count once each. Spanish copy lives in `content/es/` and the switch is `?lang=` through `proxy.ts` | `app/`, `content/es/`, `tests/i18n/` |
+| 1,363 Vitest tests | `npx vitest run` after `npm run cms:pull`: "Test Files 87 passed (87)", "Tests 1363 passed (1363)"; `tsc` and ESLint clean. **Caveat:** a local run; the repository has no CI | `tests/` |
+| 154 photo slots | `Object.keys(MEDIA).length` = 154 in 14 lists (`PHOTO_GROUPS`); the seed refuses a slot with no list | `content/media.ts`, `content/cms/photos.ts`, `scripts/sanity/seed-photos.mjs` |
+| Click-to-edit, section ordering | Sanity's Presentation tool opens a word or photo from the live page (draft mode, stega marks); 14 page documents hold each page's sections in order. **Caveat:** the editor is built and seeded; `npm run cms:pull` reported 0 English and 0 Spanish edits on 2026-11-08, so the client has not used it yet | `components/sanity/SanityTools.tsx`, `content/cms/pages.ts` |
+| 2,556 attributes against a limit of 2,000, now 209 | 2,556 is the total in Sanity's write error on 2026-10-14, after seeding one field per copy key. 209 is unique path and datatype pairs from walking all 222 documents with `perspective=raw` on 2026-11-08. **Caveat:** 209 is my count, not a figure Sanity reports | `content/cms/pages.ts`, `content/cms/models.ts`, the query in this row |
+| Lighthouse: largest paint 19.4 s to 4.0, 3,234 KiB to 568, JavaScript 1,141 KiB to 302, accessibility 91 to 100 | Lighthouse 12.8.2, mobile defaults (simulated throttling), home page, three runs of each site on 2026-11-08, medians. Performance scored 53 against 86 (runs 52 to 60 and 83 to 93). **Caveats:** a simulated test of one page; a single run on 2026-10-09 scored the old site 32 with largest paint at 21.0 s, so the old site's score moves between runs while its largest paint stays near 20 s | `lighthouse-2026-11-08/*.json` in `~/.cache/flagship/cake-artista/` |
+| Assistant: 1.8 s median to first words, about one cent | 52 questions on Claude Opus 5.5 on 2026-10-25, 12 of them probes: median `firstTextMs` 1,800.5, median cost $0.0106, total $0.63, no errors. **Caveat:** calls the API the way the site does, not through a browser | `sandrita-compare-2026-10-25/results-opus-new.jsonl` in `~/.cache/flagship/cake-artista/` |
+| 160 answers graded across four setups | 40 visitor questions on Opus 5.5, Sonnet 5.5 and Haiku 5.5 (low and medium effort), each answer read against the expected facts and her rules; none had a wrong fact. **Caveat:** one run, graded by reading rather than by a scorer | `sandrita-compare-2026-10-25/notes.json`, `report.html` in `~/.cache/flagship/cake-artista/` |
+| One validated tool, rate limits, same-origin check | `show_next_steps` is the only tool (strict schema), and each call is checked against real pages and products before the visitor sees it; nothing runs until the visitor taps. 8 a minute and 60 a day per visitor, 600 an hour per server instance | `lib/sandrita/steps.ts`, `components/sandrita/ActionCard.tsx`, `app/api/sandrita/route.ts` |
+| Checkout in demo mode | `lib/commerce/gateway.ts` runs demo checkout unless `STRIPE_SECRET_KEY` is set; no Stripe variable exists on the Vercel project (names read 2026-11-08). Prices are the placeholders in `content/catalog.ts`, marked `sample` | `lib/commerce/gateway.ts`, `content/catalog.ts` |
+
 ## AnimalDot (capstone)
 
 | Claim | How | Evidence |

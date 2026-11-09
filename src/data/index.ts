@@ -88,6 +88,7 @@ export const workExperience = [
     location: 'Atlanta, GA',
     period: 'May 2026 – Present',
     highlights: [
+      'Built cake-artista.vercel.app for Cake Artista, a Maryland cake studio: a bilingual Next.js 16 storefront with Sanity click-to-edit across its words and 154 photo slots, a Claude assistant held to one validated tool, and 1,363 tests, live ahead of the move to cakeartista.com.',
       'Designed, built, and shipped kulenterprises.com for KUL Enterprises, a Georgia freight carrier: 22 statically generated Next.js pages on a git-backed TinaCMS content model, dependency-free site search, rate-limited forms, and WCAG AA-audited contrast.',
       'Extended the engagement with a broker credit-vetting operations portal on Supabase, with the compliance rules enforced in Postgres itself (row-level security, audit log, atomic SQL functions) behind invite-only auth with four staff roles.',
       'Built and shipped akilahmali.com for recording artist Akilah Mali: a real-time 3D control room in React Three Fiber, a Web Audio rotary payphone, and a headless Shopify commerce integration consolidated onto the hosted storefront.',
@@ -445,6 +446,8 @@ export const RELATED_TITLE_TO_SLUG: Record<string, string> = {
   'KUL Enterprises: Freight Carrier Marketing Website': 'freight-carrier-website',
   'Freight Carrier Operations Portal': 'freight-operations-portal',
   'KUL Enterprises: Broker Credit-Vetting Operations Portal': 'freight-operations-portal',
+  'Cake Artista: Bakery Storefront and Academy': 'cake-artista',
+  'Cake Artista': 'cake-artista',
   'Live Election Platform': 'live-election-platform',
   'NSBE UGA Live Election Platform': 'live-election-platform',
   'Live Election Platform for a Campus Engineering Organization': 'live-election-platform',
@@ -677,6 +680,7 @@ const extraProjects: WorkProject[] = [
     ],
     relatedProjects: [
       { title: 'Freight Carrier Operations Portal', slug: 'freight-operations-portal', period: 'August 2026 – Present' },
+      { title: 'Cake Artista: Bakery Storefront and Academy', slug: 'cake-artista', period: 'October 2026 – Present' },
       { title: 'Musical Artist Website', slug: 'musical-artist-site', period: 'May 2026 – Present' },
     ],
   },
@@ -698,6 +702,26 @@ const extraProjects: WorkProject[] = [
     ],
   },
   {
+    id: 'cake-artista',
+    title: 'Cake Artista: Bakery Storefront and Academy',
+    shortTitle: 'Cake Artista',
+    tagline: 'A bilingual storefront and class site for a cake studio, with an assistant on Claude.',
+    period: 'October 2026 – Present',
+    location: 'Freelance client work (private repo)',
+    category: 'web',
+    liveUrl: 'https://cake-artista.vercel.app',
+    techStack: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Sanity', 'Anthropic Claude API', 'Vitest', 'Vercel'],
+    description: [
+      "A cake gets ordered from a photo, and on Cake Artista's WordPress site the main photo took 19.4 s to appear in Lighthouse's mobile test. So I rebuilt the site for Sandra Torres's Maryland studio, design through deployment, as a Next.js 16 storefront in English and Spanish. It sells cake kits, a Kit Club subscription and classes, shows a custom cake gallery that filters by kind and color, and books consults through her real Calendly.",
+      "It's built so she can change it herself. Every page's words and 154 photo slots open in Sanity from a click on the live page, and each page's sections can be reordered or hidden. My first schema gave every line of copy its own field, reached 2,556 attributes against the dataset's limit of 2,000, and blocked writes, so the copy moved to uniform word lists and the dataset now holds 209. Sandrita, the site's assistant, runs on Claude Opus 5.5 and answers from facts compiled out of the site's own content. One strict tool holds her to real pages and products, nothing reaches the cart until the visitor taps, and rate limits plus a same-origin check keep other sites from spending her budget.",
+      "In same-day Lighthouse mobile runs against the WordPress site (median of 3), largest paint went from 19.4 s to 4.0, page weight from 3,234 KiB to 568, JavaScript from 1,141 KiB to 302, and accessibility from 91 to 100. 1,363 Vitest tests pass. I picked the model by grading 160 answers across four Opus, Sonnet and Haiku setups, and her first words arrive at a 1.8 s median for about a cent an answer. The site is live at its own address ahead of the move to cakeartista.com. Prices are samples, and checkout stays in demo mode until the studio's Stripe account is connected.",
+    ],
+    relatedProjects: [
+      { title: 'Freight Carrier Website', slug: 'freight-carrier-website', period: 'June 2026 – Present' },
+      { title: 'Musical Artist Website', slug: 'musical-artist-site', period: 'May 2026 – Present' },
+    ],
+  },
+  {
     id: 'musical-artist-site',
     title: 'Musical Artist Website',
     tagline: 'A recording artist\'s home on the web: real-time 3D, a working payphone, zero backend to babysit.',
@@ -714,6 +738,7 @@ const extraProjects: WorkProject[] = [
     ],
     relatedProjects: [
       { title: 'Freight Carrier Website', slug: 'freight-carrier-website', period: 'June 2026 – Present' },
+      { title: 'Cake Artista: Bakery Storefront and Academy', slug: 'cake-artista', period: 'October 2026 – Present' },
       { title: 'Personal Portfolio Website', slug: 'personal-portfolio', period: 'January 2026 – Present' },
     ],
   },
@@ -1190,6 +1215,7 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
   'personal-portfolio': { kind: 'image', src: '/media/portfolio-preview.jpg', alt: 'jalenedusei.com home page' },
   'freight-carrier-website': { kind: 'site', url: 'https://www.kulenterprises.com', embed: true },
   'musical-artist-site': { kind: 'site', url: 'https://www.akilahmali.com/', embed: true },
+  'cake-artista': { kind: 'site', url: 'https://cake-artista.vercel.app', embed: false, screenshot: '/media/cake-artista-1.jpg' },
   'parmco-ble-motor': { kind: 'site', url: 'https://jke48222.github.io/parmco/', embed: true },
   'website-development': { kind: 'site', url: 'https://nsbe.uga.edu/', embed: true },
   
@@ -1243,6 +1269,13 @@ const PROJECT_DEMOS: Record<string, { title: string; youtubeId: string }[]> = {
 
 /** Real photo galleries by slug, shown on the detail page (and openable full-size). */
 const PROJECT_GALLERY: Record<string, { src: string; alt: string }[]> = {
+  'cake-artista': [
+    { src: '/media/cake-artista-1.jpg', alt: 'Cake Artista custom cakes page: the heading Custom cakes, by consult beside a fanned hand of five cakes' },
+    { src: '/media/cake-artista-2.jpg', alt: 'The From the studio gallery with pills for each kind of dessert, color swatches, and cakes on gingham, harlequin and dotted grounds' },
+    { src: '/media/cake-artista-3.jpg', alt: 'Sandrita, the site assistant, answering a question about a wedding cake with a Wedding cake consult card and a Pick a time button' },
+    { src: '/media/cake-artista-4.jpg', alt: 'The Cake Date page with wedding cookies on a cake stand over a pattern of small pink hearts' },
+    { src: '/media/cake-artista-5.jpg', alt: 'Three phone screens of the Spanish site: the custom cakes page, the gallery and Cake Date' },
+  ],
   animaldot: [
     { src: '/media/animaldot-poster.png', alt: 'AnimalDot capstone research poster' },
   ],
