@@ -1,19 +1,18 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { getIdeProject, IDE_PROJECTS, LANG_LABELS, type IdeProject } from "../../../components/ide/projectRegistry";
 import { ProjectMedia } from "../../../components/work/ui/ProjectMedia";
 import { PREVIEW_CODE, type PreviewCode } from "../../content/previewCode";
-import { useInView } from "../../lib/hooks";
 import { ArrowUpRight } from "../ui";
 
 /**
  * A miniature of the real workstation. The explorer lists four shipped projects by the
  * file the IDE gives them, and each opens two ways, as an editor does for a document:
  * Preview is the live site (or Otto's recorded window, since ottonotch.com refuses
- * framing), Code is a verbatim excerpt of that project's source.
+ * framing), Code is a verbatim excerpt of that project's source. Nothing advances on
+ * its own: each preview is a whole website, so one loads only when a visitor asks.
  */
 
-const ADVANCE_MS = 6500;
 type View = "preview" | "code";
 
 interface Entry {
@@ -80,7 +79,7 @@ function CodePane({ code }: { code: PreviewCode }) {
       return painted.nodes;
     });
   }, [code]);
-  const source = `${code.path} · from line ${code.startLine} · ${code.commit}`;
+  const source = `${code.path}, from line ${code.startLine}`;
   return (
     <div className="absolute inset-0 flex flex-col bg-[#0b0b0c]">
       <div className="min-h-0 flex-1 overflow-auto py-3 [scrollbar-color:rgba(255,255,255,0.25)_transparent] [scrollbar-width:thin]" tabIndex={0} aria-label={`Source excerpt from ${code.path}`}>
@@ -115,28 +114,19 @@ export default function IdePreview() {
       }),
     []
   );
-  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.3 });
   const [active, setActive] = useState(0);
   const [view, setView] = useState<View>("preview");
-  const [pinned, setPinned] = useState(false);
-
-  useEffect(() => {
-    if (!inView || pinned || view === "code" || entries.length < 2) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setActive((i) => (i + 1) % entries.length), ADVANCE_MS);
-    return () => clearInterval(id);
-  }, [inView, pinned, view, entries.length]);
 
   const current = entries[active];
   if (!current) return null;
   const { file, code, host } = current;
-  const pick = (i: number) => { setActive(i); setPinned(true); };
+  const live = file.project.tileMedia?.kind === "site";
   const tab = (v: View, label: string) => (
     <button
       type="button"
       role="tab"
       aria-selected={view === v}
-      onClick={() => { setView(v); setPinned(true); }}
+      onClick={() => setView(v)}
       className={`rounded-md px-2.5 py-1 transition-colors ${view === v ? "bg-white/[0.14] text-dark-ink" : "text-dark-ink-mute hover:text-dark-ink"}`}
     >
       {label}
@@ -144,12 +134,7 @@ export default function IdePreview() {
   );
 
   return (
-    <div
-      ref={ref}
-      className="glass-dark flex h-full flex-col overflow-hidden rounded-2xl !bg-[rgba(12,12,12,0.88)] font-mono text-[12px] leading-relaxed"
-      onMouseEnter={() => setPinned(true)}
-      onFocus={() => setPinned(true)}
-    >
+    <div className="glass-dark flex h-full flex-col overflow-hidden rounded-2xl !bg-[rgba(12,12,12,0.88)] font-mono text-[12px] leading-relaxed">
       {/* title bar: the open file, and the Preview / Code switch an editor puts top right */}
       <div className="flex items-center gap-3 border-b border-[var(--dark-line)] py-2 pl-4 pr-2">
         <span className="hidden gap-1.5 sm:flex" aria-hidden>
@@ -176,7 +161,7 @@ export default function IdePreview() {
               <li key={e.file.id}>
                 <button
                   type="button"
-                  onClick={() => pick(i)}
+                  onClick={() => setActive(i)}
                   aria-current={i === active}
                   className={`block w-full border-l-2 px-4 py-1.5 text-left transition-colors ${
                     i === active
@@ -201,8 +186,14 @@ export default function IdePreview() {
             {view === "code" ? (
               <CodePane code={code} />
             ) : (
-              // keyed so each file mounts its own frame or player
-              <ProjectMedia key={file.id} project={file.project} />
+              <>
+                {/* keyed so each file mounts its own frame or player */}
+                <ProjectMedia key={file.id} project={file.project} />
+                <span className="pointer-events-none absolute right-2.5 top-2.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-dark-ink backdrop-blur">
+                  <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-[#3FB950]" : "bg-white/60"}`} />
+                  {live ? "Live site" : "Screen recording"}
+                </span>
+              </>
             )}
           </div>
           <Link
@@ -228,7 +219,7 @@ export default function IdePreview() {
           <button
             key={e.file.id}
             type="button"
-            onClick={() => pick(i)}
+            onClick={() => setActive(i)}
             aria-label={`Show ${e.host}`}
             aria-current={i === active}
             className="flex h-6 w-6 items-center justify-center"
