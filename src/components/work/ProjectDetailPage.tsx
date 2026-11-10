@@ -88,6 +88,9 @@ export function ProjectDetailPage() {
     .filter((p): p is NonNullable<typeof p> => Boolean(p) && p!.id !== project.id)
     .slice(0, 3);
 
+  const wideShots = (project.gallery ?? []).filter((g) => g.device !== 'phone');
+  const phoneShots = (project.gallery ?? []).filter((g) => g.device === 'phone');
+
   return (
     <div ref={scrollRef} className="landing work-theme work-page-scroll fixed inset-0 z-40 overflow-y-auto">
       <WorkHeader active="work" />
@@ -218,12 +221,12 @@ export function ProjectDetailPage() {
           </div>
         )}
 
-        {/* Gallery — real screenshots pulled from the project's GitHub */}
-        {project.gallery && project.gallery.length > 0 && (
+        {/* Gallery: real captures of the project. Wide shots first, phone shots in their own row. */}
+        {wideShots.length > 0 && (
           <div className="mt-16 border-t border-[var(--pf-line)] pt-12">
             <h2 className="mb-6 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--pf-ink-faint)]">Gallery</h2>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              {project.gallery.map((g, i) => (
+              {wideShots.map((g, i) => (
                 <motion.div
                   key={g.src}
                   initial={{ opacity: 0, y: 14 }}
@@ -236,6 +239,30 @@ export function ProjectDetailPage() {
                     src={g.src}
                     alt={g.alt}
                     className="aspect-video w-full object-cover transition-transform duration-500 group-hover/zoom:scale-105"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {phoneShots.length > 0 && (
+          <div className={wideShots.length > 0 ? 'mt-10' : 'mt-16 border-t border-[var(--pf-line)] pt-12'}>
+            <h2 className="mb-6 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--pf-ink-faint)]">On a phone</h2>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {phoneShots.map((g, i) => (
+                <motion.div
+                  key={g.src}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.4, delay: (i % 4) * 0.06 }}
+                  className="overflow-hidden rounded-[1.4rem] border border-[var(--pf-line)] bg-[var(--pf-bg-elev)] shadow-[var(--pf-shadow-sm)]"
+                >
+                  <ZoomableImage
+                    src={g.src}
+                    alt={g.alt}
+                    className="aspect-[390/844] w-full object-cover object-top transition-transform duration-500 group-hover/zoom:scale-105"
                   />
                 </motion.div>
               ))}

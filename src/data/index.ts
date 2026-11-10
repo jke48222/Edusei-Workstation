@@ -535,6 +535,13 @@ export type TileMedia =
   /** Animated dot-matrix spinning globe (canvas). */
   | { kind: 'globe' };
 
+/** One gallery image. Wide captures are 1600x1000; phone captures are 780x1688. */
+export interface GalleryShot {
+  src: string;
+  alt: string;
+  device?: 'phone';
+}
+
 /** Coarse project taxonomy used by the future redesign for tile layout decisions. */
 export type ProjectCategory = 'web' | 'embedded' | 'vr' | 'hardware' | 'research' | 'ai';
 
@@ -555,8 +562,11 @@ export interface WorkProject {
   tileMedia?: TileMedia;
   /** Project category — informs tile presentation and filtering. */
   category?: ProjectCategory;
-  /** Real screenshots (e.g. pulled from a GitHub README) shown as a gallery on the detail page. */
-  gallery?: { src: string; alt: string }[];
+  /**
+   * Real screenshots shown as a gallery on the detail page. `device: 'phone'` marks a
+   * portrait capture taken at phone width; those get their own row of tall tiles.
+   */
+  gallery?: GalleryShot[];
   /** YouTube demo videos shown as an embedded "Demos" section on the detail page. */
   demos?: { title: string; youtubeId: string }[];
   additionalProjects?: { title: string; period: string; github?: string; description: string[] }[];
@@ -1264,7 +1274,7 @@ const PROJECT_DEMOS: Record<string, { title: string; youtubeId: string }[]> = {
 };
 
 /** Real photo galleries by slug, shown on the detail page (and openable full-size). */
-const PROJECT_GALLERY: Record<string, { src: string; alt: string }[]> = {
+const PROJECT_GALLERY: Record<string, GalleryShot[]> = {
   animaldot: [
     { src: '/media/animaldot-poster.png', alt: 'AnimalDot capstone research poster' },
   ],
@@ -1276,6 +1286,22 @@ const PROJECT_GALLERY: Record<string, { src: string; alt: string }[]> = {
     { src: '/media/otto-5.jpg', alt: 'The Shelf under the notch with five files, two of them selected, ready to ask about' },
     { src: '/media/otto-6.jpg', alt: 'The closed notch after a reply finished, with the first line of the answer under the camera' },
     { src: '/media/otto-7.jpg', alt: 'Otto Settings on the Models tab with the API key saved in Keychain, the Claude models, and the response style' },
+  ],
+  // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+  'cake-artista': [
+    { src: '/media/cake-artista-1.jpg', alt: 'The custom cakes page: five cakes fanned like playing cards beside the heading Custom cakes, by consult, with one card lifted on hover' },
+    { src: '/media/cake-artista-2.jpg', alt: 'Site search answering the question is the vanilla kit vegan with a diets answer and four kits priced for the vegan option' },
+    { src: '/media/cake-artista-3.jpg', alt: 'Sandrita, the site assistant, recommending the Vanilla Bean Kit with a product card and an Add button, over a row of tall cake photos' },
+    { src: '/media/cake-artista-4.jpg', alt: 'The cake gallery filtered to cakes in gold: a four-column grid of cakes on gingham, harlequin and dotted grounds' },
+    { src: '/media/cake-artista-5.jpg', alt: 'The Shop menu open from the header, listing three cake kits with prices beside four photo tiles' },
+    { src: '/media/cake-artista-6.jpg', alt: 'The Vanilla Bean Kit page with the vegan option chosen, a quantity of 2 and an Add to cart button showing $102' },
+    { src: '/media/cake-artista-7.jpg', alt: 'The Black Friday page: a box of cupcakes beside a dark panel with the bundle, what is inside it and a countdown' },
+    { src: '/media/cake-artista-8.jpg', alt: 'The photo viewer open on a tiered cake, showing 2 of 10 with previous and next arrows' },
+    { src: '/media/cake-artista-9.jpg', alt: 'A cake decorating course page in Spanish, with class dates and an enrol card' },
+    { src: '/media/cake-artista-phone-1.jpg', device: 'phone', alt: 'On a phone, the assistant as a full-screen chat recommending a kit with a product card and diet choices' },
+    { src: '/media/cake-artista-phone-2.jpg', device: 'phone', alt: 'On a phone, the menu open with shop and studio links beside small cake photos and a Book a consult button' },
+    { src: '/media/cake-artista-phone-3.jpg', device: 'phone', alt: 'On a phone, the custom cakes page with the fanned cake cards under the heading and the gallery filters below' },
+    { src: '/media/cake-artista-phone-4.jpg', device: 'phone', alt: 'On a phone, search results for is the vanilla kit vegan as a list of kits with vegan prices' },
   ],
   'pdms-microfluidic-mixer': [
     { src: '/media/pdms-1.jpg', alt: 'PDMS microfluidic mixer device' },
