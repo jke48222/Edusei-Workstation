@@ -9,7 +9,8 @@ import { ArrowUpRight } from "../ui";
 /**
  * A miniature of the real workstation. The explorer lists four shipped projects by the
  * file the IDE gives them, and each opens two ways, as an editor does for a document:
- * Preview is the live site, Code is a verbatim excerpt of that project's source.
+ * Preview is the live site. Code is a short script: a sketch of what the site does for
+ * the three private client repos, and a verbatim excerpt for Otto, whose repo is public.
  * Nothing advances on
  * its own: each preview is a whole website, so one loads only when a visitor asks.
  */
@@ -35,7 +36,7 @@ function hostOf(url: string | undefined): string {
 /* ---------------------------- syntax colouring ---------------------------- */
 
 const KEYWORDS = new Set([
-  "const", "let", "var", "function", "return", "if", "else", "for", "of", "in", "new", "export", "import", "from",
+  "const", "let", "var", "function", "return", "async", "await", "if", "else", "for", "of", "in", "new", "export", "import", "from",
   "type", "true", "false", "nil", "null", "undefined", "func", "guard", "static", "private", "self", "Self", "continue",
 ]);
 // One pass per line: comment, string, number, word. Anything else is plain text.
@@ -80,24 +81,27 @@ function CodePane({ code }: { code: PreviewCode }) {
       return painted.nodes;
     });
   }, [code]);
-  const source = `${code.path}, from line ${code.startLine}`;
+  const first = code.startLine ?? 1;
+  const source = `${code.path}, from line ${first}`;
   return (
     <div className="absolute inset-0 flex flex-col bg-[#0b0b0c]">
-      <div className="min-h-0 flex-1 overflow-auto py-3 [scrollbar-color:rgba(255,255,255,0.25)_transparent] [scrollbar-width:thin]" tabIndex={0} aria-label={`Source excerpt from ${code.path}`}>
+      <div className="min-h-0 flex-1 overflow-auto py-3 [scrollbar-color:rgba(255,255,255,0.25)_transparent] [scrollbar-width:thin]" tabIndex={0} aria-label={code.sketch ? `Illustrative script, ${code.path}` : `Source excerpt from ${code.path}`}>
         <pre className="w-max min-w-full text-[11.5px] leading-[1.65] text-dark-ink-dim">
           {rows.map((nodes, i) => (
             <div key={i} className="flex pr-4">
-              <span aria-hidden className="w-11 shrink-0 select-none pr-3 text-right text-dark-ink-mute/70">{code.startLine + i}</span>
+              <span aria-hidden className="w-11 shrink-0 select-none pr-3 text-right text-dark-ink-mute/70">{first + i}</span>
               <code className="whitespace-pre">{nodes.length ? nodes : " "}</code>
             </div>
           ))}
         </pre>
       </div>
       <p className="truncate border-t border-[var(--dark-line)] px-4 py-1.5 text-[10.5px] text-dark-ink-mute">
-        {code.href ? (
+        {code.sketch ? (
+          <>Illustrative sketch. The site's own source is private.</>
+        ) : code.href ? (
           <a href={code.href} target="_blank" rel="noreferrer" className="underline decoration-white/25 underline-offset-2 hover:text-dark-ink">{source}</a>
         ) : (
-          <>{source} · private repository</>
+          source
         )}
       </p>
     </div>
