@@ -88,9 +88,9 @@ export const workExperience = [
     location: 'Kennesaw, GA',
     period: 'November 2026 – Present',
     highlights: [
-      'Maintain and extend the AI shopping assistant on yamaha-motor.com: it answers policy questions, compares current models, finds parts that fit a vehicle, and locates dealers.',
-      'Work in its TypeScript agent loop on Amazon Bedrock AgentCore, where Claude calls tools over DynamoDB, S3, and a dealer API behind a guardrail and streams each reply over a WebSocket.',
-      'Keep its scheduled data pipelines and the LLM-graded test suite that gates every deploy running, alongside full-stack work on the e-commerce platform.',
+      'Look after the AI shopping assistant on yamaha-motor.com, the chat that helps shoppers find parts that fit their vehicle, compare current models, find a dealer, and get answers about store policies.',
+      'Keep its answers current by running the daily jobs that refresh what it knows about parts, accessories, and models.',
+      "Check every change against a set of test questions before it reaches shoppers, and build features for Yamaha's online store alongside it.",
     ],
   },
   {

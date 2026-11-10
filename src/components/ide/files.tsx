@@ -87,7 +87,7 @@ export const PROJECT_TEASERS: Record<ProjectId, string | string[] | undefined> =
   animaldot: 'Go Dawgs!',
   'kitchen-chaos-vr': 'Entering virtual reality...',
   memesat: 'lol',
-  'capital-one': ['Now at Yamaha.', `https://${profileData.linkedin}`],
+  'capital-one': ['Now at Yamaha Motor.', `https://${profileData.linkedin}`],
 };
 
 function longestCommon(matches: string[], prefix: string): string {
@@ -162,7 +162,7 @@ export function buildWelcomeLines(opts: { listFiles: boolean }): DocLine[] {
     [],
     [{ t: `${profileData.title} · ${profileData.university} · Class of ${profileData.graduationYear}`, tone: 'plain' }],
     [
-      { t: '**Full Stack Developer at Yamaha**', tone: 'bold' },
+      { t: '**Full Stack Developer at Yamaha Motor**', tone: 'bold' },
       { t: ' -> ', tone: 'dim' },
       { t: `linkedin.com/in/jalenedusei`, tone: 'link', href: `https://${profileData.linkedin}` },
     ],

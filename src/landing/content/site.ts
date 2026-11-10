@@ -131,7 +131,7 @@ export const site = {
     label: "NOW AT YAMAHA",
     title: "An engineer who builds the whole product.",
     body:
-      "University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026). I'm a Full Stack Developer at Yamaha Motor Corporation, U.S.A., where I look after the AI assistant on its online store. Before that I spent six months building websites for paying clients as a freelance software engineer. I'm not looking for a new job, but I'm always glad to talk about the work.",
+      "University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026). I'm a Full Stack Developer at Yamaha Motor, where I look after the AI assistant on its online store. Before that I spent six months building websites for paying clients as a freelance software engineer. I'm not looking for a new job, but I'm always glad to talk about the work.",
     tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
     cta: { label: "Download résumé", href: "/resume.pdf" },
     contact: { label: "Email me", href: "mailto:jalen.edusei@gmail.com" },
@@ -157,7 +157,7 @@ export const site = {
     eyebrow: "GET IN TOUCH",
     title: ["Let's build", "something."], // 2nd word italic
     body:
-      "I work at Yamaha Motor Corporation, U.S.A., and I'm always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
+      "I work at Yamaha Motor now, and I'm always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
     subscribeCta: "Say hi!",
   },
 
