@@ -140,17 +140,17 @@ export const site = {
       { cmd: "open projects/animaldot.cpp", out: "Contactless vitals via geophone DSP: ONLINE" },
       { cmd: "ls --domains", out: "embedded  vr-xr  full-stack  hardware  research" },
       { cmd: "ls clients/", out: "kulenterprises.com  akilahmali.com  ops-portal (private)" },
-      { cmd: "cat status.txt", out: "Open to full-time software roles: full-stack, AI, embedded" },
+      { cmd: "cat status.txt", out: "Full Stack Developer at Yamaha Motor Corporation, U.S.A." },
     ],
   },
 
   // ── For teams / recruiters ───────────────────────────────────────────────
   forBrands: {
     eyebrow: "FOR TEAMS",
-    label: "OPEN TO OPPORTUNITIES",
-    title: "Need someone who can go from firmware to front-end?",
+    label: "NOW AT YAMAHA",
+    title: "From firmware to front-end.",
     body:
-      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now shipping production sites for paying clients as a freelance software engineer. I'm open to full-time software roles across full-stack, AI, and embedded, and I bring a habit of shipping tested, measured systems.",
+      "University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026). I'm a Full Stack Developer at Yamaha Motor Corporation, U.S.A., after six months of shipping production sites for paying clients as a freelance software engineer. I'm not looking for a new role, but I'm always happy to talk shop.",
     tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
     cta: { label: "Download résumé", href: "/resume.pdf" },
     contact: { label: "Email me", href: "mailto:jalen.edusei@gmail.com" },
@@ -162,7 +162,7 @@ export const site = {
     title: ["The engineer", "behind", "it all."], // middle word italic
     greeting: "Hi, I'm Jalen.",
     bio:
-      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: production client websites and realtime platforms, agentic AI systems on the Claude API, embedded firmware and signal processing, and multiplayer VR for the Quest 3. These days I ship as a freelance software engineer (kulenterprises.com and akilahmali.com are mine) after a Business Analyst internship at Capital One on the CreditWise team.",
+      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build across the whole stack: production client websites and realtime platforms, agentic AI systems on the Claude API, embedded firmware and signal processing, and multiplayer VR for the Quest 3. These days I'm a Full Stack Developer at Yamaha Motor Corporation, U.S.A.. Before that I shipped client sites as a freelance software engineer (kulenterprises.com and akilahmali.com are mine) and interned as a Business Analyst at Capital One on the CreditWise team.",
     info: [
       { label: "DEGREE", value: "B.S. Computer Systems Engineering, Cum Laude" },
       { label: "SCHOOL", value: "University of Georgia · Morehead Honors" },
@@ -176,7 +176,7 @@ export const site = {
     eyebrow: "GET IN TOUCH",
     title: ["Let's build", "something."], // 2nd word italic
     body:
-      "I'm open to software, technology, business, and data roles across all domains, and always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
+      "I work at Yamaha Motor Corporation, U.S.A., and I'm always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
     subscribeCta: "Say hi!",
   },
 

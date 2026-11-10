@@ -36,7 +36,7 @@ export const profileData = {
   github: 'github.com/jke48222',
   resumeUrl: '/resume.pdf',
   cvUrl: '/cv.pdf',
-  openForWork: true,
+  openForWork: false,
   birthday: '09-28',
 };
 
@@ -83,10 +83,19 @@ export const skillsData = {
 
 export const workExperience = [
   {
+    title: 'Full Stack Developer',
+    company: 'Yamaha Motor Corporation, U.S.A.',
+    location: 'Kennesaw, GA',
+    period: 'November 2026 – Present',
+    highlights: [
+      "Full-stack development on Yamaha's e-commerce platform.",
+    ],
+  },
+  {
     title: 'Freelance Software Engineer',
     company: 'Self-Employed',
     location: 'Atlanta, GA',
-    period: 'May 2026 – Present',
+    period: 'May 2026 – October 2026',
     highlights: [
       'Built cake-artista.vercel.app for Cake Artista, a Maryland cake studio: a bilingual Next.js 16 storefront with Sanity click-to-edit across its words and 154 photo slots, a Claude assistant held to one validated tool, and 1,363 tests, live ahead of the move to cakeartista.com.',
       'Designed, built, and shipped kulenterprises.com for KUL Enterprises, a Georgia freight carrier: 22 statically generated Next.js pages on a git-backed TinaCMS content model, dependency-free site search, rate-limited forms, and WCAG AA-audited contrast.',

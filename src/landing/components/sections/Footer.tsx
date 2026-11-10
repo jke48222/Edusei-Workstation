@@ -29,7 +29,7 @@ export default function Footer() {
     <footer className="relative z-10 overflow-hidden bg-bg pt-16 text-ink">
       <div className="mx-auto max-w-container px-5 md:px-8">
         <p className="max-w-[40ch] text-[14px] leading-[1.5] text-ink-dim">
-          {site.degree}. Open to software, technology, business, and data roles.
+          {site.degree}. Full Stack Developer at Yamaha Motor Corporation, U.S.A.
         </p>
 
         {/* oversized wordmark */}

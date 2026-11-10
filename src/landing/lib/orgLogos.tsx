@@ -5,6 +5,7 @@
  */
 const LOGO_FILE: Record<string, string> = {
   // Experience
+  // Yamaha has no entry on purpose: the card shows a monogram, not their trademark.
   "Self-Employed": "self-employed.svg",
   "Capital One": "capitalone",
   "University of Georgia Housing": "uga-housing",
