@@ -48,7 +48,7 @@ export const site = {
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
     recentProjectIds: ["otto", "exocortex", "windowpet", "freight-carrier-website"],
-    scrollCue: "SCROLL TO EXPLORE",
+    scrollCue: "Scroll down",
   },
 
   // ── What I Build ─────────────────────────────────────────────────────────

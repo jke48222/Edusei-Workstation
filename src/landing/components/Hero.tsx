@@ -1,9 +1,17 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
+import { ArrowDown, Github, Linkedin, Mail, type LucideIcon } from "lucide-react";
 import { site } from "../content/site";
 import { useScrollProgress, useIsNarrow } from "../lib/hooks";
 import { getProjectBySlug } from "../../data";
 import { EyebrowPill } from "./ui";
+
+/** The three ways to reach me, shown as icons along the hero's bottom edge. */
+const HERO_SOCIALS: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: "GitHub", href: site.socials.github, icon: Github },
+  { label: "LinkedIn", href: site.socials.linkedin, icon: Linkedin },
+  { label: "Email", href: site.socials.email, icon: Mail },
+];
 
 /** Additive reveal: a block fades + slides in once scroll passes `start`, and stays. */
 function appear(p: number, start: number, span = 0.12) {
@@ -16,6 +24,8 @@ export default function Hero() {
   const p = useScrollProgress(zoneRef);
   const isMobile = useIsNarrow();
   const { hero } = site;
+  // The scroll cue's opacity: gone by about a third of the way through the hero.
+  const cue = Math.max(0, 1 - p * 3.2);
   const projects = hero.recentProjectIds
     .map((id) => getProjectBySlug(id))
     .filter((x): x is NonNullable<typeof x> => Boolean(x));
@@ -104,19 +114,43 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* ── Scroll cue: fades out as the page scrolls ── */}
-          <div
-            className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 md:block"
-            style={{ opacity: Math.max(0, 1 - p * 3.2) }}
-          >
-            {/* .hero-glass sets its own position, so the pill sits inside the placed wrapper */}
-            <div className="hero-glass over-video flex items-center gap-3 rounded-full py-2 pl-2.5 pr-4">
-              {/* a mouse outline whose wheel rolls down, then resets */}
-              <span aria-hidden className="relative block h-[30px] w-[19px] rounded-full border-[1.5px] border-current">
-                <span className="absolute left-1/2 top-[6px] -ml-[1.5px] block h-[6px] w-[3px] rounded-full bg-current animate-scrollWheel motion-reduce:animate-none" />
-              </span>
-              <span className="font-mono text-[10.5px] uppercase tracking-[0.18em]">{hero.scrollCue}</span>
+          {/* ── Social links, bottom centre: they stay put for the whole hero ── */}
+          {/* .hero-glass sets its own position, so the pill sits inside the placed wrapper */}
+          <div className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 md:block">
+            <div className="hero-glass over-video flex items-center gap-1 rounded-full p-1.5">
+              {HERO_SOCIALS.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel="noreferrer"
+                  aria-label={label}
+                  title={label}
+                  className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15"
+                >
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} />
+                </a>
+              ))}
             </div>
+          </div>
+
+          {/* ── Scroll cue, bottom right: a bouncing arrow that fades as the page scrolls ── */}
+          <div
+            className="absolute bottom-7 right-5 hidden md:block"
+            style={{ opacity: cue, pointerEvents: cue > 0.5 ? "auto" : "none" }}
+          >
+            <button
+              type="button"
+              aria-label={hero.scrollCue}
+              title={hero.scrollCue}
+              tabIndex={cue > 0.5 ? 0 : -1}
+              onClick={(e) =>
+                e.currentTarget.closest(".landing")?.scrollBy({ top: window.innerHeight * 0.9, behavior: "smooth" })
+              }
+              className="hero-glass over-video flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/15"
+            >
+              <ArrowDown className="h-[18px] w-[18px] animate-bounceArrow" strokeWidth={1.8} aria-hidden />
+            </button>
           </div>
         </div>
       </div>
