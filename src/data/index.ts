@@ -88,7 +88,7 @@ export const workExperience = [
     location: 'Atlanta, GA',
     period: 'May 2026 – Present',
     highlights: [
-      "Rebuilt the website for Cake Artista, a Maryland cake studio, in English and Spanish: an online shop for cake kits and classes, a cake gallery, an assistant that answers visitors' questions, and pages the owner can edit herself. Live at cake-artista.vercel.app ahead of its move to cakeartista.com.",
+      "Rebuilt the website for Cake Artista, a Maryland cake studio: custom cake consultations, an online shop for cake kits and classes, an assistant that answers visitors' questions, and pages the owner can edit herself. Live at cake-artista.vercel.app ahead of its move to cakeartista.com.",
       'Designed, built, and launched kulenterprises.com for KUL Enterprises, a Georgia freight carrier: 22 pages the owner can edit without touching code, site search, spam-protected forms, and text colors that meet accessibility standards.',
       "Then built the carrier's staff a private, invite-only portal for deciding whether a freight broker can be trusted with a load, with four staff roles and a log of every change.",
       'Built and launched akilahmali.com for recording artist Akilah Mali: a 3D control room fans can explore, email signups, and merch sold through a hosted store.',
@@ -703,15 +703,15 @@ const extraProjects: WorkProject[] = [
     id: 'cake-artista',
     title: 'Cake Studio Website',
     shortTitle: 'Cake Studio Site',
-    tagline: 'A bilingual website and online shop for a Maryland cake studio.',
+    tagline: "A Maryland cake studio's website for custom cakes, cake kits, and classes.",
     period: 'October 2026 – Present',
     location: 'Freelance client work (private repo)',
     category: 'web',
     liveUrl: 'https://cake-artista.vercel.app',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Sanity', 'Anthropic Claude API', 'Vitest', 'Vercel'],
     description: [
-      "A cake gets ordered from a photo, and on Cake Artista's old WordPress site the main photo took 19 seconds to appear in Google's phone speed test. So I rebuilt the studio's whole site, from design to launch, in English and Spanish.",
-      "Visitors can buy cake kits, subscribe to a kit club, sign up for classes, browse custom cakes by type and color, and book a consultation. The owner can change any words or photos herself, right from the live site. Sandrita, the site's assistant, answers questions using only what's on the site, and nothing goes in the cart unless the visitor taps.",
+      "A cake gets ordered from a photo, and on Cake Artista's old WordPress site the main photo took 19 seconds to appear in Google's phone speed test. So I rebuilt the studio's whole site, from design to launch.",
+      "Visitors can book a custom cake consultation, buy cake kits, subscribe to a kit club, sign up for classes, and browse custom cakes by type and color, all in English or Spanish. The owner can change any words or photos herself, right from the live site. Sandrita, the site's assistant, answers questions using only what's on the site, and nothing goes in the cart unless the visitor taps.",
       "In the same speed test the main photo now appears in 4 seconds, and the site scores 100 for accessibility, up from 91. It's live at its own address until it moves to cakeartista.com. Prices are samples for now, and checkout stays in demo mode until the studio's payment account is connected.",
     ],
     relatedProjects: [
@@ -1203,8 +1203,8 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
   'personal-portfolio': { kind: 'image', src: '/media/portfolio-preview.jpg', alt: 'jalenedusei.com home page' },
   'freight-carrier-website': { kind: 'site', url: 'https://www.kulenterprises.com', embed: true },
   'musical-artist-site': { kind: 'site', url: 'https://www.akilahmali.com/', embed: true },
-  // ?popups=off keeps the studio's deal and newsletter popups out of the preview.
-  'cake-artista': { kind: 'site', url: 'https://cake-artista.vercel.app/?popups=off', embed: true },
+  // Opens on custom cakes, the studio's main offering, with its popups off.
+  'cake-artista': { kind: 'site', url: 'https://cake-artista.vercel.app/custom-cakes?popups=off', embed: true },
   'parmco-ble-motor': { kind: 'site', url: 'https://jke48222.github.io/parmco/', embed: true },
   'website-development': { kind: 'site', url: 'https://nsbe.uga.edu/', embed: true },
   
