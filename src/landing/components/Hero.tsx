@@ -22,6 +22,29 @@ function appear(p: number, start: number, span = 0.12) {
   return { opacity: o, transform: `translateY(${(1 - o) * 18}px)`, pointerEvents: o > 0.5 ? ("auto" as const) : ("none" as const) };
 }
 
+/**
+ * Exit for the i-th of n icon links, scrubbed by scroll so it plays backwards on the way
+ * up. The outer pair goes first and the centre pair last; each sinks, shrinks, tilts
+ * away from the centre and blurs out.
+ */
+function leave(p: number, i: number, n: number) {
+  const mid = (n - 1) / 2;
+  const fromCentre = Math.abs(i - mid);            // 0.5, 1.5, 2.5 for six links
+  const order = Math.floor(mid) - Math.floor(fromCentre); // 0 = outermost, leaves first
+  const t = Math.max(0, Math.min(1, (p - (0.04 + order * 0.045)) / 0.11));
+  const e = t * t * (3 - 2 * t);                   // smoothstep, so it eases at both ends
+  const side = i < mid ? -1 : 1;
+  return {
+    gone: e > 0.5,
+    style: {
+      opacity: 1 - e,
+      transform: `translate(${side * e * fromCentre * 10}px, ${e * 34}px) scale(${1 - e * 0.45}) rotate(${side * e * 14}deg)`,
+      filter: e > 0 ? `blur(${e * 7}px)` : undefined,
+      pointerEvents: e > 0.5 ? ("none" as const) : ("auto" as const),
+    },
+  };
+}
+
 export default function Hero() {
   const zoneRef = useRef<HTMLDivElement>(null);
   const p = useScrollProgress(zoneRef);
@@ -117,31 +140,37 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* ── Icon links, bottom centre: they stay put for the whole hero ── */}
-          {/* .hero-glass sets its own position, so the pill sits inside the placed wrapper */}
-          <div className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 md:block">
-            <div className="hero-glass over-video flex items-center gap-1 rounded-full p-1.5">
-              {HERO_LINKS.map(({ label, href, icon: Icon, internal }) => {
-                const cls = "flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15";
-                const glyph = <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} />;
-                return internal ? (
-                  <Link key={label} to={href} aria-label={label} title={label} className={cls}>{glyph}</Link>
-                ) : (
-                  // Web links and the two PDFs open in a new tab; the mailto does not.
-                  <a
-                    key={label}
-                    href={href}
-                    target={href.startsWith("mailto:") ? undefined : "_blank"}
-                    rel="noreferrer"
-                    aria-label={label}
-                    title={label}
-                    className={cls}
-                  >
-                    {glyph}
-                  </a>
-                );
-              })}
-            </div>
+          {/* ── Icon links, bottom centre: each in its own glass circle. As the page scrolls
+                 they leave from the outside in, each one sinking, shrinking and blurring. ── */}
+          <div className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 items-center gap-2.5 md:flex">
+            {HERO_LINKS.map(({ label, href, icon: Icon, internal }, i) => {
+              const exit = leave(p, i, HERO_LINKS.length);
+              const cls =
+                "hero-glass over-video flex h-11 w-11 items-center justify-center rounded-full transition-transform duration-300 hover:-translate-y-1 hover:bg-white/15";
+              const glyph = <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} />;
+              const hidden = { tabIndex: exit.gone ? -1 : 0, "aria-hidden": exit.gone };
+              return (
+                // The scroll-driven exit lives on the wrapper so the link's hover lift stays its own.
+                <span key={label} className="block will-change-transform" style={exit.style}>
+                  {internal ? (
+                    <Link to={href} aria-label={label} title={label} className={cls} {...hidden}>{glyph}</Link>
+                  ) : (
+                    // Web links and the two PDFs open in a new tab; the mailto does not.
+                    <a
+                      href={href}
+                      target={href.startsWith("mailto:") ? undefined : "_blank"}
+                      rel="noreferrer"
+                      aria-label={label}
+                      title={label}
+                      className={cls}
+                      {...hidden}
+                    >
+                      {glyph}
+                    </a>
+                  )}
+                </span>
+              );
+            })}
           </div>
 
           {/* ── Scroll cue, bottom right: a bouncing arrow that fades as the page scrolls ── */}
