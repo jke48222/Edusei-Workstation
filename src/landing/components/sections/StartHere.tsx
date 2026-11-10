@@ -23,13 +23,15 @@ export default function StartHere() {
             </a>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            {socialRow.map((soc) => (
-              <a key={soc.label} href={soc.href} target="_blank" rel="noreferrer"
-                className="over-bright link-underline font-display text-[12px] tracking-[0.08em]">
-                {soc.short}
-              </a>
-            ))}
+          <div className="mt-10 flex justify-center">
+            <div className="glass-subtle flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-full px-6 py-2.5">
+              {socialRow.map((soc) => (
+                <a key={soc.label} href={soc.href} target="_blank" rel="noreferrer"
+                  className="over-bright link-underline font-display text-[12px] tracking-[0.08em]">
+                  {soc.short}
+                </a>
+              ))}
+            </div>
           </div>
         </Reveal>
       </div>
