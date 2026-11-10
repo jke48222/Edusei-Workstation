@@ -1286,6 +1286,16 @@ const PROJECT_GALLERY: Record<string, GalleryShot[]> = {
     { src: '/media/otto-5.jpg', alt: 'The Shelf under the notch with five files, two of them selected, ready to ask about' },
     { src: '/media/otto-6.jpg', alt: 'The closed notch after a reply finished, with the first line of the answer under the camera' },
     { src: '/media/otto-7.jpg', alt: 'Otto Settings on the Models tab with the API key saved in Keychain, the Claude models, and the response style' },
+    // ottonotch.com, captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+    { src: '/media/otto-site-1.jpg', alt: 'ottonotch.com: the page header shaped like a notch above the promo film, which shows an answer streaming in' },
+    { src: '/media/otto-site-2.jpg', alt: 'ottonotch.com: the features Answers that stream in and Acts with your OK, each beside a screenshot of the app' },
+    { src: '/media/otto-site-3.jpg', alt: 'ottonotch.com: Three steps from download to answer, as three numbered cards above a large view of the app' },
+    { src: '/media/otto-site-4.jpg', alt: 'ottonotch.com: You decide what leaves your Mac, with one card for what stays and one for what is sent' },
+    { src: '/media/otto-site-5.jpg', alt: 'ottonotch.com: the pricing page with the license at $19 once beside the trial and the requirements' },
+    { src: '/media/otto-phone-1.jpg', device: 'phone', alt: 'On a phone, ottonotch.com opening with the headline The AI assistant that lives in your notch and two buttons' },
+    { src: '/media/otto-phone-2.jpg', device: 'phone', alt: 'On a phone, the feature Acts with your OK under a screenshot of the app asking before it adds an event' },
+    { src: '/media/otto-phone-3.jpg', device: 'phone', alt: 'On a phone, the pricing cards stacked: the license, the trial and the requirements' },
+    { src: '/media/otto-phone-4.jpg', device: 'phone', alt: 'On a phone, the questions list with the first answer open' },
   ],
   // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
   'cake-artista': [
@@ -1318,6 +1328,22 @@ const PROJECT_GALLERY: Record<string, GalleryShot[]> = {
     { src: '/media/freight-carrier-website-phone-2.jpg', device: 'phone', alt: 'On a phone, site search with matches for cold chain above the home page headline' },
     { src: '/media/freight-carrier-website-phone-3.jpg', device: 'phone', alt: 'On a phone, the safety statement in white and gold on black with its five steps' },
     { src: '/media/freight-carrier-website-phone-4.jpg', device: 'phone', alt: 'On a phone, the Road Ahead page: 11 years driving, then 2026 and 48 as a ruled list' },
+  ],
+  // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+  'musical-artist-site': [
+    { src: '/media/musical-artist-site-1.jpg', alt: 'The Who Really Won? cover tearing in two like paper, with a 3D control room showing through the gap' },
+    { src: '/media/musical-artist-site-2.jpg', alt: 'The 3D control room: a desk with seven lit monitors, a phone and a blue button, under a REC marker' },
+    { src: '/media/musical-artist-site-3.jpg', alt: 'The camera part-way through its move toward one monitor, four screens filling the frame' },
+    { src: '/media/musical-artist-site-4.jpg', alt: 'The Gone Away screen fading in over the monitor the camera is still closing on' },
+    { src: '/media/musical-artist-site-5.jpg', alt: 'The Been There Once screen: the title across a full-screen photo, with arrows and a strip of track names' },
+    { src: '/media/musical-artist-site-6.jpg', alt: 'The music video screen, with the title Who Really Won Music Video over a still from the video' },
+    { src: '/media/musical-artist-site-7.jpg', alt: 'The camera above the blue button on the desk, with two monitors behind it' },
+    { src: '/media/musical-artist-site-8.jpg', alt: 'The home page: a full-screen video with Tower of Roses in script and a Listen Now button' },
+    { src: '/media/musical-artist-site-9.jpg', alt: 'The About page: a script heading, the artist biography in two columns and a portrait on red' },
+    { src: '/media/musical-artist-site-phone-1.jpg', device: 'phone', alt: 'On a phone, the paper cover tearing open over the control room' },
+    { src: '/media/musical-artist-site-phone-2.jpg', device: 'phone', alt: 'On a phone, the Been There Once screen with its title, arrows and track strip' },
+    { src: '/media/musical-artist-site-phone-3.jpg', device: 'phone', alt: 'On a phone, the control room with its desk of monitors and a checkered floor' },
+    { src: '/media/musical-artist-site-phone-4.jpg', device: 'phone', alt: 'On a phone, the menu open with five page links and a row of social icons' },
   ],
   'pdms-microfluidic-mixer': [
     { src: '/media/pdms-1.jpg', alt: 'PDMS microfluidic mixer device' },
