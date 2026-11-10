@@ -1229,13 +1229,9 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
     alt: 'PrimeForge FPGA prime engine running a timed prime search',
   },
 
-  // Otto: an 8-second cut of the promo film, which records the real app window
-  otto: {
-    kind: 'video',
-    src: '/media/otto.mp4',
-    poster: '/media/otto-poster.jpg',
-    alt: 'Otto opening from the MacBook notch with the browser tab attached, then reading the page and searching the web for an answer',
-  },
+  // Otto's own product site. ottonotch.com allows framing from jalenedusei.com only
+  // (frame-ancestors in the otto repo's vercel.json), so this stays blank anywhere else.
+  otto: { kind: 'site', url: 'https://ottonotch.com', embed: true },
 
   // LED frequency filter demo video
   'led-frequency-filter': {
