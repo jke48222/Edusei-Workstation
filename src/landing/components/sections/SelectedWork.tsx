@@ -18,9 +18,10 @@ type BentoSize = "lg" | "wide" | "tall" | "sm";
  * Curated Selected Work as a bento mosaic (decoupled from /work's featured order).
  * Source order + per-tile size is tuned so the tiles pack with no gaps on both the
  * 2-col (md) and 4-col (xl) grids, and each project's medium sits in a shape that
- * flatters it: the landscape Otto video (the newest build, so it leads) and the
- * freight site fill the large squares, the AnimalDot model (framed to fit by
- * <Bounds>) stands in the tall tile, and the rest take the small/wide cells.
+ * flatters it: the Otto site (the newest build, so it leads) and the freight site
+ * fill the large squares, the AnimalDot model (framed to fit by <Bounds>) stands
+ * in the tall tile, and the rest take the small/wide cells. The three client
+ * sites all sit in the second band, each as a live frame.
  *
  *   xl (4 cols)          md (2 cols)
  *   ┌─────┬──┬──┐        ┌─────┐
@@ -30,7 +31,7 @@ type BentoSize = "lg" | "wide" | "tall" | "sm";
  *   ├─────┼──┴──┤        │an│ex│
  *   │ kit │ fre │        │im├──┤
  *   ├──┬──┤ ight│        │al│wp│
- *   │ms│re│     │        ├──┴──┤   … (kitchen, freight, ms, relay follow)
+ *   │ms│ca│     │        ├──┴──┤   … (kitchen, freight, ms, cake follow)
  *   └──┴──┴─────┘        └─────┘
  */
 const BENTO_LAYOUT: { id: string; size: BentoSize }[] = [
@@ -41,7 +42,7 @@ const BENTO_LAYOUT: { id: string; size: BentoSize }[] = [
   { id: "kitchen-chaos-vr", size: "wide" },
   { id: "freight-carrier-website", size: "lg" },
   { id: "musical-artist-site", size: "sm" },
-  { id: "relay-oms", size: "sm" },
+  { id: "cake-artista", size: "sm" },
 ];
 
 /** Column/row spans per size — `md:` prefixes persist up into the xl grid unchanged. */

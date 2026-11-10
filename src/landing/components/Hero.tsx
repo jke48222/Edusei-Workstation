@@ -1,9 +1,20 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
+import { ArrowDown, Boxes, FileBadge, FileText, Github, Linkedin, Mail, type LucideIcon } from "lucide-react";
 import { site } from "../content/site";
 import { useScrollProgress, useIsNarrow } from "../lib/hooks";
 import { getProjectBySlug } from "../../data";
 import { EyebrowPill } from "./ui";
+
+/** The footer's icon links, minus the source code, along the hero's bottom edge. */
+const HERO_LINKS: { label: string; href: string; icon: LucideIcon; internal?: boolean }[] = [
+  { label: "GitHub", href: site.socials.github, icon: Github },
+  { label: "LinkedIn", href: site.socials.linkedin, icon: Linkedin },
+  { label: "Email", href: site.socials.email, icon: Mail },
+  { label: "Résumé", href: site.socials.resume, icon: FileText },
+  { label: "CV", href: site.socials.cv, icon: FileBadge },
+  { label: "3D Workstation", href: "/workstation", icon: Boxes, internal: true },
+];
 
 /** Additive reveal: a block fades + slides in once scroll passes `start`, and stays. */
 function appear(p: number, start: number, span = 0.12) {
@@ -11,11 +22,36 @@ function appear(p: number, start: number, span = 0.12) {
   return { opacity: o, transform: `translateY(${(1 - o) * 18}px)`, pointerEvents: o > 0.5 ? ("auto" as const) : ("none" as const) };
 }
 
+/**
+ * Exit for the i-th of n icon links, scrubbed by scroll so it plays backwards on the way
+ * up. The outer pair goes first and the centre pair last; each sinks, shrinks, tilts
+ * away from the centre and blurs out.
+ */
+function leave(p: number, i: number, n: number) {
+  const mid = (n - 1) / 2;
+  const fromCentre = Math.abs(i - mid);            // 0.5, 1.5, 2.5 for six links
+  const order = Math.floor(mid) - Math.floor(fromCentre); // 0 = outermost, leaves first
+  const t = Math.max(0, Math.min(1, (p - (0.04 + order * 0.045)) / 0.11));
+  const e = t * t * (3 - 2 * t);                   // smoothstep, so it eases at both ends
+  const side = i < mid ? -1 : 1;
+  return {
+    gone: e > 0.5,
+    style: {
+      opacity: 1 - e,
+      transform: `translate(${side * e * fromCentre * 10}px, ${e * 34}px) scale(${1 - e * 0.45}) rotate(${side * e * 14}deg)`,
+      filter: e > 0 ? `blur(${e * 7}px)` : undefined,
+      pointerEvents: e > 0.5 ? ("none" as const) : ("auto" as const),
+    },
+  };
+}
+
 export default function Hero() {
   const zoneRef = useRef<HTMLDivElement>(null);
   const p = useScrollProgress(zoneRef);
   const isMobile = useIsNarrow();
   const { hero } = site;
+  // The scroll cue's opacity: gone by about a third of the way through the hero.
+  const cue = Math.max(0, 1 - p * 3.2);
   const projects = hero.recentProjectIds
     .map((id) => getProjectBySlug(id))
     .filter((x): x is NonNullable<typeof x> => Boolean(x));
@@ -104,16 +140,56 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* ── Scroll cue: fades out as the page scrolls ── */}
+          {/* ── Icon links, bottom centre: each in its own glass circle. As the page scrolls
+                 they leave from the outside in, each one sinking, shrinking and blurring. ── */}
+          <div className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 items-center gap-2.5 md:flex">
+            {HERO_LINKS.map(({ label, href, icon: Icon, internal }, i) => {
+              const exit = leave(p, i, HERO_LINKS.length);
+              const cls =
+                "hero-glass over-video flex h-11 w-11 items-center justify-center rounded-full transition-transform duration-300 hover:-translate-y-1 hover:bg-white/15";
+              const glyph = <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} />;
+              const hidden = { tabIndex: exit.gone ? -1 : 0, "aria-hidden": exit.gone };
+              return (
+                // The scroll-driven exit lives on the wrapper so the link's hover lift stays its own.
+                <span key={label} className="block will-change-transform" style={exit.style}>
+                  {internal ? (
+                    <Link to={href} aria-label={label} title={label} className={cls} {...hidden}>{glyph}</Link>
+                  ) : (
+                    // Web links and the two PDFs open in a new tab; the mailto does not.
+                    <a
+                      href={href}
+                      target={href.startsWith("mailto:") ? undefined : "_blank"}
+                      rel="noreferrer"
+                      aria-label={label}
+                      title={label}
+                      className={cls}
+                      {...hidden}
+                    >
+                      {glyph}
+                    </a>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+
+          {/* ── Scroll cue, bottom right: a bouncing arrow that fades as the page scrolls ── */}
           <div
-            className="over-video-dim absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 md:flex"
-            style={{ opacity: Math.max(0, 1 - p * 3.2) }}
+            className="absolute bottom-7 right-5 hidden md:block"
+            style={{ opacity: cue, pointerEvents: cue > 0.5 ? "auto" : "none" }}
           >
-            <span className="font-display text-[11px] tracking-[0.08em]">{hero.scrollCue}</span>
-            <svg className="animate-bounceArrow" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M12 5v14" /><path d="m6 13 6 6 6-6" />
-            </svg>
+            <button
+              type="button"
+              aria-label={hero.scrollCue}
+              title={hero.scrollCue}
+              tabIndex={cue > 0.5 ? 0 : -1}
+              onClick={(e) =>
+                e.currentTarget.closest(".landing")?.scrollBy({ top: window.innerHeight * 0.9, behavior: "smooth" })
+              }
+              className="over-video flex h-11 w-11 items-center justify-center transition-opacity hover:opacity-70"
+            >
+              <ArrowDown className="h-6 w-6 animate-bounceArrow" strokeWidth={1.6} aria-hidden />
+            </button>
           </div>
         </div>
       </div>

@@ -48,7 +48,7 @@ export const site = {
     recentLabel: "RECENT BUILDS",
     // Right-rail projects (by slug in ../../data) revealed additively, each linked.
     recentProjectIds: ["otto", "exocortex", "windowpet", "freight-carrier-website"],
-    scrollCue: "SCROLL TO EXPLORE",
+    scrollCue: "Scroll down",
   },
 
   // ── What I Build ─────────────────────────────────────────────────────────
@@ -114,7 +114,7 @@ export const site = {
     title: ["Certifications &", "programs."],
   },
 
-  // ── Editorial block (the Workstation card next to the terminal) ──────────
+  // ── Editorial block (the Workstation card next to the IDE preview) ──────────
   editorial: {
     community: {
       eyebrow: "THE WORKSTATION",
@@ -125,32 +125,13 @@ export const site = {
     },
   },
 
-  // ── Terminal widget ──────────────────────────────────────────────────────
-  terminal: {
-    label: "EDUSEI IDE",
-    meta: "v2.026",
-    boot: [
-      "EDUSEI IDE v3.026",
-      "Restoring workspace...",
-      "Indexing 30+ shipped projects...",
-      "Workspace ready.",
-    ],
-    commands: [
-      { cmd: "whoami", out: "Jalen Edusei · B.S. Computer Systems Engineering, UGA '26" },
-      { cmd: "open projects/animaldot.cpp", out: "Contactless vitals via geophone DSP: ONLINE" },
-      { cmd: "ls --domains", out: "embedded  vr-xr  full-stack  hardware  research" },
-      { cmd: "ls clients/", out: "kulenterprises.com  akilahmali.com  ops-portal (private)" },
-      { cmd: "cat status.txt", out: "Open to full-time software roles: full-stack, AI, embedded" },
-    ],
-  },
-
   // ── For teams / recruiters ───────────────────────────────────────────────
   forBrands: {
     eyebrow: "FOR TEAMS",
-    label: "OPEN TO OPPORTUNITIES",
-    title: "Need an engineer who can build the whole product?",
+    label: "NOW AT YAMAHA",
+    title: "An engineer who builds the whole product.",
     body:
-      "Recent University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026), now building websites for paying clients as a freelance software engineer. I'm open to full-time software roles in web, AI, and hardware, and I test and measure what I ship.",
+      "University of Georgia graduate (B.S. Computer Systems Engineering, Morehead Honors, cum laude, May 2026). I'm a Full Stack Developer at Yamaha Motor, where I look after the AI assistant on its online store. Before that I spent six months building websites for paying clients as a freelance software engineer. I'm not looking for a new job, but I'm always glad to talk about the work.",
     tags: ["FULL-STACK WEB", "AI / AGENTS", "EMBEDDED / FIRMWARE", "XR & GAMES", "PRODUCT & DATA"],
     cta: { label: "Download résumé", href: "/resume.pdf" },
     contact: { label: "Email me", href: "mailto:jalen.edusei@gmail.com" },
@@ -162,7 +143,7 @@ export const site = {
     title: ["The engineer", "behind", "it all."], // middle word italic
     greeting: "Hi, I'm Jalen.",
     bio:
-      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build websites for real clients, AI assistants, the software inside small devices, and multiplayer VR games. These days I work as a freelance software engineer (kulenterprises.com, akilahmali.com and cake-artista.vercel.app are mine), after a Business Analyst internship at Capital One on the CreditWise team.",
+      "Computer Systems Engineer from the University of Georgia (Morehead Honors, Cum Laude, Class of 2026). I build websites for real clients, AI assistants, the software inside small devices, and multiplayer VR games. These days I'm a Full Stack Developer at Yamaha Motor Corporation, U.S.A. Before that I built websites as a freelance software engineer (kulenterprises.com, akilahmali.com and cake-artista.vercel.app are mine) and interned as a Business Analyst at Capital One on the CreditWise team.",
     info: [
       { label: "DEGREE", value: "B.S. Computer Systems Engineering, Cum Laude" },
       { label: "SCHOOL", value: "University of Georgia · Morehead Honors" },
@@ -176,7 +157,7 @@ export const site = {
     eyebrow: "GET IN TOUCH",
     title: ["Let's build", "something."], // 2nd word italic
     body:
-      "I'm open to software, technology, business, and data roles across all domains, and always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
+      "Tell me about a project, ask about anything you saw here, or just say hello. Email is the fastest way to reach me: jalen.edusei@gmail.com.",
     subscribeCta: "Say hi!",
   },
 

@@ -36,7 +36,7 @@ export const profileData = {
   github: 'github.com/jke48222',
   resumeUrl: '/resume.pdf',
   cvUrl: '/cv.pdf',
-  openForWork: true,
+  openForWork: false,
   birthday: '09-28',
 };
 
@@ -83,10 +83,21 @@ export const skillsData = {
 
 export const workExperience = [
   {
+    title: 'Full Stack Developer',
+    company: 'Yamaha Motor Corporation, U.S.A.',
+    location: 'Kennesaw, GA',
+    period: 'November 2026 – Present',
+    highlights: [
+      'Look after the AI shopping assistant on yamaha-motor.com, the chat that helps shoppers find parts that fit their vehicle, compare current models, find a dealer, and get answers about store policies.',
+      'Keep its answers current by running the daily jobs that refresh what it knows about parts, accessories, and models.',
+      "Check every change against a set of test questions before it reaches shoppers, and build features for Yamaha's online store alongside it.",
+    ],
+  },
+  {
     title: 'Freelance Software Engineer',
     company: 'Self-Employed',
     location: 'Atlanta, GA',
-    period: 'May 2026 – Present',
+    period: 'May 2026 – October 2026',
     highlights: [
       "Rebuilt the website for Cake Artista, a Maryland cake studio: custom cake consultations, an online shop for cake kits and classes, an assistant that answers visitors' questions, and pages the owner can edit herself. Live at cake-artista.vercel.app ahead of its move to cakeartista.com.",
       'Designed, built, and launched kulenterprises.com for KUL Enterprises, a Georgia freight carrier: 22 pages the owner can edit without touching code, site search, spam-protected forms, and text colors that meet accessibility standards.',
@@ -524,6 +535,13 @@ export type TileMedia =
   /** Animated dot-matrix spinning globe (canvas). */
   | { kind: 'globe' };
 
+/** One gallery image. Wide captures are 1600x1000; phone captures are 780x1688. */
+export interface GalleryShot {
+  src: string;
+  alt: string;
+  device?: 'phone';
+}
+
 /** Coarse project taxonomy used by the future redesign for tile layout decisions. */
 export type ProjectCategory = 'web' | 'embedded' | 'vr' | 'hardware' | 'research' | 'ai';
 
@@ -544,8 +562,11 @@ export interface WorkProject {
   tileMedia?: TileMedia;
   /** Project category — informs tile presentation and filtering. */
   category?: ProjectCategory;
-  /** Real screenshots (e.g. pulled from a GitHub README) shown as a gallery on the detail page. */
-  gallery?: { src: string; alt: string }[];
+  /**
+   * Real screenshots shown as a gallery on the detail page. `device: 'phone'` marks a
+   * portrait capture taken at phone width; those get their own row of tall tiles.
+   */
+  gallery?: GalleryShot[];
   /** YouTube demo videos shown as an embedded "Demos" section on the detail page. */
   demos?: { title: string; youtubeId: string }[];
   additionalProjects?: { title: string; period: string; github?: string; description: string[] }[];
@@ -724,9 +745,8 @@ const extraProjects: WorkProject[] = [
     title: 'Musical Artist Website',
     tagline: "A recording artist's home on the web, built around a 3D control room fans can explore.",
     period: 'May 2026 – Present',
-    location: 'Freelance client work',
+    location: 'Freelance client work (private repo)',
     category: 'web',
-    github: 'https://github.com/jke48222/akilahmali',
     liveUrl: 'https://www.akilahmali.com',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'three.js', 'React Three Fiber', 'GSAP', 'Web Audio API', 'Vercel'],
     description: [
@@ -955,6 +975,7 @@ export const FEATURED_IDS = [
   'otto',
   'exocortex',
   'windowpet',
+  'cake-artista',
   'freight-carrier-website',
   'musical-artist-site',
   'relay-oms',
@@ -1219,13 +1240,9 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
     alt: 'PrimeForge FPGA prime engine running a timed prime search',
   },
 
-  // Otto: an 8-second cut of the promo film, which records the real app window
-  otto: {
-    kind: 'video',
-    src: '/media/otto.mp4',
-    poster: '/media/otto-poster.jpg',
-    alt: 'Otto opening from the MacBook notch with the browser tab attached, then reading the page and searching the web for an answer',
-  },
+  // Otto's own product site. ottonotch.com allows framing from jalenedusei.com only
+  // (frame-ancestors in the otto repo's vercel.json), so this stays blank anywhere else.
+  otto: { kind: 'site', url: 'https://ottonotch.com', embed: true },
 
   // LED frequency filter demo video
   'led-frequency-filter': {
@@ -1257,7 +1274,7 @@ const PROJECT_DEMOS: Record<string, { title: string; youtubeId: string }[]> = {
 };
 
 /** Real photo galleries by slug, shown on the detail page (and openable full-size). */
-const PROJECT_GALLERY: Record<string, { src: string; alt: string }[]> = {
+const PROJECT_GALLERY: Record<string, GalleryShot[]> = {
   animaldot: [
     { src: '/media/animaldot-poster.png', alt: 'AnimalDot capstone research poster' },
   ],
@@ -1269,6 +1286,68 @@ const PROJECT_GALLERY: Record<string, { src: string; alt: string }[]> = {
     { src: '/media/otto-5.jpg', alt: 'The Shelf under the notch with five files, two of them selected, ready to ask about' },
     { src: '/media/otto-6.jpg', alt: 'The closed notch after a reply finished, with the first line of the answer under the camera' },
     { src: '/media/otto-7.jpg', alt: 'Otto Settings on the Models tab with the API key saved in Keychain, the Claude models, and the response style' },
+    // ottonotch.com, captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+    { src: '/media/otto-site-1.jpg', alt: 'ottonotch.com: the page header shaped like a notch above the promo film, which shows an answer streaming in' },
+    { src: '/media/otto-site-2.jpg', alt: 'ottonotch.com: the features Answers that stream in and Acts with your OK, each beside a screenshot of the app' },
+    { src: '/media/otto-site-3.jpg', alt: 'ottonotch.com: Three steps from download to answer, as three numbered cards above a large view of the app' },
+    { src: '/media/otto-site-4.jpg', alt: 'ottonotch.com: You decide what leaves your Mac, with one card for what stays and one for what is sent' },
+    { src: '/media/otto-site-5.jpg', alt: 'ottonotch.com: the pricing page with the license at $19 once beside the trial and the requirements' },
+    { src: '/media/otto-phone-1.jpg', device: 'phone', alt: 'On a phone, ottonotch.com opening with the headline The AI assistant that lives in your notch and two buttons' },
+    { src: '/media/otto-phone-2.jpg', device: 'phone', alt: 'On a phone, the feature Acts with your OK under a screenshot of the app asking before it adds an event' },
+    { src: '/media/otto-phone-3.jpg', device: 'phone', alt: 'On a phone, the pricing cards stacked: the license, the trial and the requirements' },
+    { src: '/media/otto-phone-4.jpg', device: 'phone', alt: 'On a phone, the questions list with the first answer open' },
+  ],
+  // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+  'cake-artista': [
+    { src: '/media/cake-artista-1.jpg', alt: 'The custom cakes page: five cakes fanned like playing cards beside the heading Custom cakes, by consult, with one card lifted on hover' },
+    { src: '/media/cake-artista-2.jpg', alt: 'Site search answering the question is the vanilla kit vegan with a diets answer and four kits priced for the vegan option' },
+    { src: '/media/cake-artista-3.jpg', alt: 'Sandrita, the site assistant, recommending the Vanilla Bean Kit with a product card and an Add button, over a row of tall cake photos' },
+    { src: '/media/cake-artista-4.jpg', alt: 'The cake gallery filtered to cakes in gold: a four-column grid of cakes on gingham, harlequin and dotted grounds' },
+    { src: '/media/cake-artista-5.jpg', alt: 'The Shop menu open from the header, listing three cake kits with prices beside four photo tiles' },
+    { src: '/media/cake-artista-6.jpg', alt: 'The Vanilla Bean Kit page with the vegan option chosen, a quantity of 2 and an Add to cart button showing $102' },
+    { src: '/media/cake-artista-7.jpg', alt: 'The Black Friday page: a box of cupcakes beside a dark panel with the bundle, what is inside it and a countdown' },
+    { src: '/media/cake-artista-8.jpg', alt: 'The photo viewer open on a tiered cake, showing 2 of 10 with previous and next arrows' },
+    { src: '/media/cake-artista-9.jpg', alt: 'A cake decorating course page in Spanish, with class dates and an enrol card' },
+    { src: '/media/cake-artista-phone-1.jpg', device: 'phone', alt: 'On a phone, the assistant as a full-screen chat recommending a kit with a product card and diet choices' },
+    { src: '/media/cake-artista-phone-2.jpg', device: 'phone', alt: 'On a phone, the menu open with shop and studio links beside small cake photos and a Book a consult button' },
+    { src: '/media/cake-artista-phone-3.jpg', device: 'phone', alt: 'On a phone, the custom cakes page with the fanned cake cards under the heading and the gallery filters below' },
+    { src: '/media/cake-artista-phone-4.jpg', device: 'phone', alt: 'On a phone, search results for is the vanilla kit vegan as a list of kits with vegan prices' },
+  ],
+  // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+  'freight-carrier-website': [
+    { src: '/media/freight-carrier-website-1.jpg', alt: 'The opening brand film: a golden hummingbird with long tail streamers on black' },
+    { src: '/media/freight-carrier-website-2.jpg', alt: 'Site search open over the home page, with matches for cold chain highlighted above the headline On the road. On your side.' },
+    { src: '/media/freight-carrier-website-3.jpg', alt: 'The equipment section: a truck in the lion livery over a row of figures for trailer length, payload, states and year' },
+    { src: '/media/freight-carrier-website-4.jpg', alt: 'The dry van page: line drawings of the tractor and trailer above a table of dimensions' },
+    { src: '/media/freight-carrier-website-5.jpg', alt: 'The services carousel with the Reefer card enlarged in the centre between Dry Van and Dedicated' },
+    { src: '/media/freight-carrier-website-6.jpg', alt: 'A map of the 48 states with the six-state home region in copper and Georgia highlighted on hover' },
+    { src: '/media/freight-carrier-website-7.jpg', alt: 'The safety page: Stop the unsafe operation. Not the problem-solving. in white and gold on black' },
+    { src: '/media/freight-carrier-website-8.jpg', alt: 'The Journey player on scene 5 of 17: a photo of open hills beside four lines of narration, over a strip of scene markers' },
+    { src: '/media/freight-carrier-website-9.jpg', alt: 'The Safety menu open from the header with the carrier numbers, over the Over-the-Road page' },
+    { src: '/media/freight-carrier-website-phone-1.jpg', device: 'phone', alt: 'On a phone, the menu open with page links, a list of freight services and a Get a quote button' },
+    { src: '/media/freight-carrier-website-phone-2.jpg', device: 'phone', alt: 'On a phone, site search with matches for cold chain above the home page headline' },
+    { src: '/media/freight-carrier-website-phone-3.jpg', device: 'phone', alt: 'On a phone, the safety statement in white and gold on black with its five steps' },
+    { src: '/media/freight-carrier-website-phone-4.jpg', device: 'phone', alt: 'On a phone, the Road Ahead page: 11 years driving, then 2026 and 48 as a ruled list' },
+  ],
+  // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+  'musical-artist-site': [
+    { src: '/media/musical-artist-site-1.jpg', alt: 'The home page: a full-screen video of the artist walking past a painted wall, with Tower of Roses in script and a Listen Now button' },
+    { src: '/media/musical-artist-site-2.jpg', alt: 'Further down the home page: Listen Now in script on red, music players, a sign-up card for text updates and a drawing of roses' },
+    { src: '/media/musical-artist-site-3.jpg', alt: 'The Music page: Listen Now in script above players for Tower of Roses and the Who Really Won? EP' },
+    { src: '/media/musical-artist-site-4.jpg', alt: 'The About page: a script heading, the artist biography in two columns and a portrait on red' },
+    { src: '/media/musical-artist-site-5.jpg', alt: 'The Tour page: the artist crouched in a white shirt against dark trees, with Tour in script' },
+    { src: '/media/musical-artist-site-6.jpg', alt: 'The Who Really Won? cover: the title as a handwritten signature on cream paper over a faint portrait' },
+    { src: '/media/musical-artist-site-7.jpg', alt: 'The cover tearing in two like paper, with a 3D control room showing through the gap' },
+    { src: '/media/musical-artist-site-8.jpg', alt: 'The 3D control room: a desk with seven lit monitors, a phone and a blue button, under a REC marker' },
+    { src: '/media/musical-artist-site-9.jpg', alt: 'The Strange track screen: the title in white over a dark photo of the artist, with arrows and a strip of track names' },
+    { src: '/media/musical-artist-site-phone-1.jpg', device: 'phone', alt: 'On a phone, the Who Really Won? cover with the signature title on cream paper' },
+    { src: '/media/musical-artist-site-phone-2.jpg', device: 'phone', alt: 'On a phone, the control room with its desk of monitors and a checkered floor' },
+    { src: '/media/musical-artist-site-phone-3.jpg', device: 'phone', alt: 'On a phone, the Strange track screen with its title, arrows and track strip' },
+    { src: '/media/musical-artist-site-phone-4.jpg', device: 'phone', alt: 'On a phone, the home page video with Tower of Roses in script and a Listen Now button' },
+    { src: '/media/musical-artist-site-phone-5.jpg', device: 'phone', alt: 'On a phone, the Music page with Listen Now in script above a player for Tower of Roses' },
+    { src: '/media/musical-artist-site-phone-6.jpg', device: 'phone', alt: 'On a phone, the About page with its script heading and the artist biography' },
+    { src: '/media/musical-artist-site-phone-7.jpg', device: 'phone', alt: 'On a phone, the Tour page with the artist crouched under the word Tour in script' },
+    { src: '/media/musical-artist-site-phone-8.jpg', device: 'phone', alt: 'On a phone, the menu open with five page links and a row of social icons' },
   ],
   'pdms-microfluidic-mixer': [
     { src: '/media/pdms-1.jpg', alt: 'PDMS microfluidic mixer device' },

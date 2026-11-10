@@ -11,9 +11,15 @@ export default function Header() {
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="mx-auto flex max-w-container items-center justify-between px-5 py-3.5 md:px-8">
         {/* Left: search + wordmark */}
-        <div className="flex items-center gap-2.5 text-ink">
+        {/* The pill is a sibling layer, not a wrapper: a backdrop-filter ancestor would
+            become the containing block for the search dialog's fixed overlay. */}
+        <div className="relative isolate flex items-center gap-2.5 text-ink sm:py-1 sm:pl-1 sm:pr-4">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 hidden rounded-full border border-[var(--line)] bg-white/55 backdrop-blur sm:block"
+          />
           <LandingSearch />
-          <a href="#top" className="over-video hidden flex-col leading-none sm:flex">
+          <a href="#top" className="hidden flex-col leading-none sm:flex">
             <span className="font-display text-[17px] tracking-[-0.04em]">{site.name}</span>
             <span className="font-display text-[9px] tracking-[0.18em] opacity-70">{site.role}</span>
           </a>

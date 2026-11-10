@@ -5,6 +5,7 @@
  */
 const LOGO_FILE: Record<string, string> = {
   // Experience
+  "Yamaha Motor Corporation, U.S.A.": "yamaha-motor.svg",
   "Self-Employed": "self-employed.svg",
   "Capital One": "capitalone",
   "University of Georgia Housing": "uga-housing",
