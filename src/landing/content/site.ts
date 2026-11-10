@@ -125,25 +125,6 @@ export const site = {
     },
   },
 
-  // ── Terminal widget ──────────────────────────────────────────────────────
-  terminal: {
-    label: "EDUSEI IDE",
-    meta: "v2.026",
-    boot: [
-      "EDUSEI IDE v3.026",
-      "Restoring workspace...",
-      "Indexing 30+ shipped projects...",
-      "Workspace ready.",
-    ],
-    commands: [
-      { cmd: "whoami", out: "Jalen Edusei · B.S. Computer Systems Engineering, UGA '26" },
-      { cmd: "open projects/animaldot.cpp", out: "Contactless vitals via geophone DSP: ONLINE" },
-      { cmd: "ls --domains", out: "embedded  vr-xr  full-stack  hardware  research" },
-      { cmd: "ls clients/", out: "kulenterprises.com  akilahmali.com  ops-portal (private)" },
-      { cmd: "cat status.txt", out: "Full Stack Developer at Yamaha Motor Corporation, U.S.A." },
-    ],
-  },
-
   // ── For teams / recruiters ───────────────────────────────────────────────
   forBrands: {
     eyebrow: "FOR TEAMS",

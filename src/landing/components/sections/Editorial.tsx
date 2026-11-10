@@ -1,6 +1,6 @@
 import { site } from "../../content/site";
 import { Reveal, BtnPrimary } from "../ui";
-import Terminal from "./Terminal";
+import IdePreview from "./IdePreview";
 
 function NoteCard({
   eyebrow, title, body, cta, align = "left",
@@ -28,14 +28,14 @@ export default function Editorial() {
   const { editorial: e } = site;
   return (
     <div className="relative z-10">
-      {/* The Workstation + terminal */}
+      {/* The Workstation + a live miniature of it */}
       <section className="py-20 md:py-28">
         <div className="mx-auto grid w-full max-w-container items-stretch gap-6 px-5 md:grid-cols-2 md:px-8">
           <div className="flex items-center">
             <NoteCard {...e.community} align="left" />
           </div>
-          <Reveal delay={120} className="h-[420px]">
-            <Terminal />
+          <Reveal delay={120} className="h-[420px] min-w-0">
+            <IdePreview />
           </Reveal>
         </div>
       </section>
