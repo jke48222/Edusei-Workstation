@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { Code2, Eye, type LucideIcon } from "lucide-react";
 import { getIdeProject, IDE_PROJECTS, LANG_LABELS, type IdeProject } from "../../../components/ide/projectRegistry";
 import { ProjectMedia } from "../../../components/work/ui/ProjectMedia";
 import { PREVIEW_CODE, type PreviewCode } from "../../content/previewCode";
@@ -8,8 +9,8 @@ import { ArrowUpRight } from "../ui";
 /**
  * A miniature of the real workstation. The explorer lists four shipped projects by the
  * file the IDE gives them, and each opens two ways, as an editor does for a document:
- * Preview is the live site (or Otto's recorded window, since ottonotch.com refuses
- * framing), Code is a verbatim excerpt of that project's source. Nothing advances on
+ * Preview is the live site, Code is a verbatim excerpt of that project's source.
+ * Nothing advances on
  * its own: each preview is a whole website, so one loads only when a visitor asks.
  */
 
@@ -120,15 +121,15 @@ export default function IdePreview() {
   const current = entries[active];
   if (!current) return null;
   const { file, code, host } = current;
-  const live = file.project.tileMedia?.kind === "site";
-  const tab = (v: View, label: string) => (
+  const tab = (v: View, label: string, Icon: LucideIcon) => (
     <button
       type="button"
       role="tab"
       aria-selected={view === v}
       onClick={() => setView(v)}
-      className={`rounded-md px-2.5 py-1 transition-colors ${view === v ? "bg-white/[0.14] text-dark-ink" : "text-dark-ink-mute hover:text-dark-ink"}`}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 transition-colors ${view === v ? "bg-white/[0.14] text-dark-ink" : "text-dark-ink-mute hover:text-dark-ink"}`}
     >
+      <Icon className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
       {label}
     </button>
   );
@@ -147,8 +148,8 @@ export default function IdePreview() {
           <span className="hidden text-dark-ink-mute md:inline"> · {view === "code" ? (code.lang === "swift" ? "Swift" : "TypeScript") : LANG_LABELS[file.lang]}</span>
         </span>
         <div role="tablist" aria-label="Show the site or its source" className="flex shrink-0 gap-0.5 rounded-lg bg-white/[0.06] p-0.5 text-[11px]">
-          {tab("preview", "Preview")}
-          {tab("code", "Code")}
+          {tab("preview", "Preview", Eye)}
+          {tab("code", "Code", Code2)}
         </div>
       </div>
 
@@ -186,14 +187,8 @@ export default function IdePreview() {
             {view === "code" ? (
               <CodePane code={code} />
             ) : (
-              <>
-                {/* keyed so each file mounts its own frame or player */}
-                <ProjectMedia key={file.id} project={file.project} />
-                <span className="pointer-events-none absolute right-2.5 top-2.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-dark-ink backdrop-blur">
-                  <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-[#3FB950]" : "bg-white/60"}`} />
-                  {live ? "Live site" : "Screen recording"}
-                </span>
-              </>
+              // keyed so each file mounts its own frame
+              <ProjectMedia key={file.id} project={file.project} />
             )}
           </div>
           <Link
