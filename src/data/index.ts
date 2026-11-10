@@ -88,7 +88,9 @@ export const workExperience = [
     location: 'Kennesaw, GA',
     period: 'November 2026 – Present',
     highlights: [
-      "Full-stack development on Yamaha's e-commerce platform.",
+      'Maintain and extend the AI shopping assistant on yamaha-motor.com: it answers policy questions, compares current models, finds parts that fit a vehicle, and locates dealers.',
+      'Work in its TypeScript agent loop on Amazon Bedrock AgentCore, where Claude calls tools over DynamoDB, S3, and a dealer API behind a guardrail and streams each reply over a WebSocket.',
+      'Keep its scheduled data pipelines and the LLM-graded test suite that gates every deploy running, alongside full-stack work on the e-commerce platform.',
     ],
   },
   {
