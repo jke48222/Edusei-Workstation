@@ -1303,6 +1303,22 @@ const PROJECT_GALLERY: Record<string, GalleryShot[]> = {
     { src: '/media/cake-artista-phone-3.jpg', device: 'phone', alt: 'On a phone, the custom cakes page with the fanned cake cards under the heading and the gallery filters below' },
     { src: '/media/cake-artista-phone-4.jpg', device: 'phone', alt: 'On a phone, search results for is the vanilla kit vegan as a list of kits with vegan prices' },
   ],
+  // Captured from the live site on 2026-11-09 at 1440x900 and 390x844.
+  'freight-carrier-website': [
+    { src: '/media/freight-carrier-website-1.jpg', alt: 'The opening brand film: a golden hummingbird with long tail streamers on black' },
+    { src: '/media/freight-carrier-website-2.jpg', alt: 'Site search open over the home page, with matches for cold chain highlighted above the headline On the road. On your side.' },
+    { src: '/media/freight-carrier-website-3.jpg', alt: 'The equipment section: a truck in the lion livery over a row of figures for trailer length, payload, states and year' },
+    { src: '/media/freight-carrier-website-4.jpg', alt: 'The dry van page: line drawings of the tractor and trailer above a table of dimensions' },
+    { src: '/media/freight-carrier-website-5.jpg', alt: 'The services carousel with the Reefer card enlarged in the centre between Dry Van and Dedicated' },
+    { src: '/media/freight-carrier-website-6.jpg', alt: 'A map of the 48 states with the six-state home region in copper and Georgia highlighted on hover' },
+    { src: '/media/freight-carrier-website-7.jpg', alt: 'The safety page: Stop the unsafe operation. Not the problem-solving. in white and gold on black' },
+    { src: '/media/freight-carrier-website-8.jpg', alt: 'The Journey player on scene 5 of 17: a photo of open hills beside four lines of narration, over a strip of scene markers' },
+    { src: '/media/freight-carrier-website-9.jpg', alt: 'The Safety menu open from the header with the carrier numbers, over the Over-the-Road page' },
+    { src: '/media/freight-carrier-website-phone-1.jpg', device: 'phone', alt: 'On a phone, the menu open with page links, a list of freight services and a Get a quote button' },
+    { src: '/media/freight-carrier-website-phone-2.jpg', device: 'phone', alt: 'On a phone, site search with matches for cold chain above the home page headline' },
+    { src: '/media/freight-carrier-website-phone-3.jpg', device: 'phone', alt: 'On a phone, the safety statement in white and gold on black with its five steps' },
+    { src: '/media/freight-carrier-website-phone-4.jpg', device: 'phone', alt: 'On a phone, the Road Ahead page: 11 years driving, then 2026 and 48 as a ruled list' },
+  ],
   'pdms-microfluidic-mixer': [
     { src: '/media/pdms-1.jpg', alt: 'PDMS microfluidic mixer device' },
     { src: '/media/pdms-2.jpg', alt: 'PDMS microfluidic channel under the microscope' },
