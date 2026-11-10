@@ -106,14 +106,17 @@ export default function Hero() {
 
           {/* ── Scroll cue: fades out as the page scrolls ── */}
           <div
-            className="over-video-dim absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 md:flex"
+            className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 md:block"
             style={{ opacity: Math.max(0, 1 - p * 3.2) }}
           >
-            <span className="font-display text-[11px] tracking-[0.08em]">{hero.scrollCue}</span>
-            <svg className="animate-bounceArrow" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M12 5v14" /><path d="m6 13 6 6 6-6" />
-            </svg>
+            {/* .hero-glass sets its own position, so the pill sits inside the placed wrapper */}
+            <div className="hero-glass over-video flex items-center gap-3 rounded-full py-2 pl-2.5 pr-4">
+              {/* a mouse outline whose wheel rolls down, then resets */}
+              <span aria-hidden className="relative block h-[30px] w-[19px] rounded-full border-[1.5px] border-current">
+                <span className="absolute left-1/2 top-[6px] -ml-[1.5px] block h-[6px] w-[3px] rounded-full bg-current animate-scrollWheel motion-reduce:animate-none" />
+              </span>
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.18em]">{hero.scrollCue}</span>
+            </div>
           </div>
         </div>
       </div>

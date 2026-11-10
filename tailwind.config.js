@@ -54,6 +54,7 @@ export default {
         msgIn: 'msgIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
         rise: 'rise 1.2s cubic-bezier(0.34,1.56,0.64,1) both',
         bounceArrow: 'bounceArrow 1.4s ease-in-out infinite',
+        scrollWheel: 'scrollWheel 1.9s cubic-bezier(0.65,0,0.35,1) infinite',
         pulseDot: 'pulseDot 2s cubic-bezier(0.4,0,0.6,1) infinite',
         fly: 'fly 5s ease-in-out infinite alternate',
       },
@@ -69,6 +70,12 @@ export default {
         bounceArrow: {
           '0%,100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(6px)' },
+        },
+        scrollWheel: {
+          '0%': { transform: 'translateY(0)', opacity: '0' },
+          '18%': { opacity: '1' },
+          '62%': { transform: 'translateY(10px)', opacity: '1' },
+          '100%': { transform: 'translateY(12px)', opacity: '0' },
         },
         pulseDot: {
           '50%': { opacity: '0.4' },

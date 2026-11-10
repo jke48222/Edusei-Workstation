@@ -157,7 +157,7 @@ export const site = {
     eyebrow: "GET IN TOUCH",
     title: ["Let's build", "something."], // 2nd word italic
     body:
-      "I work at Yamaha Motor now, and I'm always happy to talk shop. The fastest way to reach me is email, at jalen.edusei@gmail.com.",
+      "Tell me about a project, ask about anything you saw here, or just say hello. Email is the fastest way to reach me: jalen.edusei@gmail.com.",
     subscribeCta: "Say hi!",
   },
 
