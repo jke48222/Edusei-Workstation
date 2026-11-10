@@ -965,6 +965,7 @@ export const FEATURED_IDS = [
   'otto',
   'exocortex',
   'windowpet',
+  'cake-artista',
   'freight-carrier-website',
   'musical-artist-site',
   'relay-oms',
