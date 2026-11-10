@@ -1,48 +1,50 @@
 /**
- * Source shown by the landing page's IDE preview when a visitor switches a file to Code.
- * Each excerpt is copied verbatim from the project's repository at the commit named beside
- * it, so the lines here are lines that run in production. The three client repositories
- * are private, which is why only Otto's excerpt carries a link.
+ * Code shown by the landing page's IDE preview when a visitor switches a file to Code.
+ *
+ * The three client sites live in private repositories, so their entries are sketches:
+ * short scripts written for this page that show what each site does, not the sites'
+ * source. They are marked `sketch` and the Code view labels them that way. Otto's
+ * repository is public, so its entry is a verbatim excerpt at the commit named beside
+ * it, with a link to the lines.
  */
 export interface PreviewCode {
   /** Project slug in ../../data. */
   id: string;
-  /** File path inside the project's repository. */
+  /** File name shown in the title bar. For an excerpt, the path inside the repository. */
   path: string;
   lang: "ts" | "swift";
-  /** Line number of the excerpt's first line in that file. */
-  startLine: number;
-  /** Short SHA the excerpt was copied at. */
-  commit: string;
+  /** True when the code was written for this page and is not the project's source. */
+  sketch?: boolean;
+  /** Excerpts only: line number of the first line in that file. */
+  startLine?: number;
+  /** Excerpts only: short SHA the excerpt was copied at. */
+  commit?: string;
   code: string;
-  /** Set only when the repository is public. */
+  /** Excerpts only: link to the lines in the public repository. */
   href?: string;
 }
 
 export const PREVIEW_CODE: PreviewCode[] = [
   {
     "id": "musical-artist-site",
-    "path": "src/components/wrw/grid/GridScene.tsx",
+    "path": "control-room.ts",
     "lang": "ts",
-    "startLine": 38,
-    "commit": "a3cee2c",
-    "code": "function focusFor(feed: Feed, fov: number, aspect: number) {\n  const t = Math.tan((fov * Math.PI) / 180 / 2);\n  const distH = SCREEN_SIZE[1] / (2 * t);\n  const distW = SCREEN_SIZE[0] / (2 * t * aspect);\n  const dist = Math.min(distH, distW) * 0.96;\n  const nrm = new THREE.Vector3(Math.sin(feed.rotY), 0, Math.cos(feed.rotY)).normalize(); // plane normal (-x-ish)\n  const pos = new THREE.Vector3(...feed.pos).add(nrm.multiplyScalar(dist));\n  return { pos, look: new THREE.Vector3(...feed.pos) };\n}\n\nfunction homeFor(aspect: number) {\n  let fov = 48;\n  let back = 0;\n  const target = HOME_TARGET.clone();\n  // On portrait/mobile the bank otherwise sits tiny in a sea of empty room, so\n  // pull the camera IN (smaller back) and tighten the FOV so the monitors fill\n  // the frame while still keeping all 7 monitors in view.\n  if (aspect < 0.6) {\n    fov = 64;\n    back = 0.7;\n  } else if (aspect < 0.85) {\n    fov = 54;\n    back = 0.0;\n  } else if (aspect < 1.2) {\n    fov = 50;\n    back = 0.3;\n  }\n  const dir = HOME_POS.clone().sub(HOME_TARGET).normalize();\n  return { pos: HOME_POS.clone().add(dir.multiplyScalar(back)), fov, target };\n}"
+    "sketch": true,
+    "code": "// Seven monitors, seven tracks. Click one and the camera flies to it.\nconst feeds: Feed[] = [\n  { title: \"Last Year\", accent: \"#3b4cff\" },\n  { title: \"My Bed\", accent: \"#d8c9a3\" },\n  { title: \"Gone Away\", accent: \"#1f9d6b\" },\n  { title: \"Been There Once\", accent: \"#e0564f\" },\n  { title: \"Who Really Won?\", accent: \"#b24bd6\" },\n];\n\nexport async function openFeed(room: ControlRoom, index: number) {\n  const feed = feeds[index];\n  await room.camera.flyTo(room.monitor(index), { seconds: 1.6 });\n  room.showTrack(feed); // full-screen title, photo and streaming links\n  room.audio.play(feed.title);\n}\n\nexport function onKey(room: ControlRoom, key: string, current: number) {\n  const last = feeds.length - 1;\n  if (key === \"ArrowRight\") return openFeed(room, current === last ? 0 : current + 1);\n  if (key === \"ArrowLeft\") return openFeed(room, current === 0 ? last : current - 1);\n  if (key === \"Escape\") return room.camera.flyHome();\n}"
   },
   {
     "id": "freight-carrier-website",
-    "path": "lib/ratelimit.ts",
+    "path": "quote-request.ts",
     "lang": "ts",
-    "startLine": 24,
-    "commit": "f3db742",
-    "code": "export function rateLimit(\n  key: string,\n  max = 5,\n  windowMs = 10 * 60 * 1000\n): { allowed: boolean } {\n  const now = Date.now();\n  const windowStart = now - windowMs;\n\n  const stamps = (hits.get(key) ?? []).filter((t) => t > windowStart);\n  hits.delete(key);\n  if (hits.size >= MAX_KEYS) {\n    const oldest = hits.keys().next().value;\n    if (oldest !== undefined) hits.delete(oldest);\n  }\n\n  if (stamps.length >= max) {\n    hits.set(key, stamps);\n    return { allowed: false };\n  }\n  stamps.push(now);\n  hits.set(key, stamps);\n  return { allowed: true };\n}"
+    "sketch": true,
+    "code": "// A freight quote request: check it, limit repeats, then email dispatch.\ntype QuoteRequest = {\n  origin: string;\n  destination: string;\n  freight: \"dry-van\" | \"reefer\" | \"power-only\";\n  pickup: string;\n  contact: string;\n};\n\nexport async function submitQuote(form: QuoteRequest, ip: string) {\n  const missing = REQUIRED.filter((field) => !form[field].trim());\n  if (missing.length > 0) return { ok: false, error: `Missing: ${missing.join(\", \")}` };\n\n  // Five requests per address every ten minutes keeps the form from being flooded.\n  if (!allow(ip, { max: 5, perMinutes: 10 })) return { ok: false, error: \"Too many requests\" };\n\n  await email.send({\n    to: \"dispatch\",\n    subject: `Quote: ${form.origin} to ${form.destination}`,\n    body: summarize(form),\n  });\n  return { ok: true };\n}"
   },
   {
     "id": "cake-artista",
-    "path": "lib/sandrita/match.ts",
+    "path": "assistant-card.ts",
     "lang": "ts",
-    "startLine": 19,
-    "commit": "e64bf16",
-    "code": "/**\n * Each phrase found adds 2 and each whole word adds 1. The highest score wins; a tie goes to the\n * intent listed first in INTENT_PRIORITY, and a score of 0 means fallback.\n */\nexport function detectIntent(input: string): SandritaIntent {\n  const text = normalize(input);\n  if (text === \"\") return \"fallback\";\n  const padded = ` ${text} `;\n  const words = new Set(text.split(\" \"));\n\n  let best: SandritaIntent = \"fallback\";\n  let bestScore = 0;\n  for (const intent of INTENT_PRIORITY) {\n    const entry = SANDRITA.intents[intent];\n    let score = 0;\n    for (const phrase of entry.phrases) if (padded.includes(` ${phrase} `)) score += 2;\n    for (const word of entry.words) if (words.has(word)) score += 1;\n    if (score > bestScore) {\n      best = intent;\n      bestScore = score;\n    }\n  }\n  return best;\n}"
+    "sketch": true,
+    "code": "// The site assistant can do one thing besides talk: show a card.\n// Every card is checked against the real catalog before a visitor sees it.\ntype Card = { kind: \"kit\" | \"class\" | \"consult\"; id: string };\n\nexport function showCard(card: Card, catalog: Catalog) {\n  const item = catalog[card.kind].find((entry) => entry.id === card.id);\n  if (!item) return { shown: false, reason: \"No such item on the site\" };\n\n  return {\n    shown: true,\n    title: item.title,\n    price: item.price,\n    // Adding to the cart or booking still takes the visitor's own tap.\n    action: card.kind === \"consult\" ? \"Pick a time\" : \"Add to cart\",\n  };\n}"
   },
   {
     "id": "otto",
