@@ -1226,7 +1226,7 @@ const PROJECT_TILE_MEDIA: Record<string, TileMedia> = {
   'personal-portfolio': { kind: 'image', src: '/media/portfolio-preview.jpg', alt: 'jalenedusei.com home page' },
   'freight-carrier-website': { kind: 'site', url: 'https://www.kulenterprises.com', embed: true },
   'musical-artist-site': { kind: 'site', url: 'https://www.akilahmali.com/', embed: true },
-  'cake-artista': { kind: 'site', url: 'https://cake-artista.vercel.app', embed: false, screenshot: '/media/cake-artista-1.jpg' },
+  'cake-artista': { kind: 'site', url: 'https://cake-artista.vercel.app', embed: true },
   'parmco-ble-motor': { kind: 'site', url: 'https://jke48222.github.io/parmco/', embed: true },
   'website-development': { kind: 'site', url: 'https://nsbe.uga.edu/', embed: true },
   
