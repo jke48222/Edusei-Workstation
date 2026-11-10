@@ -121,9 +121,9 @@ Atlanta, GA \;|\;
 \sectiontitle{PROFESSIONAL EXPERIENCE}
 \experienceheading{Yamaha Motor Corporation, U.S.A.}{Full Stack Developer}{Kennesaw, GA}{Nov 2026 -- Present}
 \begin{itemize}
-\item Maintain and extend the AI shopping assistant on yamaha-motor.com: it answers policy questions, compares current models, finds parts that fit a vehicle, and locates dealers.
-\item Work in its TypeScript agent loop on Amazon Bedrock AgentCore, where Claude calls tools over DynamoDB, S3, and a dealer API behind a guardrail and streams each reply over a WebSocket.
-\item Keep its scheduled data pipelines and the LLM-graded test suite that gates every deploy running, alongside full-stack work on the e-commerce platform.
+\item Maintain and extend the AI shopping assistant on yamaha-motor.com, which finds parts that fit a vehicle, compares current models, locates dealers, and answers store-policy questions.
+\item Work in its TypeScript agent loop on Amazon Bedrock AgentCore: Claude tool use over product, fitment, and dealer data, a guardrail on every model call, and replies streamed over a WebSocket.
+\item Run the scheduled GitHub Actions pipelines that refresh its data and the LLM-graded test suite that gates each deploy, alongside full-stack work on the e-commerce platform.
 \end{itemize}
 
 \experienceheading{Capital One}{Business Analyst Intern}{McLean, VA}{Jun 2025 -- Aug 2025}
@@ -168,9 +168,9 @@ Atlanta, GA \;|\;
 
 \Needspace*{8\baselineskip}
 \projectheading{Akilah Mali: Musical Artist Website}{May 2026 -- Present}
-{Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, three.js, React Three Fiber, GSAP, Web Audio API, Vercel}{\href{https://www.akilahmali.com}{akilahmali.com} \;|\; \href{https://github.com/jke48222/akilahmali}{github.com/jke48222/akilahmali}}
+{Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, three.js, React Three Fiber, GSAP, Web Audio API, Vercel}{\href{https://www.akilahmali.com}{akilahmali.com} \;|\; Private repository}
 \begin{itemize}
-\item Built and shipped akilahmali.com for a recording artist: Next.js 16, React 19, TypeScript, and Tailwind CSS v4 with a real-time 3D ``control room'' scene (three.js, React Three Fiber, GLB models, CCTV-style feeds), a rotary-dial payphone route with Web Audio dialing, and embed-served music and tour content that leaves the client no backend to operate.
+\item Built and shipped akilahmali.com for a recording artist: Next.js 16, React 19, TypeScript, and Tailwind CSS v4 with a real-time 3D ``control room'' scene (three.js, React Three Fiber, GLB models, CCTV-style feeds), and embed-served music and tour content that leaves the client no backend to operate.
 \item Cut a roughly 46 MB payload by code-splitting three.js off the release routes and deferring the WebGL mount to idle behind an instant paper cover, kept reduced-motion and \texttt{noscript} fallbacks throughout, and shipped HSTS-preload and permissions-policy security headers with a Laylo-backed email-capture route.
 \item Built, then deliberately removed, a headless Shopify Storefront API cart (httpOnly cookie, server-side mutation boundary) after a security and architecture review, moving commerce to Shopify's hosted storefront in a 2,700-line deletion.
 \end{itemize}

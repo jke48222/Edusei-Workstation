@@ -735,9 +735,8 @@ const extraProjects: WorkProject[] = [
     title: 'Musical Artist Website',
     tagline: "A recording artist's home on the web, built around a 3D control room fans can explore.",
     period: 'May 2026 – Present',
-    location: 'Freelance client work',
+    location: 'Freelance client work (private repo)',
     category: 'web',
-    github: 'https://github.com/jke48222/akilahmali',
     liveUrl: 'https://www.akilahmali.com',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'three.js', 'React Three Fiber', 'GSAP', 'Web Audio API', 'Vercel'],
     description: [
