@@ -238,7 +238,7 @@ export function ProjectDetailPage() {
                   <ZoomableImage
                     src={g.src}
                     alt={g.alt}
-                    className="aspect-video w-full object-cover transition-transform duration-500 group-hover/zoom:scale-105"
+                    className="aspect-[16/10] w-full object-cover object-top transition-transform duration-500 group-hover/zoom:scale-105"
                   />
                 </motion.div>
               ))}
