@@ -1,16 +1,19 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, Github, Linkedin, Mail, type LucideIcon } from "lucide-react";
+import { ArrowDown, Boxes, FileBadge, FileText, Github, Linkedin, Mail, type LucideIcon } from "lucide-react";
 import { site } from "../content/site";
 import { useScrollProgress, useIsNarrow } from "../lib/hooks";
 import { getProjectBySlug } from "../../data";
 import { EyebrowPill } from "./ui";
 
-/** The three ways to reach me, shown as icons along the hero's bottom edge. */
-const HERO_SOCIALS: { label: string; href: string; icon: LucideIcon }[] = [
+/** The footer's icon links, minus the source code, along the hero's bottom edge. */
+const HERO_LINKS: { label: string; href: string; icon: LucideIcon; internal?: boolean }[] = [
   { label: "GitHub", href: site.socials.github, icon: Github },
   { label: "LinkedIn", href: site.socials.linkedin, icon: Linkedin },
   { label: "Email", href: site.socials.email, icon: Mail },
+  { label: "Résumé", href: site.socials.resume, icon: FileText },
+  { label: "CV", href: site.socials.cv, icon: FileBadge },
+  { label: "3D Workstation", href: "/workstation", icon: Boxes, internal: true },
 ];
 
 /** Additive reveal: a block fades + slides in once scroll passes `start`, and stays. */
@@ -114,23 +117,30 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* ── Social links, bottom centre: they stay put for the whole hero ── */}
+          {/* ── Icon links, bottom centre: they stay put for the whole hero ── */}
           {/* .hero-glass sets its own position, so the pill sits inside the placed wrapper */}
           <div className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 md:block">
             <div className="hero-glass over-video flex items-center gap-1 rounded-full p-1.5">
-              {HERO_SOCIALS.map(({ label, href, icon: Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target={href.startsWith("http") ? "_blank" : undefined}
-                  rel="noreferrer"
-                  aria-label={label}
-                  title={label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15"
-                >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} />
-                </a>
-              ))}
+              {HERO_LINKS.map(({ label, href, icon: Icon, internal }) => {
+                const cls = "flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/15";
+                const glyph = <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} />;
+                return internal ? (
+                  <Link key={label} to={href} aria-label={label} title={label} className={cls}>{glyph}</Link>
+                ) : (
+                  // Web links and the two PDFs open in a new tab; the mailto does not.
+                  <a
+                    key={label}
+                    href={href}
+                    target={href.startsWith("mailto:") ? undefined : "_blank"}
+                    rel="noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className={cls}
+                  >
+                    {glyph}
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -147,9 +157,9 @@ export default function Hero() {
               onClick={(e) =>
                 e.currentTarget.closest(".landing")?.scrollBy({ top: window.innerHeight * 0.9, behavior: "smooth" })
               }
-              className="hero-glass over-video flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/15"
+              className="over-video flex h-11 w-11 items-center justify-center transition-opacity hover:opacity-70"
             >
-              <ArrowDown className="h-[18px] w-[18px] animate-bounceArrow" strokeWidth={1.8} aria-hidden />
+              <ArrowDown className="h-6 w-6 animate-bounceArrow" strokeWidth={1.6} aria-hidden />
             </button>
           </div>
         </div>
